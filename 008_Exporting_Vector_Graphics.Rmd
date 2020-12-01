@@ -1,0 +1,125 @@
+---
+title: "Introduction to data visualization with R and ggplot2"
+author: "Dr. Dominik Schmidt"
+date: "2020"
+output:
+  rmdformats::readthedown:
+    self_contained: true
+    thumbnails: true
+    lightbox: true
+    gallery: false
+    highlight: tango
+    toc_depth: 4    
+    css: "../custom.css"     
+    code_folding: show
+---
+```{r echo=FALSE}
+
+knitr::opts_chunk$set(
+  class.output  = "bg-success",
+  class.message = "bg-info text-info",
+  class.warning = "bg-warning text-warning",
+  class.error   = "bg-danger text-danger"
+  )
+```
+
+
+# 008 Exporting Vector Graphics
+
+
+# Plot preparation
+
+
+```{r message=FALSE}
+
+usePackage <- function(p)   
+{ 
+  if (!is.element(p, installed.packages()[,1])) 
+    install.packages(p, dep = TRUE, repos="https://cloud.r-project.org/", lib=.libPaths()[1]) 
+  require(p, character.only = TRUE) 
+} 
+  
+usePackage("data.table")
+usePackage("ggplot2")
+
+
+clim <- fread("clim_DWD_Geisenheim_historic_monthly.csv")
+
+
+pB1 <- ggplot(clim[MESS_DATUM >= as.POSIXct("2015-01-01") & MESS_DATUM < as.POSIXct("2017-01-01")], 
+        aes(x=MESS_DATUM,y=MO_TT.Lufttemperatur))+
+        geom_line()+
+        geom_smooth(method="lm")+
+        scale_x_datetime(name="t (Month/Year)",date_breaks = "1 month", date_labels = "%m/%Y")+
+        ylab("Monthly-Mean Temperature (°C)")+
+        theme_classic()+
+            theme(axis.text.x=element_text(angle = 45, vjust=0.5))
+
+```
+
+
+# Export to file
+
+- `ggsave()`
+- if possible - export in the same dimensions you will use it (i.e. text/column width of a paper)
+
+
+```{r}
+# Options of the ggsave-function: ?ggsave
+# ggsave(
+#   filename,
+#   plot = last_plot(),
+#   device = NULL,
+#   path = NULL,
+#   scale = 1,
+#   width = NA,
+#   height = NA,
+#   units = c("in", "cm", "mm"),
+#   dpi = 300,
+#   limitsize = TRUE,
+# )
+
+# Print the plot 
+pB1
+
+# save the last printed plot as 15x10cm PDF
+ggsave("FigurePB1.pdf", width=15,height=10, unit="cm")
+
+
+# save a plot (variable) without printing, as 15x10cm PNG with a 300 DPI resolution
+ggsave("FigurePB1.png", plot=pB1, width=15,height=10, unit="cm", dpi=300)
+
+
+
+```
+
+- most platform independent vector graphics format: pdf
+- common alternatives: ps, eps
+
+> Device to use. Can either be a device function (e.g. png()), or one of "eps", "ps", "tex" (pictex), "pdf", "jpeg", "tiff", "png", "bmp", "svg" or "wmf" (windows only).
+> <small>https://ggplot2.tidyverse.org/reference/ggsave.html</small>
+
+
+
+
+
+# Exercise
+
+- Create a plot of your choice and export it as a vector and as a raster graphics
+- Compare the plot quality when zooming in 
+
+
+
+
+
+# Additional resources
+
+- <a href=https://youtu.be/-Fs2t6P5AjY>Vector versus raster graphics</a>
+
+#  Session Info
+
+```{r}
+
+sessionInfo()
+
+```

@@ -1,0 +1,174 @@
+---
+title: "Introduction to data visualization with R and ggplot2"
+author: "Dr. Dominik Schmidt"
+date: "2020"
+geometry: paperheight=20cm,paperwidth=30cm,margin=1cm
+output:
+  rmdformats::readthedown:
+    self_contained: true
+    thumbnails: true
+    lightbox: true
+    gallery: false
+    highlight: tango
+    toc_depth: 4    
+    css: "../custom.css"     
+    code_folding: hide
+  # html_document:
+  #   #code_folding: hide
+  #   toc: true
+  #   toc_depth: 4
+  #   theme: united
+  #   highlight: zenburn
+  #   number_sections: true
+  #   toc_float: 
+  #     collapsed: false
+#      smooth_scroll: false
+  pdf_document:
+    toc: true
+    toc_depth: 4
+    number_sections: true
+    highlight: zenburn
+---
+
+```{r echo=FALSE}
+
+knitr::opts_chunk$set(
+  class.output  = "bg-success",
+  class.message = "bg-info text-info",
+  class.warning = "bg-warning text-warning",
+  class.error   = "bg-danger text-danger"
+  )
+```
+ 
+# Overview     
+
+ 
+- Create basic scientific figures using ggplot2 
+- Applying simple modifications 
+- Figure legends and annotations 
+- Combining and arranging multiple figures 
+- Exporting high-quality figures (vector images) 
+- Optional: Interactive plots in HTML documents 
+- Optional: Data structure and management for plotting 
+
+
+## Vote for optional settings
+
+
+# Schedule 
+
+- Total: 6h 
+- 08:30 - 12:00 (3.5h)
+- Break (1h)
+- 13:00 - 15:30 (2.5h)
+
+
+
+
+
+
+```{r}
+
+library("data.table")
+schedule <- data.table( 
+					Timeslot= c(
+						"08:30 -- 08:45", #"1 Intro", 
+						"08:45 -- 09:00", #"2 First Plot",
+						"09:00 -- 09:30", #"Exercise (1)",
+						"09:30 -- 09:45", #"3 Plot types",
+						"09:45 -- 10:15", #"Exercise (2) + short break",
+						"10:15 -- 10:30", #"4 Layers "
+						"10:30 -- 11:00", #"5 Colors, Shapes, Linetypes",
+						"11:00 -- 12:00", #	"Exercise (3)"
+						"12:00 -- 13:00", #break
+						"13:00 -- 13:30", #"6 Scientific figures",	
+						"13:30 -- 13:45", #"Exercise (4)"
+						"13:45 -- 14:00", #"7 Facets and patchwork",	
+						"14:00 -- 14:30", #"Exercise (5) + short break"	
+						"14:30 -- 14:45", #"8 Exporting vector graphics",	
+						"14:45 -- 15:00", #"9 Optional topic",	
+						"15:00 -- 15:30"  #"Q&A",		
+						),
+					                        
+
+					Topic = c(
+						"1 Intro", 
+						"2 First Plot",
+						"Exercise (1)",
+						"3 Plot types",
+						"Exercise (2) + short break",
+						"4 Layers ",
+						"5 Colors, Shapes, Linetypes",
+						"Exercise (3)",
+						"Break",
+						"6 Scientific figures",	
+						"Exercise (4)",
+						"7 Facets and patchwork",	
+						"Exercise (5) + short break",	
+						"8 Exporting vector graphics + Exercise (6)",	
+						"9 Optional topic",	
+						"Q & A"
+						)
+					)
+
+knitr::kable(schedule)
+
+
+
+
+```
+
+
+
+# Exercises / R-Environment
+
+- Local R/R-Studio installation with R version 3.6.3 (2020-02-29) or later
+- https://rstudio.cloud/
+- https://mybinder.org/v2/gh/dschmidt-hgu/ggplot2-course/main
+- https://mybinder.org/v2/gh/dschmidt-hgu/ggplot2-course/main?urlpath=rstudio
+
+## Packages
+
+```{r message=FALSE}
+
+usePackage <- function(p)   
+{ 
+  if (!is.element(p, installed.packages()[,1])) 
+    install.packages(p, dep = TRUE, repos="https://cloud.r-project.org/", lib=.libPaths()[1]) 
+  require(p, character.only = TRUE) 
+} 
+
+usePackage("rmarkdown")     # to compile RMD files
+usePackage("ggplot2")  		# plotting
+usePackage("data.table")    # data management
+#usePackage("rdwd")         # get DWD climate data (optional)
+remotes::install_github("brry/rdwd", build_vignettes=TRUE) # for latest version
+usePackage("patchwork")     # align multiple plots
+usePackage("scales")        # pretty scales
+usePackage("ggforce")       # zoom facet, annotation
+usePackage("transformr")    # req. for gganimate example
+usePackage("sf")            # req. for gganmiate example
+usePackage("gganimate")     # animate ggplot2s
+usePackage("ggthemes")      # themes for ggplot2
+usePackage("rgl")           # 3D plotting
+usePackage("rglwidget")     # 3D plotting in HTML
+usePackage("plotly")        # Interactive graphs
+
+
+```
+
+
+
+# Additional resources
+
+- https://ggplot2-book.org/index.html
+- https://ggplot2.tidyverse.org/
+
+
+#  Session Info
+
+```{r}
+
+sessionInfo()
+
+```

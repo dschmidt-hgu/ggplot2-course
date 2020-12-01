@@ -1,0 +1,266 @@
+---
+title: "Introduction to data visualization with R and ggplot2"
+author: "Dr. Dominik Schmidt"
+date: "2020"
+output:
+  rmdformats::readthedown:
+    self_contained: true
+    thumbnails: true
+    lightbox: true
+    gallery: false
+    highlight: tango
+    toc_depth: 4    
+    css: "../custom.css"     
+    code_folding: show
+---
+```{r echo=FALSE}
+
+knitr::opts_chunk$set(
+  class.output  = "bg-success",
+  class.message = "bg-info text-info",
+  class.warning = "bg-warning text-warning",
+  class.error   = "bg-danger text-danger"
+  )
+```
+
+
+# 003: Plot types
+
+## Cheatsheet 
+
+- https://github.com/rstudio/cheatsheets/raw/master/data-visualization-2.1.pdf
+
+
+
+
+## Package installation
+
+- Copy and paste the following code in the R-console to install necessary packages.
+
+
+```{r message=FALSE}
+
+usePackage <- function(p)   
+{ 
+  if (!is.element(p, installed.packages()[,1])) 
+    install.packages(p, dep = TRUE, repos="https://cloud.r-project.org/", lib=.libPaths()[1]) 
+  require(p, character.only = TRUE) 
+} 
+  
+usePackage("data.table")
+usePackage("ggplot2")
+usePackage("rdwd")
+
+```
+
+
+# Examples
+
+## Histograms and distributions 
+
+- Continuous or ordinal input 
+
+```{r}
+library("ggplot2")
+library("data.table")
+
+# Counts per 'bin' 
+ggplot(data=iris, aes(x=Sepal.Length))+
+  geom_histogram()
+
+ggplot(data=iris, aes(x=Sepal.Length))+
+  geom_histogram(binwidth=0.1)
+
+ggplot(data=iris, aes(x=Sepal.Length))+
+  geom_histogram(binwidth=0.2, aes(fill=Species))
+
+ggplot(data=iris, aes(x=Sepal.Length))+
+  geom_histogram(binwidth=0.2, aes(fill=Species), position="dodge")
+
+
+# Smoothed 'Histogram'
+ggplot(data=iris, aes(x=Sepal.Length,color=Species))+
+  geom_density()
+
+# Rotated Density
+ggplot(data=iris, aes(x=Species,y=Sepal.Length))+
+  geom_violin()
+
+
+# Alternative histogram code
+ggplot(data=iris, aes(x=Sepal.Length))+
+  geom_bar()+
+  scale_x_binned()
+
+# Alternative: frequency polygons
+ggplot(data=iris, aes(x=Sepal.Length, color=Species))+
+  geom_freqpoly(binwidth=0.2)
+
+
+```
+
+
+## Bar plot
+
+- counts of discrete variables/factors
+
+```{r}
+
+ggplot(data=iris, aes(x=Species))+
+  geom_bar()
+
+ggplot(data=iris, aes(x=as.character(Species)))+
+  geom_bar()
+
+```
+
+
+## Scatterplot + Count
+
+- measurement precision of iris data set = 0.1 cm
+- problem: overlapping observations in scatter plot
+
+```{r}
+
+# original
+ggplot(data=iris, aes(x=Petal.Length,y=Petal.Width))+
+  geom_point()
+
+# counts
+ggplot(data=iris, aes(x=Petal.Length,y=Petal.Width))+
+  geom_count()
+
+
+```
+
+
+## Boxplot alternatives
+
+```{r}
+
+ggplot(data=iris, aes(x=Species,y=Petal.Width))+
+  geom_boxplot()
+
+ggplot(data=iris, aes(x=Species,y=Petal.Width))+
+  geom_count()
+
+ggplot(data=iris, aes(x=Species,y=Petal.Width))+
+  geom_violin()
+
+ggplot(data=iris, aes(x=Species,y=Petal.Width))+
+  geom_violin(draw_quantiles=c(0.25,0.5,0.75))
+
+
+
+```
+
+
+# Time-series data
+
+- ... or equivalents
+
+
+
+```{r}
+
+# load packages
+# library("rdwd")
+# to update to latest version
+# updateRdwd() 
+
+##########################################################################################
+# DO NOT EXECUTE CODE IN BINDER !
+##########################################################################################
+# #Select data from the DWD CDC FTP Server
+# #set current=TRUE - to check current FTP Server Index to gather up-to-date file information
+# link <- selectDWD("Geisenheim", res="daily", var="kl", per="recent", current=FALSE)
+# #Download data from the DWD CDC FTP Server
+# file <- dataDWD(link, read=FALSE, dir="DWDdata", quiet=TRUE, force=NA)
+# #Process data from the DWD CDC FTP Server to a data.frame
+# clim <- readDWD(file, varnames=TRUE, fread=TRUE)
+
+# # Write out for students 
+# fwrite(clim,"clim_DWD_Geisenheim_current.csv")
+##########################################################################################
+# Read file (for BINDER USERS)
+##########################################################################################
+clim <- fread("clim_DWD_Geisenheim_current.csv")
+##########################################################################################
+
+str(clim)
+
+summary(clim)
+
+#MESS_DATUM  = Measurement Date
+#TMK.Lufttemperatur = Daily Mean Air Temperature 2 m above ground 
+
+# Time frame [first and last value of 'MESS_DATUM']
+clim[c(1,nrow(clim)),"MESS_DATUM"]
+
+# Scatterplot air temperature over time
+
+ggplot(data=clim, aes(x=MESS_DATUM, y=TMK.Lufttemperatur))+
+  geom_point()
+
+# Line plot
+
+ggplot(data=clim, aes(x=MESS_DATUM, y=TMK.Lufttemperatur))+
+  geom_line()
+
+
+# Missing data 
+nrow(clim)
+
+ggplot(data=clim[-c(100:150),], aes(x=MESS_DATUM, y=TMK.Lufttemperatur))+
+  geom_point()
+
+# not do
+ggplot(data=clim[-c(100:150),], aes(x=MESS_DATUM, y=TMK.Lufttemperatur))+
+  geom_line()
+
+# combine plots
+ggplot(data=clim[-c(100:150),], aes(x=MESS_DATUM, y=TMK.Lufttemperatur))+
+  geom_point()+
+  geom_line()  
+
+
+```
+
+
+# Exercise
+
+- Create different visualization of the distribution of daily mean air temperature (`TMK.Lufttemperatur`) using density, histogram and frequency polygon plots
+- Play around with their options (density: `adjust=`, histogram and frequency polygon: `binwidth=`)
+- more options can be found in the help of the respective `?geom_...`
+
+
+```{r eval=FALSE, echo=FALSE}
+ggplot(data=clim, aes(x=TMK.Lufttemperatur))+
+  geom_density()
+
+ggplot(data=clim, aes(x=TMK.Lufttemperatur))+
+  geom_density(adjust=0.5)
+
+ggplot(data=clim, aes(x=TMK.Lufttemperatur))+
+  geom_freqpoly(binwidth=1)  
+
+ggplot(data=clim, aes(x=TMK.Lufttemperatur))+
+  geom_histogram(binwidth=1)  
+
+```
+
+
+# Additional resources
+
+
+- http://www.sthda.com/english/wiki/ggplot2-essentials
+
+
+
+#  Session Info
+
+```{r}
+
+sessionInfo()
+
+```

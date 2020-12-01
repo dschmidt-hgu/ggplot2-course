@@ -1,0 +1,136 @@
+---
+title: "Introduction to data visualization with R and ggplot2"
+author: "Dr. Dominik Schmidt"
+date: "2020"
+output:
+  rmdformats::readthedown:
+    self_contained: true
+    thumbnails: true
+    lightbox: true
+    gallery: false
+    highlight: tango
+    toc_depth: 4    
+    css: "../custom.css"     
+    code_folding: show
+---
+```{r echo=FALSE}
+
+knitr::opts_chunk$set(
+  class.output  = "bg-success",
+  class.message = "bg-info text-info",
+  class.warning = "bg-warning text-warning",
+  class.error   = "bg-danger text-danger"
+  )
+```
+
+
+# 002: First plot
+
+
+
+
+# R and RStudio
+
+## Package installation
+
+- Copy and paste the following code in the R-console to install necessary packages.
+
+
+```{r message=FALSE}
+
+usePackage <- function(p) 	
+{	
+  if (!is.element(p, installed.packages()[,1]))	
+    install.packages(p, dep = TRUE, repos="https://cloud.r-project.org/", lib=.libPaths()[1])	
+  require(p, character.only = TRUE)	
+}	
+	
+usePackage("data.table")
+usePackage("ggplot2")
+
+
+```
+
+
+
+
+
+# First plot
+
+- Data: https://en.wikipedia.org/wiki/Iris_flower_data_set
+
+
+```{r}
+# load packages
+library(data.table)
+library(ggplot2)
+
+# to data table [for data management](optional)
+iris <- as.data.table(iris)
+
+str(iris)
+
+summary(iris)
+
+
+# Scatterplot
+ggplot(data=iris, aes(x=Sepal.Length, y=Sepal.Width))+
+  geom_point()
+
+# show unique values of Species
+unique(iris$Species)
+
+# Show subset
+iris[Species=="setosa"]
+
+# Scatter plot Subset
+ggplot(data=iris[Species=="setosa"], aes(x=Sepal.Length, y=Sepal.Width))+
+  geom_point()
+
+# Introduce color
+ggplot(data=iris, aes(x=Sepal.Length, y=Sepal.Width, color=Species))+
+  geom_point()
+
+# Boxplot
+ggplot(data=iris, aes(x=Species, y=Sepal.Length))+
+  geom_boxplot()  
+
+# Reduce data set to first 5 Rows
+iris[1:5,]
+
+# Combine boxplot and 'scatterplot'
+ggplot(data=iris[1:5,], aes(x=Species, y=Sepal.Length))+
+  geom_boxplot()+
+  geom_point()
+
+# Boxplot for 5 Data points does not make much sense!
+
+```
+
+
+
+# Exercise 
+
+## Part 1 - Scatter plot
+
+- Open R/RStudio and load the packages "ggplot2" and "data.table"
+- Create a plot comparing Petal.Width and Petal.Length using scatter plots for the entire iris data set 
+- Create singe plots for each species
+- Plot all data, use color to distinguish between species 
+- Plot all data, use shapes to distinguish between species
+
+## Part 2 - Box plot
+
+- Compare all four numerical variables describing the different species using box plots.
+
+
+
+
+
+#  Session Info
+
+```{r}
+
+sessionInfo()
+
+```

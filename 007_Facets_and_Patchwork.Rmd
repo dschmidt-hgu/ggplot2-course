@@ -1,0 +1,925 @@
+---
+title: "Introduction to data visualization with R and ggplot2"
+author: "Dr. Dominik Schmidt"
+date: "2020"
+output:
+  rmdformats::readthedown:
+    self_contained: true
+    thumbnails: true
+    lightbox: true
+    gallery: false
+    highlight: tango
+    toc_depth: 4    
+    css: "../custom.css"     
+    code_folding: show
+---
+```{r echo=FALSE}
+
+knitr::opts_chunk$set(
+  class.output  = "bg-success",
+  class.message = "bg-info text-info",
+  class.warning = "bg-warning text-warning",
+  class.error   = "bg-danger text-danger"
+  )
+```
+
+
+# 007: Facets and Patchwork
+
+- grouping plots with `patchwork`
+- facets for multidimensional visualization
+
+
+## Package installation
+
+- Copy and paste the following code in the R-console to install necessary packages.
+
+
+```{r message=FALSE}
+
+usePackage <- function(p)   
+{ 
+  if (!is.element(p, installed.packages()[,1])) 
+    install.packages(p, dep = TRUE, repos="https://cloud.r-project.org/", lib=.libPaths()[1]) 
+  require(p, character.only = TRUE) 
+} 
+  
+usePackage("data.table")
+usePackage("ggplot2")
+usePackage("patchwork")
+usePackage("rdwd")
+
+```
+
+
+# Arranging different plots 
+
+
+## `patchwork` 
+
+> The goal of patchwork is to make it ridiculously simple to combine separate ggplots into the same graphic.
+> <small>https://patchwork.data-imaginist.com/index.html</small>
+
+
+
+```{r}
+library("ggplot2")
+library("patchwork")
+
+# generate 4 arbitrary plots
+# Boxplot
+p1 <- ggplot(data = iris, aes(x = Species, y = Petal.Length)) + 
+        geom_boxplot(aes(color = Species))+
+        theme_minimal()+
+        scale_y_continuous(name="Petal length (m)", limits=c(0,max(iris$Petal.Length)))+
+        theme(legend.position="bottom")
+
+
+# Scatterplot
+p2 <- ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
+        geom_point(aes(color = Species))+
+        theme_minimal()+
+        scale_x_continuous(name="Petal width (m)")+
+        scale_y_continuous(name="Petal length (m)", limits=c(0,max(iris$Petal.Length)))+
+        theme( legend.position="bottom")
+
+# Density 1
+p3 <- ggplot(iris, aes(Petal.Length, fill = Species)) + 
+        geom_density(alpha = 0.5) +
+        theme_minimal()+
+        scale_x_continuous(name="Petal length (m)")+
+        theme( legend.position="bottom")
+
+# Density 2
+p4 <- ggplot(iris, aes(Petal.Width, fill = Species)) + 
+        geom_density(alpha = 0.5) +
+        theme_minimal()+
+        scale_x_continuous(name="Petal width (m)")+
+        theme( legend.position="bottom")
+
+
+
+
+```
+
+## Syntax
+
+- *adding* plots
+
+```{r}
+
+p1+p2
+
+# automatic line breaks
+p1+p2+p3+p4
+
+``` 
+
+- Tabulating plots 
+
+```{r}
+#... in a row
+p1|p2|p3|p4
+
+#... in a column
+p1/p2/p3/p4
+
+``` 
+
+- brackets 
+
+```{r}
+
+(p1|p2|p3)/p4
+
+
+``` 
+
+
+## `plot_layout`
+
+- using `plot_layout`
+
+```{r}
+
+p1+p2+p3+p4 + plot_layout(nrow = 1, byrow = TRUE)
+
+``` 
+
+
+
+### Merge legends 
+
+- ... where possible
+- identical legends are *collected*
+
+
+```{r}
+
+p1+p2+p3+p4 + 
+  plot_layout(guides = 'collect')
+
+```
+
+
+### Theme modifications - global
+
+```{r}
+p1+p2+p3+p4  + 
+  plot_layout(guides = 'collect') & 
+  theme(legend.direction="vertical")
+
+
+```
+
+### Theme modifications - local
+
+- use only one color legend in the collection 
+- further legends do not provide additional information 
+
+```{r}
+
+p1+theme(legend.position = "none")+
+p2+
+p3+theme(legend.position = "none")+
+p4+theme(legend.position = "none")+
+  plot_layout(guides = 'collect') & 
+  theme(legend.direction="vertical")
+
+```
+
+### Modify grid
+
+```{r}
+
+(p1|p2)/(p3|p4)  / guide_area() +
+  plot_layout(guides = 'collect', heights = c(2,2,1)) & 
+  theme(legend.box = "horizontal")
+
+
+```
+
+
+
+## *Advanced* `patchwork` 
+
+For additional/more complex problems related to the arrangement of plots, please refer to the package vignettes  (https://patchwork.data-imaginist.com/) e.g.
+
+- https://patchwork.data-imaginist.com/articles/guides/assembly.html
+- https://patchwork.data-imaginist.com/articles/guides/layout.html
+
+## Alternative packages
+
+If alternative packages and their tutorials are addressing your grid arrangement problem directly - use them instead.
+
+
+### `cowplot`
+
+- https://wilkelab.org/cowplot/index.html
+- https://wilkelab.org/cowplot/articles/index.html
+
+### `egg`
+
+- https://cran.r-project.org/web/packages/egg/vignettes/Overview.html
+- https://cran.r-project.org/web/packages/egg/vignettes/Ecosystem.html
+
+
+
+
+
+# Facets for multidimensional visualizations in `ggplot2`
+
+- no additional package necessary
+- requires data in long format as an input
+
+
+## `facet_grid` - 1 dimension
+
+
+
+```{r}
+
+library(data.table)
+library(ggplot2)
+
+iris <- as.data.table(iris)
+
+# covert to long format 
+iris.m <- melt(iris, id.vars="Species")
+
+iris.m
+
+```
+
+
+- To get an overview of the iris data set
+
+```{r}
+# Approach 1: color boxplot by variable
+ggplot(iris.m, aes(x=Species,y=value,color=variable))+
+ geom_boxplot()
+
+# Hard to compare across species
+
+```
+
+```{r}
+# Approach 2: color boxplot by Species
+ggplot(iris.m, aes(x=variable,y=value,color=Species))+
+ geom_boxplot()
+
+# not too bad here, but fails when variables are on more different scales
+
+```
+
+```{r}
+# put on a grid | use a column for each variable 
+ggplot(iris.m, aes(x=Species,y=value, color=Species))+
+ geom_boxplot()+
+ facet_grid(.~variable)
+
+#more or less similar to approach 2 
+```
+
+
+```{r}
+# put on a grid | use a row for each variable
+ggplot(iris.m, aes(x=Species,y=value, color=Species))+
+ geom_boxplot()+
+ facet_grid(variable~.)
+
+
+# put on a grid | use a row for each variable
+ # AND allow different y-axis
+ggplot(iris.m, aes(x=Species,y=value, color=Species))+
+ geom_boxplot()+
+ facet_grid(variable~., scales="free_y")
+
+```
+
+
+
+- Alternative: `facet_wrap` for custom 'grid' (see below)
+
+
+
+
+## `facet_grid` - 2 dimensions
+
+
+
+```{r}
+set.seed(1)
+sinoid <- function(x) {rnorm(n=1,mean=sin(x*(2*pi/365)),sd=0.2)+5}
+vsinoid <- Vectorize(sinoid)
+
+dFACE <- data.table(
+            Day = rep(c(1:365),times=6),
+            Ring_Pair=factor(rep(c(1:3,1:3),each=365)),
+            Treatment= rep(c("A","E"),each=365*3)     
+          )
+
+
+dFACE[,"Measurement":=vsinoid(Day)]
+
+
+dFACE
+
+```
+
+
+```{r}
+# Split by Ring_Pair [rows] + Treatment [cols]
+  # plus: Color by Treatment
+ggplot(dFACE, aes(x=Day, y=Measurement,color=Treatment))+
+    geom_point()+
+    facet_grid(Ring_Pair~Treatment)+
+    scale_color_manual(values=c("blue","red"))+
+    theme_classic() 
+
+
+```
+
+
+```{r}
+
+ggplot(dFACE, aes(x=Day, y=Measurement,fill=Treatment))+
+    geom_point(alpha=0.5,shape=21)+
+    facet_grid(Ring_Pair~.)+
+    scale_fill_manual(values=c("blue","red"))+
+    theme_classic() 
+
+
+```
+
+
+## `facet_wrap`
+
+- The differences between facet_wrap() and facet_grid():
+  - https://ggplot2-book.org/facet.html
+
+
+
+### `facet_wrap` - 1 dimension
+
+
+
+```{r}
+
+ggplot(dFACE, aes(x=Day, y=Measurement,fill=Ring_Pair))+
+    geom_point(alpha=0.5,shape=21)+
+    facet_wrap(.~Treatment)+
+    scale_fill_viridis_d()+
+    theme_classic() 
+```
+
+```{r}
+# same plot 
+ggplot(dFACE, aes(x=Day, y=Measurement,fill=Ring_Pair))+
+    geom_point(alpha=0.5,shape=21)+
+    facet_wrap(.~Treatment)+
+    scale_fill_viridis_d()+
+    theme_classic() 
+
+```
+
+
+### `facet_wrap` - 2 dimensions
+
+```{r}
+
+ggplot(dFACE, aes(x=Day, y=Measurement,color=Treatment))+
+    geom_point()+
+    facet_wrap(Ring_Pair~Treatment)+
+    scale_color_manual(values=c("blue","red"))+
+    theme_classic() 
+
+```
+
+
+
+```{r}
+
+ggplot(iris.m, aes(x=Species,y=value, color=Species))+
+ geom_boxplot()+
+ facet_wrap(variable~., scales="free")
+
+```
+
+
+## `facet_*` options
+
+### `scales` - free axis scales
+
+```{r}
+
+ggplot(iris.m, aes(x=Species,y=value, color=Species))+
+ geom_boxplot()+
+ facet_grid(variable~., scales="free_y")
+
+```
+
+
+```{r}
+
+ggplot(iris.m, aes(x=Species,y=value, color=Species))+
+ geom_boxplot()+
+ facet_wrap(variable~., scales="free")
+
+```
+
+
+### `labels` - facet-text options
+
+- `?labellers`
+
+```{r}
+ggplot(dFACE, aes(x=Day, y=Measurement,color=Treatment))+
+    geom_point()+
+    facet_grid(Ring_Pair~Treatment, label="label_both")+
+    scale_color_manual(values=c("blue","red"))+
+    theme_classic() 
+```
+
+For mathemaical symbols use, e.g.
+
+> `label_parsed()` interprets the labels as plotmath expressions. 
+> `label_bquote()` offers a more flexible way of constructing plotmath expressions. 
+
+
+
+
+### Further options
+
+- `?facet_wrap`: e.g. `strip.positon`
+- `theme()` options (`?theme`), some examples:
+
+```{r eval=FALSE}
+  strip.background,
+  strip.background.x,
+  strip.background.y,
+  strip.placement,
+  strip.text,
+  strip.text.x,
+  strip.text.y,
+  strip.switch.pad.grid,
+  strip.switch.pad.wrap,
+
+```
+
+
+
+# Exercise (1)
+
+1. Use the following code to load the 'tree'-dataset, transfer it into a `data.table` and to add two artificial groups (experiments):
+
+```{r}
+library("data.table")
+library("ggplot2")
+library("patchwork")
+
+str(trees)
+
+trees <- as.data.table(trees)
+
+#Assig 'artifical' Groups
+trees[,"Group":=rep(c("1","2"), length.out=nrow(trees))]
+
+
+```
+
+2. Information about the data (https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/trees.html)
+3. Create a plot to each of the three variables showing their distribution and merge theme to a single plot using `patchwork`
+4. Modify the axis titles to match scientific standards
+5. Optional: Customize the appearance according to your preferences
+
+
+
+
+```{r echo=FALSE}
+
+{
+sink("./007_Exercise_1.R")
+cat('
+library("data.table")
+library("ggplot2")
+library("patchwork")
+
+trees <- as.data.table(trees)
+
+#Assign artifical Groups
+trees[,"Group":=rep(c("1","2"), length.out=nrow(trees))]
+
+colnames(trees)
+
+#**********************************************************************
+# using patchwork
+#**********************************************************************
+# Plots of distributions per group (e.g. Boxplots, (alternatives: Density, Histogramm, Violin ..))
+#************************************************
+pG <- ggplot(trees, aes(x=Group, y=Girth,color=Group))+  
+                geom_boxplot()+
+                ylab("Tree diameter (in)")     # https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/trees.html
+
+pG
+
+
+
+pH <- ggplot(trees, aes(x=Group, y=Height,color=Group))+  
+                geom_boxplot()+
+                ylab("Height (ft)")                 # add axis label with unit
+
+pH
+
+
+pV <- ggplot(trees, aes(x=Group, y=Volume,color=Group))+  
+                geom_boxplot()+
+                ylab(quote("Volume of timber in ("*ft^3*")") ) # add axis label with unit
+
+pV
+
+#************************************************
+# patchwork + small customizations
+#************************************************
+
+pG+pH+pV+
+        plot_layout(guides = "collect") &                   # reduce to 1 legend
+            theme_minimal() +                               # change theme for alle plots
+            theme(panel.grid.major.x=element_blank())       # remove vertical grid lines
+
+
+# Save plot as vector Graphic
+ggsave("./Plot_U1_Patch.pdf", width=18,height=10, unit="cm")
+
+
+
+
+
+
+#************************************************
+# patchwork + more customizations
+#************************************************
+library("scales")   # for pretty breaks
+
+pGc <- ggplot(trees, aes(x=Group, y=Girth))+  
+                geom_violin(aes(fill=Group),alpha=0.35)+        # violin plot filled locally
+                geom_boxplot(width=0.1)+                        # overlay with boxplot 
+                ylab("Tree diameter (in)")+                     
+                scale_y_continuous(breaks=pretty_breaks())      # use "pretty breaks"
+
+
+
+pHc <- ggplot(trees, aes(x=Group, y=Height))+  
+                geom_violin(aes(fill=Group),alpha=0.35)+
+                geom_boxplot(width=0.1)+
+                ylab("Height (ft)")+
+                scale_y_continuous(breaks=pretty_breaks())      
+
+
+pVc <- ggplot(trees, aes(x=Group, y=Volume))+  
+                geom_violin(aes(fill=Group),alpha=0.35)+
+                geom_boxplot(width=0.1)+
+                ylab(quote("Volume of timber in ("*ft^3*")") )+
+                scale_y_continuous(breaks=pretty_breaks())
+
+
+#************************************************
+# patchwork + small customizations
+#************************************************
+
+
+
+pGc+pHc+pVc+
+        plot_layout(guides = "collect") & 
+            theme_minimal() + 
+            theme(  
+                    panel.grid.major.x=element_blank(),          # remove vertical grid
+                    panel.grid.minor.y=element_blank(),          # remove minor horizontal grid
+                    legend.position="bottom",                    # place legend at bottom
+                    axis.title.x = element_blank(),              # remove axis title (legend provides the information)
+                    axis.text.x = element_blank()                # remove axis ticks text (legend provides the information)
+                )
+
+
+
+#************************************************
+# Advanced: Only replace Data/Aes in ggplot Object 
+#************************************************
+#https://ggplot2.tidyverse.org/reference/gg-add.html
+
+# Create Base Plot            
+pGc0 <- ggplot(trees, aes(x=Group, y=Girth))+  
+                geom_violin(aes(fill=Group),alpha=0.35)+
+                geom_boxplot(width=0.1)+
+                ylab("Tree diameter (in)")+
+                scale_y_continuous(breaks=pretty_breaks())+
+                theme_minimal() + 
+                theme(  
+                        panel.grid.major.x=element_blank(),
+                        panel.grid.minor.y=element_blank(),
+                        axis.title.x = element_blank(),
+                        axis.text.x = element_blank()
+                    )
+
+# Change aes data input and axis
+pHc0 <- pGc0 %+% aes(x=Group, y=Height)+                            # replace aes with %+% 
+                 ylab("Height (ft)")                                # replace axis label
+
+#https://ggplot2.tidyverse.org/reference/gg-add.html
+pVc0 <- pGc0 %+% aes(x=Group, y=Volume)+
+                ylab(quote("Volume of timber in ("*ft^3*")") )
+
+
+
+pGc0+pHc0+pVc0+
+        plot_layout(guides = "collect") &
+        theme(legend.position="bottom")
+
+')
+sink()
+}
+
+```
+
+
+
+
+# Exercise (2)
+
+
+1. Load the historic climate data set from Geisenheim (s. code) and extract three years from this long-time data to a new data table (s. code example). You could use different years.
+2. Transfer into a long-format data set for plotting.
+3. Use `ggplot2` (facets) to create a plot illustrating two variables (`MO_TT.Lufttemperatur` und `MO_RR.Niederschlagshoehe`) by year.
+4. Optional: Customize the appearance according to your preferences
+
+
+
+```{r message=FALSE}
+library("data.table")
+library("ggplot2")
+library("rdwd")
+
+clim <- fread("clim_DWD_Geisenheim_historic_monthly.csv")
+
+
+#Create a new year variable from date 
+clim[,"Year":=year(MESS_DATUM)] # using year function (provided by data.table)
+#clim[,"Year":=substr(MESS_DATUM,1:4)] #alternative extract first 4 digits from string
+# More alternatives can be found with a quick google search: https://stackoverflow.com/questions/36568070/extract-year-from-date
+
+
+# Extract 3 Years [2000-2002]
+# Using Year
+climSub <- clim[Year %in% c(2000:2002)]
+#climSub <- clim[Year %in% c(1998,2001,2004)]
+
+# ... should be 3x12=36
+nrow(climSub)
+
+
+# melt to long format using relevant columns only:
+climSub.m <- melt(climSub[,c("MESS_DATUM","Year","MO_TT.Lufttemperatur","MO_RR.Niederschlagshoehe")], id.vars=c("MESS_DATUM","Year"))
+
+str(climSub.m)
+
+```
+
+
+
+
+
+
+```{r echo=FALSE}
+{
+sink("./007_Exercise_2.R")
+cat('
+library("data.table")
+library("ggplot2")
+library("rdwd")
+
+
+#*********************************************
+# Collect data set
+#*********************************************
+
+# #Select data from the DWD CDC FTP Server
+#   #current=TRUE - check current FTP Server Index to gather up-to-date file information
+# link <- selectDWD("Geisenheim", res="monthly", var="kl", per="historic", current=TRUE)
+# #Download data from the DWD CDC FTP Server
+# file <- dataDWD(link, read=FALSE, dir="DWDdata", quiet=TRUE, force=NA)
+# #Process data from the DWD CDC FTP Server to a data.frame
+# clim <- readDWD(file, varnames=TRUE)
+
+# #Change data.frame to data.table
+# clim <- as.data.table(clim)
+
+clim <- fread("clim_DWD_Geisenheim_historic_monthly.csv")
+
+
+#*********************************************
+# Working with the data set
+#*********************************************
+
+#Create new Year Variable from Date 
+clim[,"Year":=year(MESS_DATUM)] # using year function (provided by data.table)
+#clim[,"Year":=substr(MESS_DATUM,1:4)] #alternative extract first 4 digits from string
+# More alternatives can be found with a quick google search: https://stackoverflow.com/questions/36568070/extract-year-from-date
+
+
+# Extract 3 Years [2000-2002]
+# Using Year
+climSub <- clim[Year %in% c(2000:2002)]
+# Alternative: Using Date 
+# climSub <- clim[MESS_DATUM >= as.POSIXct("2000-01-01") & MESS_DATUM < as.POSIXct("2003-01-01")]
+
+
+# ... should be 3x12=36
+nrow(climSub)
+
+
+# melt to long format using relevant columns only:
+climSub.m <- melt(climSub[,c("MESS_DATUM","Year","MO_TT.Lufttemperatur","MO_RR.Niederschlagshoehe")], id.vars=c("MESS_DATUM","Year"))
+
+str(climSub.m)
+
+#*********************************************
+# Plotting 
+#*********************************************
+
+p1 <- ggplot(climSub.m, aes(x=MESS_DATUM,y=value))+
+        geom_line()+
+        facet_grid(variable~Year, scales = "free")
+
+
+p1
+
+
+
+#*********************************************
+# Plotting - Customization 1
+#*********************************************
+# Introduce Month Variable to remove redundant information (axis + strip text)
+climSub.m[,"Month":=month(MESS_DATUM)]
+
+
+# Get month names for relabeling
+# https://stat.ethz.ch/R-manual/R-devel/library/base/html/Constants.html
+months <- format(ISOdate(2000, 1:12, 1), "%b")
+
+# Select custom colors [color blind friendly red blue]
+# https://colorbrewer2.org/#type=diverging&scheme=RdYlBu&n=3
+rdbl <- c("#fc8d59","#91bfdb")
+
+p2c <- ggplot(climSub.m, aes(x=Month,y=value,color=variable))+  #introduce color
+        geom_line()+
+        facet_grid(variable~Year, scales = "free")+             
+        theme_classic(base_size = 10)+                          # use more clean theme, slightly smaller text
+        scale_x_continuous(breaks= 1:12, labels=months)+        # overwrite x axis labels with month 
+        theme(legend.position="none")+                          # colors are fixed to a variable, hence, legend = redundant
+        scale_color_manual(values=rdbl)                         # overwrite colors with custom 
+        
+
+p2c
+
+
+#*********************************************
+# Plotting - Customization 2 
+#*********************************************
+
+p2c1 <- p2c +  
+        geom_point()+                                                   # add points for better identification of specific month across years
+        facet_grid(variable~Year, scales = "free", switch="both")+      # switch labels to use labels as axis title
+            theme(      
+                    strip.background=element_blank(),                   # remove strip box for using strips as axis title
+                    strip.placement="outside",                          # place strip outside of plot for using strips as axis title
+                    axis.title.y = element_blank(),                     # remove default title (variable)
+                    axis.title.x = element_blank(),                     # remove default title (Month)  #year and month are clearly identifiable w/o this information
+                    panel.grid.major.y = element_line(),                # re-add vertical grid to better distinguish values between plots
+                    axis.text.x = element_text(size=rel(0.75))          # adjust text size of x axis labels to fit plot 
+                )+
+        scale_y_continuous( limits = c(0, NA),                          # Limit y-axis to 0 to allow seeing absolute deviation from Zero (freezing point + no rain)
+                            expand = expansion(mult = c(0, .1))         # force y-axis to be in line with "zero" but expand above data at upper limit 
+                           )                                            # https://ggplot2.tidyverse.org/reference/expansion.html
+
+p2c1
+
+#*********************************************
+# Plotting - Customization 3
+#*********************************************
+
+# Rename variables for Plotting
+str(climSub.m$variable)
+
+# https://stat.ethz.ch/R-manual/R-devel/RHOME/library/grDevices/html/plotmath.html
+climSub.m[variable=="MO_TT.Lufttemperatur","variable_renamed":="bar(T)[Luft]~\'(°C)\'"]
+climSub.m[variable=="MO_RR.Niederschlagshoehe","variable_renamed":="Niederschlag~\'(mm)\'"]
+
+p2c2 <- p2c1 + 
+        facet_grid(variable_renamed~Year, scales = "free", switch="both", label="label_parsed") # added label interpreter label_parsed to translate mathematical expression in text
+                                                                                                # https://stat.ethz.ch/R-manual/R-devel/RHOME/library/grDevices/html/plotmath.html
+
+
+p2c2
+
+
+# Save plot as vector Graphic
+ggsave("./Plot_U2_T_N_2000_2002.pdf", width=18,height=10, unit="cm")
+
+
+
+#****************************************************************************************************************
+# Possible problems - facetting in different "directions"
+#****************************************************************************************************************
+# p1 <- ggplot(climSub.m, aes(x=MESS_DATUM,y=value))+
+#         geom_line()+
+#         facet_grid(Year~variable, scales = "free")
+
+
+# p1
+
+# Introduce Month Variable to overcome problem with facet_grid and free scales | 
+climSub.m[,"Month":=month(MESS_DATUM)]
+
+#*********************************************
+# Plotting 2 [minimal plot]
+#*********************************************
+
+# p2 <- ggplot(climSub.m, aes(x=Month,y=value))+
+#         geom_line()+
+#         facet_grid(Year~variable, scales = "free")
+#
+## Additional Problem >> Scales not allowed to vary in a row!
+
+# Alternative: Switch to "facet_wrap"
+# p2 <- ggplot(climSub.m, aes(x=MESS_DATUM,y=value))+
+#         geom_line()+
+#         facet_wrap(Year~variable, nrow=3, scales = "free")
+# p2
+
+#****************************************************************************************************************
+
+
+
+')
+sink()
+}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Additional resources
+
+
+- https://ggplot2-book.org/facet.html
+- https://ggplot2.tidyverse.org/reference/facet_grid.html
+- https://ggplot2.tidyverse.org/reference/gg-add.html
+- https://fishandwhistle.net/post/2018/modifying-facet-scales-in-ggplot2/
+- http://www.sthda.com/english/wiki/ggplot2-violin-plot-quick-start-guide-r-software-and-data-visualization
+- https://ggforce.data-imaginist.com/ [zoom to data]
+
+```{r}
+
+library(ggforce)
+ggplot(iris, aes(x=Petal.Length,y=Petal.Width, colour = Species)) +
+  geom_point() +
+  facet_zoom(x = Species == "versicolor")
+
+
+
+ggplot(iris, aes(x=Petal.Length,y=Petal.Width, colour = Species)) +
+  geom_point() +
+  facet_zoom(xlim = c(4, 6),
+             zoom.size=1) 
+
+
+
+ggplot(iris, aes(x=Petal.Length,y=Petal.Width, colour = Species)) +
+  geom_point() +
+  facet_zoom(ylim = c(1, 2),
+             zoom.size=1) 
+
+
+```
+
+
+
+
+#  Session Info
+
+```{r}
+
+sessionInfo()
+
+```

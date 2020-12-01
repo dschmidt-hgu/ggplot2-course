@@ -1,0 +1,234 @@
+---
+title: "Introduction to data visualization with R and ggplot2"
+author: "Dr. Dominik Schmidt"
+date: "2020"
+output:
+  rmdformats::readthedown:
+    self_contained: true
+    thumbnails: true
+    lightbox: true
+    gallery: false
+    highlight: tango
+    toc_depth: 4    
+    css: "../custom.css"     
+    code_folding: show
+---
+```{r echo=FALSE}
+
+knitr::opts_chunk$set(
+  class.output  = "bg-success",
+  class.message = "bg-info text-info",
+  class.warning = "bg-warning text-warning",
+  class.error   = "bg-danger text-danger"
+  )
+```
+
+
+# 004: ggplot2 layers
+
+## Package installation
+
+- Copy and paste the following code in the R-console to install necessary packages.
+
+
+```{r message=FALSE}
+
+usePackage <- function(p)   
+{ 
+  if (!is.element(p, installed.packages()[,1])) 
+    install.packages(p, dep = TRUE, repos="https://cloud.r-project.org/", lib=.libPaths()[1]) 
+  require(p, character.only = TRUE) 
+} 
+  
+usePackage("data.table")
+usePackage("ggplot2")
+
+```
+
+
+# Why ggplot2?
+
+- when working in R it's the most comprehensive plotting environment 
+- free and open source
+- large community (problem solving) 
+- reproducible results (R-script/project) 
+- very flexible ***A Layered Grammar of Graphics*** 
+  - syntax based on ***Wilkinson, Leland. 2005. The Grammar of Graphics. 2nd ed. Statistics and Computing. Springer***. 
+  - transferred to R mainly by Hadley Wickham (http://hadley.nz/, https://ggplot2-book.org/, https://ggplot2.tidyverse.org/)  
+  - 'A Layered Grammar of Graphics. (Wickham, Hadley. 2009. 'A Layered Grammar of Graphics.' Journal of Computational and Graphical Statistics.) 
+- `ggplot2` is also part of the `tidyverse` - alternative coding style with pipes `%>%` 
+
+
+
+## ggplot2 syntax / Layered Grammar of Graphics
+
+A basic overview:
+
+- build plot with different layers
+- first layer usually contains the data
+- every layer has 'aesthetic mappings' to assign variables from the data to plotting objects (x, y, color, shape, ...)
+- new layers are 'added' with a `+`
+- basic graphical layers are called (`geom_...`) 
+- other layers (`stat_...`) can be used for more specific statistical transformations 
+- and there are layers for modifying the appearance (coordinate system, axis, fonts, legends, etc.) 
+
+
+
+### graphical Layers -- `geom`s
+
+Examples:
+
+- `geom_point` - creates points
+- `geom_line` - ... lines
+- `geom_histogram` - ... a histogram
+- `geom_boxplot` - ... boxplot 
+- ...
+
+- see cheat sheet for more options https://github.com/rstudio/cheatsheets/raw/master/data-visualization-2.1.pdf
+
+
+### 'Aesthetic Mappings' `aes`
+
+- assign 'what is what' with ('mappings')
+- besides basic mappings, e.g. which variable should be plotted on x and y axis (`x=...`, `y=...`), you can also 'map'
+- colors (`color`,`fill`)
+- shapes (`shape`,`linetype`)
+- sizes (`size`)
+
+Not all `geom`s are compatible with all the 'aesthetic mappings'.
+You cannot assign a linetype to a point representation.
+
+
+
+# Combine geoms
+
+- add new layers with a `+`
+
+```{r}
+library("ggplot2")
+library("data.table")
+
+##########################################################################################
+# Read file
+##########################################################################################
+clim <- fread("clim_DWD_Geisenheim_current.csv")
+##########################################################################################
+
+# combine plots
+ggplot(data=clim[-c(100:150),], aes(x=MESS_DATUM, y=TMK.Lufttemperatur))+ # Init Data
+  geom_point()+ # Layer 1
+  geom_line()   # Layer 2 [above Layer 1]
+
+
+```
+
+
+# Regression line
+
+- "Trendlinie" 
+
+```{r}
+
+# regression line across all data
+ggplot(data=iris, aes(x=Sepal.Length, y=Sepal.Width))+
+  geom_point()+
+  geom_smooth(method="lm")   #linear model
+
+# Without specification of linear model - automatic model selection
+ggplot(data=iris, aes(x=Sepal.Length, y=Sepal.Width))+
+  geom_point()+
+  geom_smooth()
+
+# LM: Linear regression model  
+# LOESS (locally estimated scatterplot smoothing) 
+# Alternative: generalized additive model (GAM) 
+
+# Regression line for subsets [grouped by color = species] 
+ggplot(data=iris, aes(x=Sepal.Length, y=Sepal.Width, color=Species))+
+  geom_point()+
+  geom_smooth(method="lm")  #linear model
+
+
+```
+
+
+# Boxplot + jitter
+
+- combine plots + options
+- options: `?geom_jitter`; `?geom_dotplot` ... etc.
+
+```{r}
+
+# jitter is more appropriate for more and real continuous data [here: 0.1 cm 'categories']
+ggplot(data=iris, aes(x=Species,y=Petal.Width))+
+  geom_boxplot()+
+  geom_jitter( height = 0)   #do not allow random positions in y-direction
+
+# better alternative dotplot
+ggplot(data=iris, aes(x=Species,y=Petal.Width))+
+  geom_boxplot()+
+  geom_dotplot(binaxis='y', stackdir='center', binwidth = 0.1,dotsize=0.25)
+
+
+```
+
+
+
+
+# Plot objects
+
+- save plots to variables
+- e.g. to add layers step by step
+- modify appearance afterwards
+
+
+```{r}
+# Save a plot object into a variable - without displaying the plot
+p0 <- ggplot(iris,aes(x=Petal.Length, y= Petal.Width))+
+        geom_point()
+
+# display plot by calling the variable
+p0
+
+# add layer to p0 and display plot
+p0 +
+  geom_smooth(method="lm")
+
+
+# save new plot to another variable
+p1 <- p0 +
+          geom_smooth(method="lm")
+
+# output p1 
+p1 
+
+# additional layers for appearance modification, e.g. 'themes' [details follow soon]
+p0 +
+  theme_bw()
+
+
+# Store only the data initialization layer to generate different types of plots 
+p00 <- ggplot(iris,aes(x=Species, y=Petal.Width))
+
+p00 + geom_boxplot()
+
+p00 + geom_violin()
+
+```
+
+
+
+# Additional resources
+
+
+- https://en.wikipedia.org/wiki/Local_regression
+- https://en.wikipedia.org/wiki/Generalized_additive_model
+- http://www.sthda.com/english/wiki/ggplot2-dot-plot-quick-start-guide-r-software-and-data-visualization
+
+#  Session Info
+
+```{r}
+
+sessionInfo()
+
+```

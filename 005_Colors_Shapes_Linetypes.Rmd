@@ -1,0 +1,662 @@
+---
+title: "Introduction to data visualization with R and ggplot2"
+author: "Dr. Dominik Schmidt"
+date: "2020"
+output:
+  rmdformats::readthedown:
+    self_contained: true
+    thumbnails: true
+    lightbox: true
+    gallery: false
+    highlight: tango
+    toc_depth: 4    
+    css: "../custom.css"     
+    code_folding: show
+---
+```{r echo=FALSE}
+
+knitr::opts_chunk$set(
+  class.output  = "bg-success",
+  class.message = "bg-info text-info",
+  class.warning = "bg-warning text-warning",
+  class.error   = "bg-danger text-danger"
+  )
+```
+
+
+# 005: Colors, shapes and linetypes
+
+- `aes()` - aesthetics not only assign the data (variables) to the axis 
+- can also be used to associate colors, shapes etc. with variables
+
+
+
+
+## Package installation
+
+- Copy and paste the following code in the R-console to install necessary packages.
+
+
+```{r message=FALSE}
+
+usePackage <- function(p)   
+{ 
+  if (!is.element(p, installed.packages()[,1])) 
+    install.packages(p, dep = TRUE, repos="https://cloud.r-project.org/", lib=.libPaths()[1]) 
+  require(p, character.only = TRUE) 
+} 
+  
+usePackage("data.table")
+usePackage("ggplot2")
+
+```
+
+
+# Colors for points and lines - `color` 
+
+## `color` grouping for discrete variables
+
+- `color` can act as a grouping variable
+
+```{r}
+library("data.table")
+library("ggplot2")
+
+iris <- as.data.table(iris)
+
+
+# global color association
+ggplot(data=iris, aes(x=Petal.Length,y=Petal.Width,color=Species))+
+  geom_point()+
+  geom_smooth(method="lm")
+
+# local color association
+ggplot(data=iris, aes(x=Petal.Length,y=Petal.Width))+
+  geom_point(aes(color=Species))+
+  geom_smooth(method="lm")
+
+
+```
+
+
+## `color` and numerical variables
+
+- color bar
+
+```{r}
+
+ggplot(data=iris, aes(x=Petal.Length,y=Petal.Width))+
+  geom_point(aes(color=Petal.Length))
+
+
+```
+
+
+# `shape`
+
+## `shape` grouping for discrete variables
+
+
+- combine plots + options
+- options: `?geom_jitter`; `?geom_dotplot` ... etc.
+
+```{r}
+
+ggplot(data=iris, aes(x=Petal.Length,y=Petal.Width, shape=Species))+
+  geom_point()
+
+
+# local
+ggplot(data=iris, aes(x=Petal.Length,y=Petal.Width))+
+  geom_point(aes(shape=Species))+
+  geom_smooth(method="lm")
+
+# global association
+ggplot(data=iris, aes(x=Petal.Length,y=Petal.Width,shape=Species))+
+  geom_point()+
+  geom_smooth(method="lm")
+
+```
+
+
+## Grouping: `color` + `shape`
+
+```{r}
+ggplot(data=iris, aes(x=Petal.Length,y=Petal.Width,shape=Species,color=Species))+
+  geom_point()+
+  geom_smooth(method="lm")
+
+```
+
+
+## *List of available shapes* 
+
+- https://ggplot2.tidyverse.org/reference/scale_shape.html 
+- filled red shapes (21-25) also allow a `fill` color besides the `color` assignment [=border color] 
+
+```{r}
+
+df_shapes <- data.table(shape = 0:25)
+ggplot(df_shapes, aes(0, 0, shape = shape)) +
+  geom_point(aes(shape = shape), size = 5, fill = 'red') +
+  scale_shape_identity() +
+  facet_wrap(~shape) +
+  theme_void()
+
+```
+
+# `linetype`
+
+
+```{r}
+# re-assign to data.table 
+economics_long <- as.data.table(economics_long)  
+
+str(economics_long)
+
+# data in 'long format'
+economics_long
+
+# grouping by linetype
+ggplot(economics_long, aes(x=date, y=value01,linetype=variable)) + 
+  geom_line()
+
+# grouping by color
+ggplot(economics_long, aes(x=date, y=value01,color=variable)) + 
+  geom_line()
+
+# both
+ggplot(economics_long, aes(x=date, y=value01,color=variable, linetype=variable)) + 
+  geom_line()
+
+
+```
+
+- ***choose wisely*** - `linetype` harder to distinguish than `color` -- when colors are limited to high contrasts.
+
+
+# fill-colors: `fill`
+
+- for areas: box plot, histogram, etc.
+
+```{r}
+
+# fill
+ggplot(data=iris, aes(x=Species,y=Sepal.Length))+
+  geom_boxplot(aes(fill=Species))
+
+# color
+ggplot(data=iris, aes(x=Species,y=Sepal.Length))+
+  geom_boxplot(aes(color=Species))
+
+```
+
+
+- for points 
+- special shapes needed (21-25)
+
+```{r}
+# color and default shapes
+ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
+  geom_point(aes(color=Species))
+
+# not working 
+ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
+  geom_point(aes(fill=Species))
+
+# assign fixed shapes that allow filling
+ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
+  geom_point(aes(fill=Species), shape=21)             # single shape as an "option"
+
+# not working out of the box- shape by species
+ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
+  geom_point(aes(fill=Species, shape=Species))
+
+# need to assign shapes separately
+ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
+  geom_point(aes(fill=Species, shape=Species))+
+  scale_shape_manual(values=21:23)              # manual shape assignment layer
+
+```
+
+
+-  `scale_...`-layers are for modulating all kind of 'scales', e.g. including axis, colors, shapes, linetypes ...
+- standard border color = 'black' 
+
+
+
+
+
+# Best Practices
+
+## Find the red dot
+
+- based on https://socviz.co/lookatdata.html (Figure 1.18)
+
+```{r echo=FALSE, message=FALSE, fig.cap="*Searching for the red dot becomes progressively harder.*"}
+
+set.seed(1)
+d20 <- data.table(x=sample(x = seq(0,30,by=0.01), size=20),
+                  y=sample(x = seq(0,100,by=0.01), size=20),
+                  color=c(rep("B",times=19),"A"),
+                  shape=c("X",rep("Y",times=19))
+                  )
+
+d100 <- data.table(x=sample(x = seq(0,30,by=0.01), size=100),
+                  y=sample(x = seq(0,100,by=0.01), size=100),
+                  color1=c(rep("B",times=99),"A"),
+                  shape1=c(rep("Y",times=99),"X"),
+                  color2=c(rep("A",times=51),rep("B",times=49)),
+                  shape2=c(rep("Y",times=50),rep("X",times=50))
+                  )
+
+
+p1 <- ggplot(d20,aes(x=x,y=y,color=color))+
+  geom_point()+
+  theme_minimal(base_size = 8)+
+  theme(legend.position="none",
+      axis.line=element_blank(),
+      axis.text.x=element_blank(),
+      axis.text.y=element_blank(),
+      axis.ticks=element_blank(),
+      axis.title.x=element_blank(),
+      axis.title.y=element_blank())+
+  ggtitle("Farbe, N=20")+
+  xlim(0,30)+ylim(0,100)
+
+p2 <- ggplot(d100,aes(x=x,y=y,color=color1))+
+  geom_point()+
+  theme_minimal(base_size = 8)+
+  theme(legend.position="none",
+      axis.line=element_blank(),
+      axis.text.x=element_blank(),
+      axis.text.y=element_blank(),
+      axis.ticks=element_blank(),
+      axis.title.x=element_blank(),
+      axis.title.y=element_blank())+
+  ggtitle("Farbe, N=100")+
+  xlim(0,30)+ylim(0,100)
+
+p3 <- ggplot(d20,aes(x=x,y=y,shape=shape))+
+  geom_point(color="#F8766D")+
+  theme_minimal(base_size = 8)+
+  theme(legend.position="none",
+      axis.line=element_blank(),
+      axis.text.x=element_blank(),
+      axis.text.y=element_blank(),
+      axis.ticks=element_blank(),
+      axis.title.x=element_blank(),
+      axis.title.y=element_blank())+
+  ggtitle("Form, N=20")+
+  xlim(0,30)+ylim(0,100)
+
+p4 <- ggplot(d100,aes(x=x,y=y,shape=shape1))+
+  geom_point(color="#F8766D")+
+  theme_minimal(base_size = 8)+
+  theme(legend.position="none",
+      axis.line=element_blank(),
+      axis.text.x=element_blank(),
+      axis.text.y=element_blank(),
+      axis.ticks=element_blank(),
+      axis.title.x=element_blank(),
+      axis.title.y=element_blank())+
+  ggtitle("Form, N=100")+
+  xlim(0,30)+ylim(0,100)
+
+
+p5 <- ggplot(d100,aes(x=x,y=y,color=color2,shape=shape2))+
+  geom_point()+
+  theme_minimal(base_size = 8)+
+  theme(legend.position="none",
+      axis.line=element_blank(),
+      axis.text.x=element_blank(),
+      axis.text.y=element_blank(),
+      axis.ticks=element_blank(),
+      axis.title.x=element_blank(),
+      axis.title.y=element_blank())+
+  ggtitle("Farbe+Form, N=100")+
+  xlim(0,30)+ylim(0,100)
+
+
+library(cowplot)
+
+plot_grid(p1,p2,p3,p4,p5, nrow=1)
+
+```
+
+
+## Find the red dot 2
+
+
+```{r echo=FALSE, message=FALSE}
+
+p5 <- ggplot(d100,aes(x=x,y=y,color=color2,shape=shape2))+
+  geom_point()+
+  theme_minimal(base_size = 8)+
+  theme(
+      axis.line=element_blank(),
+      axis.text.x=element_blank(),
+      axis.text.y=element_blank(),
+      axis.ticks=element_blank(),
+      axis.title.x=element_blank(),
+      axis.title.y=element_blank())+
+  ggtitle("Farbe+Form, N=100")+
+  xlim(0,30)+ylim(0,100)
+
+p6 <- ggplot(d100,aes(x=x,y=y,color=paste(color2,shape2)))+
+  geom_point()+
+  theme_minimal(base_size = 8)+
+  theme(axis.line=element_blank(),
+      axis.text.x=element_blank(),
+      axis.text.y=element_blank(),
+      axis.ticks=element_blank(),
+      axis.title.x=element_blank(),
+      axis.title.y=element_blank())+
+  ggtitle("3 Farben, N=100")+
+  xlim(0,30)+ylim(0,100)
+
+
+plot_grid(p5,p6, nrow=1)
+```
+
+
+
+## `alpha` - for overlaps and appearance 
+
+- parameter `alpha` is limited between 0 - 1 
+- `alpha=0` is *invisible*/*transparent* object  
+- `alpha=1` standard = not-transparent 
+
+
+
+```{r}
+
+library(ggplot2)
+library(data.table)
+#generate overlapping scatterplot data by sampling from a normal distribution for x+y
+set.seed(1) #fix random sampling with 'seed'
+dRandom <- data.table( 
+                        x=rnorm(n=1000,mean=0,sd=0.5),
+                        y=rnorm(n=1000,mean=0,sd=0.5)
+                      )
+
+str(dRandom)
+
+
+#default
+ggplot(dRandom, aes(x=x, y=y))+
+  geom_point()
+
+
+#alpha=0.5 fix
+ggplot(dRandom, aes(x=x, y=y))+
+  geom_point(alpha=0.5)
+
+
+#alpha depending on x-values'
+ggplot(dRandom, aes(x=x, y=y))+
+  geom_point(aes(alpha=x))
+
+```
+
+
+
+# Color palettes
+
+
+## Manual color selection
+
+* `scale_color_manual`
+* `scale_fill_manual`
+
+- color names: http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf
+
+```{r}
+# With color names
+
+
+#internal definition
+ggplot(data=iris, aes(x=Sepal.Length,y=Sepal.Width))+
+  geom_point(aes(color=Species))+
+  scale_color_manual(values=c("red","orange","blue"))
+
+#external (global) variable
+cols <- c("red","orange","blue")
+
+ggplot(data=iris, aes(x=Sepal.Length,y=Sepal.Width))+
+  geom_point(aes(color=Species))+
+  scale_color_manual(values=cols)
+
+```
+
+
+
+### RGB or HEX
+
+- RGB https://en.wikipedia.org/wiki/RGB_color_model
+- HEX https://www.color-hex.com
+
+
+```{r}
+
+#create 3 colors by RGB definition
+hgu_petrol      <- rgb(0, 108, 125, maxColorValue = 255)
+hgu_lightgray   <- rgb(197, 198, 198, maxColorValue = 255)
+hgu_lightgreen  <- rgb(174, 195, 11, maxColorValue = 255)
+
+
+# Combine colors in a vector for plotting
+hgu_3cols <- c(hgu_petrol,hgu_lightgray,hgu_lightgreen)
+
+
+# Use colors in ggplot
+ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
+  geom_point(aes(color=Species))+
+  scale_color_manual(values=hgu_3cols)
+
+
+# improved visibility of light colors with fill and shape 
+ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
+      geom_point(aes(fill=Species), shape=21)+
+      scale_fill_manual(values=hgu_3cols)+
+      theme_bw()
+
+
+```
+
+```{r}
+
+# 3 HEX-Code Colors
+cols <- c("#ff0000","#ffa500","#0000ff")
+
+ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
+  geom_point(aes(color=Species))+
+  scale_color_manual(values=cols)
+
+```
+
+
+- `scale_color_identity` could be used when there is a color-code column in the dataset 
+- https://ggplot2.tidyverse.org/reference/scale_identity.html
+
+
+
+
+## Predefined color palettes
+
+- https://ggplot2.tidyverse.org/reference/scale_grey.html
+
+
+### ggplot2-Optionen
+
+A small selection: 
+> `scale_colour_grey`, `scale_colour_brewer`, `scale_colour_hue`, `scale_colour_viridis_d`
+... etc.
+
+- all palettes exist for `_color_` and `_fill_`
+
+
+```{r}
+# grayscale
+ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
+  geom_point(aes(color=Species))+
+  scale_colour_grey()
+
+#default color scale
+ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
+  geom_point(aes(color=Species))+
+  scale_colour_hue()
+
+# modification of h range -- check ?scale_colour_hue
+ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
+  geom_point(aes(color=Species))+
+  scale_colour_hue(h=c(0,50))
+```
+
+```{r}
+
+ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
+  geom_point(aes(color=Species))+
+  scale_colour_brewer()
+
+```
+
+
+- `scale_colour_brewer()` palettes
+
+```{r  echo=FALSE}
+par(cex=0.5)
+RColorBrewer::display.brewer.all()+theme_void(base_size = 8)
+
+```
+
+... und reduziert auf möglichst *colorblindFriendly* Paletten:
+
+```{r  echo=FALSE}
+
+par(cex=0.5)
+RColorBrewer::display.brewer.all(colorblindFriendly = TRUE)
+
+```
+
+
+```{r}
+
+ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
+  geom_point(aes(color=Species))+
+  scale_color_brewer(palette="Set2")
+
+```
+
+
+- https://ggplot2.tidyverse.org/reference/scale_viridis.html
+
+```{r}
+
+ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
+  geom_point(aes(color=Species))+
+  scale_colour_viridis_d()
+
+
+# improve visibility with fill+shape for light colors
+ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
+     geom_point(aes(fill=Species), shape=21)+
+     scale_fill_viridis_d(option="C")
+
+```
+
+
+### more packages with color palettes
+
+
+* `ggsci` -- https://nanx.me/ggsci/
+* `wesanderson` -- https://github.com/karthik/wesanderson
+* `unikn` -- https://cran.r-project.org/web/packages/unikn/vignettes/colors.html
+* ...
+
+Longer list: https://github.com/EmilHvitfeldt/r-color-palettes
+
+
+
+# Manual `shape`-selection
+
+```{r}
+
+ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
+  geom_point(aes(shape=Species))+
+  scale_shape_manual(values=c(2,3,4))
+
+```
+
+```{r echo=FALSE}
+
+df_shapes <- data.table(shape = 0:25)
+ggplot(df_shapes, aes(0, 0, shape = shape)) +
+  geom_point(aes(shape = shape), size = 5, fill = 'red') +
+  scale_shape_identity() +
+  facet_wrap(~shape) +
+  theme_void()
+
+
+```
+
+
+# Manual `linetype`-selection
+
+
+```{r}
+
+economics_long <- as.data.table(economics_long)
+economics_long_red <- economics_long[variable%in%c("pop","unemploy")]
+
+ggplot(economics_long_red, aes(x=date, y=value01)) + 
+  geom_line(aes(linetype=variable))+
+  scale_linetype_manual(values=c(2,3))
+
+ggplot(economics_long_red, aes(x=date, y=value01)) + 
+  geom_line(aes(linetype=variable))+
+  scale_linetype_manual(values=c("dotted","dashed"))
+
+
+```
+
+```{r echo=FALSE}
+lt <- c("blank", "solid", "dashed", "dotted", "dotdash",  "longdash", "twodash")
+ggpubr::show_line_types()+
+  theme_minimal()+
+  scale_y_discrete(labels=paste(0:6,lt,sep=' = '))
+
+```
+
+
+
+
+# Exercise
+
+- Play around with some options from the latest input 
+- e.g. colors, bar plots, etc...
+- ...
+
+
+
+# Additional resources
+
+
+- https://socviz.co/lookatdata.html
+- https://en.wikipedia.org/wiki/Alpha_compositing
+- https://en.wikipedia.org/wiki/Web_colors#Hex_triplet
+- https://ggplot2.tidyverse.org/articles/ggplot2-specs.html
+- https://ggplot2.tidyverse.org/reference/aes_linetype_size_shape.html
+- https://www.rdocumentation.org/packages/ggthemes/versions/3.5.0/topics/scale_colour_few
+- https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html
+- https://nanx.me/ggsci/
+- https://lisacharlotterost.de/2016/04/22/Colors-for-DataVis/
+- https://socviz.co/workgeoms.html
+
+#  Session Info
+
+```{r}
+
+sessionInfo()
+
+```

@@ -1,0 +1,186 @@
+---
+title: "Introduction to data visualization with R and ggplot2"
+author: "Dr. Dominik Schmidt"
+date: "2020"
+output:
+  rmdformats::readthedown:
+    self_contained: true
+    thumbnails: true
+    lightbox: true
+    gallery: false
+    highlight: tango
+    toc_depth: 4    
+    css: "../custom.css"     
+    code_folding: show
+---
+```{r echo=FALSE}
+
+knitr::opts_chunk$set(
+  class.output  = "bg-success",
+  class.message = "bg-info text-info",
+  class.warning = "bg-warning text-warning",
+  class.error   = "bg-danger text-danger"
+  )
+```
+
+
+# 009a Interactive Plots
+
+
+## Package installation
+
+- Copy and paste the following code in the R-console to install necessary packages.
+
+
+```{r message=FALSE}
+
+usePackage <- function(p)   
+{ 
+  if (!is.element(p, installed.packages()[,1])) 
+    install.packages(p, dep = TRUE, repos="https://cloud.r-project.org/", lib=.libPaths()[1]) 
+  require(p, character.only = TRUE) 
+} 
+  
+usePackage("plotly")
+usePackage("gganimate")
+usePackage("transformr")
+usePackage("sf")
+
+
+```
+
+
+# A brief insight into interactive plots
+
+- most popular interactive plotting library <a href=https://plotly.com/>`plotly`</a> (cross platform availability)
+- alternative R-packages, e.g. `ggvis`  (https://ggvis.rstudio.com/).
+
+
+## `plotly`
+
+- for R: https://plotly.com/r/
+- no need to learn `plotly` syntax for simple graphs - convert ggplot to plotly: `ggplotly()`
+
+
+```{r}
+
+library("data.table")
+library("ggplot2")
+library("plotly")
+
+iris <- as.data.table(iris)
+
+pScat  <- ggplot(iris,aes(x=Petal.Width,y=Petal.Length, color=Species))+
+            geom_point()
+
+
+ggplotly(pScat)
+
+
+```
+
+- "Mouse-Overs"
+- Zoom
+- png-export
+
+
+### ***Limitations***
+e.g. legend positioning
+
+```{r}
+
+pScat_legB <- pScat  +  
+                theme(legend.position="bottom")
+
+ggplotly(pScat_legB)
+
+
+```
+
+
+and `facet_`s (z.B. text outside of plot area). `plotly` has no equivalent functions - uses so called *subplots*
+
+
+```{r}
+
+# to long format
+miris <- melt(iris, id.vars="Species")
+
+# facetted plot
+pF <- ggplot(miris,aes(x=variable,y=value, fill=variable))+
+            geom_boxplot()+
+            facet_wrap(.~Species)
+
+
+ggplotly(pF)
+
+```
+
+
+
+
+
+
+
+## Animated ggplots -- `gganimate`
+
+
+- *Storytelling* within a plot
+- use with care, don't overdo it - only if your message benefits from the animation
+- Additional layers for controlling the animation: *transition* und *ease_aes*
+- run/global settings with `animate()`
+
+A not too useful example:
+
+```{r message=FALSE}
+library("data.table")
+library("ggplot2")
+library("gganimate")
+library("transformr")
+library("sf")
+
+
+clim <- fread("clim_DWD_Geisenheim_historic_monthly.csv")
+
+clim[,"Year":=year(MESS_DATUM)] 
+clim[,"Month":=month(MESS_DATUM)]
+
+pAnim <- ggplot(clim[Year > 1980], aes(x=Month, y=MO_TT.Lufttemperatur)) +
+  geom_line(aes(color=MO_TT.Lufttemperatur))+
+  geom_point(alpha = 0.7, show.legend = FALSE, aes(color=MO_TT.Lufttemperatur),size=5) +
+  scale_colour_viridis_c(option="A") +
+  scale_x_continuous(breaks=1:12)+
+  theme_minimal()+
+  # gganimate specific from here
+  labs(title = 'Year: {frame_time}', x = 'Month', y = 'T (°C)') +
+  transition_time(Year) +
+  ease_aes('linear')
+
+nYears <- length(unique(clim[Year > 1980]$Year))
+nYears
+
+# creat animation
+animate(pAnim, nframes = nYears, fps=1)
+
+
+
+```
+
+
+More examples can be found e.g. at https://gganimate.com/.
+
+
+# Additional resources
+
+- https://www.r-bloggers.com/comparing-plotly-ggplotly-plot-generation-times/
+- https://www.musgraveanalytics.com/blog/2018/8/24/how-to-make-ggplot2-charts-interactive-with-plotly
+- https://gganimate.com/articles/gganimate.html
+- https://ggvis.rstudio.com/
+
+#  Session Info
+
+```{r}
+
+sessionInfo()
+
+```

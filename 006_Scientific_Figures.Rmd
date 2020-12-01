@@ -1,0 +1,784 @@
+---
+title: "Introduction to data visualization with R and ggplot2"
+author: "Dr. Dominik Schmidt"
+date: "2020"
+output:
+  rmdformats::readthedown:
+    self_contained: true
+    thumbnails: true
+    lightbox: true
+    gallery: false
+    highlight: tango
+    toc_depth: 4    
+    css: "../custom.css"     
+    code_folding: show
+---
+```{r echo=FALSE}
+
+knitr::opts_chunk$set(
+  class.output  = "bg-success",
+  class.message = "bg-info text-info",
+  class.warning = "bg-warning text-warning",
+  class.error   = "bg-danger text-danger"
+  )
+```
+
+
+# 006: Scientific figures
+
+- Necessary features of a graph
+- remove <a href=https://en.wikipedia.org/wiki/Chartjunk>'chartjunk'</a>
+- consistency between plots
+
+
+## Package installation
+
+- Copy and paste the following code in the R-console to install necessary packages.
+
+
+```{r message=FALSE}
+
+usePackage <- function(p)   
+{ 
+  if (!is.element(p, installed.packages()[,1])) 
+    install.packages(p, dep = TRUE, repos="https://cloud.r-project.org/", lib=.libPaths()[1]) 
+  require(p, character.only = TRUE) 
+} 
+  
+usePackage("data.table")
+usePackage("ggplot2")
+
+```
+
+
+# Features of a graph
+
+- <a href=https://www.clips.edu.au/displaying-data>Common features of a graph</a> (Communication skills for science students, The University of Queensland)
+
+
+
+# Axis
+
+## Axis labels
+
+```{r}
+#simple
+ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
+    geom_point(aes(color = Species))+
+    xlab("Petal width (cm)")+
+    ylab("Petal length (cm)")
+
+
+#general
+ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
+    geom_point(aes(color = Species))+
+    scale_x_continuous(name="Petal width (cm)")+
+    scale_y_continuous(name="Petal length (cm)")
+
+
+#uses ?plotmath [greek symbols]
+ggplot(data = iris, aes(x = Petal.Width, y = Sepal.Length)) + 
+    geom_point(aes(color = Species))+
+    scale_x_continuous(name=quote(alpha[width]~(m)))+
+    scale_y_continuous(name=quote(beta[length]~(m)))
+
+```
+
+## Axis limits + ticks
+
+```{r}
+
+#limits
+ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
+    geom_point(aes(color = Species))+
+    scale_x_continuous(name="Petal width (cm)", limits=c(-1,5))+
+    scale_y_continuous(name="Petal length (cm)", limits=c(-1,20))
+
+
+# x-ticks
+seq(-1,5,by=1.5)
+
+# y-ticks
+seq(-1,20,by=1.5)
+
+# Breaks = ticks
+ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
+    geom_point(aes(color = Species))+
+    scale_x_continuous(name="Petal width (cm)", limits=c(-1,5), breaks=seq(-1,5,by=1.5))+
+    scale_y_continuous(name="Petal length (cm)", limits=c(-1,20), breaks=seq(-1,20,by=1.5))
+
+
+```
+
+
+
+## `coord_*`
+
+
+```{r}
+ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
+    geom_point(aes(color = Species))+
+    scale_x_continuous(name="Petal width (cm)", limits=c(-1,5), breaks=seq(-1,5,by=1.5))+
+    scale_y_continuous(name="Petal length (cm)", limits=c(-1,20), breaks=seq(-1,20,by=1.5))+
+    coord_fixed()
+```
+
+
+- `?coord_fixed` 
+  - `coord_flip` - rotation (*flip*) of axis by 90°
+  - `coord_polar` - transformation in polar coordinates
+  - `coord_map` - for projection on a 2D world map
+  - ...
+
+
+
+# Legends
+
+>  In ggplot2, you don’t directly control the legend; instead you set up the data so that there’s a clear mapping between data and aesthetics, and a legend is generated for you automatically. This can be frustrating when you first start using ggplot2, but once you get the hang of it, you’ll find that it saves you time, and there is little you cannot do. If you’re struggling to get the legend you want, it’s likely that your data is in the wrong form.
+> <small> Q: https://ggplot2-book.org/scales.html </small>
+
+
+```{r}
+
+# Change legend title = name
+ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
+    geom_point(aes(color = Species))+
+    scale_x_continuous(name="Petal width (cm)")+
+    scale_y_continuous(name="Petal length (cm)")+
+    coord_fixed()+
+    scale_colour_discrete(name="Iris species")    #Keeps colors as is, but rename title
+
+
+# Change legend item names = labels
+
+ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
+    geom_point(aes(color = Species))+
+    scale_x_continuous(name="Petal width (cm)")+
+    scale_y_continuous(name="Petal length (cm)")+
+    coord_fixed()+
+    scale_colour_discrete(labels=c("1","2","3"))   #Keeps colors as is, but rename items
+
+
+```
+
+
+## Combine legends
+
+```{r}
+
+# Global color specification 
+# Combines point and line legend
+
+ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length, color = Species)) + 
+    geom_point()+
+    geom_smooth(method="lm")+
+    scale_colour_discrete(name="Iris species") 
+
+```
+
+
+```{r}
+#Shape and color are automatically combined in a single legend 
+ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
+    geom_point(aes(color = Species, shape=Species))
+
+# unequal names and labels lead to separate legends
+    # here: by manual renaming of color legend
+ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
+    geom_point(aes(color = Species, shape=Species))+
+    scale_x_continuous(name="Petal width (cm)")+
+    scale_y_continuous(name="Petal length (cm)")+
+    coord_fixed() +
+    scale_colour_discrete(name="Species ID", labels=c("1","2","3"))     
+
+# rename both collapses legend to a single one
+ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
+    geom_point(aes(color = Species, shape=Species))+
+    scale_x_continuous(name="Petal width (cm)")+
+    scale_y_continuous(name="Petal length (cm)")+
+    coord_fixed() +
+    scale_colour_discrete(name="Species ID", labels=c("1","2","3"))    + 
+    scale_shape_discrete(name="Species ID", labels=c("1","2","3"))   
+```
+
+
+
+```{r}
+# add custom color and rename + change linetype and name
+ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
+    geom_point(aes(color = Species, shape=Species))+
+    geom_smooth(method="lm",aes(linetype="Linear model"), color="black")+
+    scale_x_continuous(name="Petal width (cm)")+
+    scale_y_continuous(name="Petal length (cm)")+
+    scale_colour_discrete(name="Species ID", labels=c("1","2","3"))    + 
+    scale_shape_discrete(name="Species ID", labels=c("1","2","3"))     +
+    scale_linetype_manual(name="Across species fit", values="dashed")
+
+```
+
+
+
+
+# Annotation
+
+- <a href=https://ggplot2-book.org/annotations.html#direct-labelling>'*direct labelling*'</a>.
+- sometimes the better legend 
+- no need to 'search' for the legend box 
+- `geom_text`, `geom_label` if you want to reuse data mappings
+- `annotate` more flexible
+
+```{r}
+# add custom color and rename + change linetype and name
+ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
+    geom_point(aes(color = Species, shape=Species))+
+    geom_smooth(method="lm", color="black")+
+    scale_x_continuous(name="Petal width (cm)")+
+    scale_y_continuous(name="Petal length (cm)")+
+    scale_colour_discrete(name="Species ID", labels=c("1","2","3"))    + 
+    scale_shape_discrete(name="Species ID", labels=c("1","2","3"))     +
+      annotate(
+        geom = "curve", x = 0.5, y = 4, xend = 0.75, yend = 3, 
+        curvature = -.3, arrow = arrow(length = unit(2, "mm"))
+      ) +
+      annotate(geom = "text", x =0.45, y = 4, label = "Linear model", hjust = "right")
+
+```
+
+
+- not too comfortable in base ggplot2
+  - `ggforce` (https://ggforce.data-imaginist.com/)
+    - https://www.data-imaginist.com/2019/the-ggforce-awakens-again/ 
+  - `ggrepel` (e.g. avoids overlapping) (https://cran.r-project.org/web/packages/ggrepel/vignettes/ggrepel.html)
+ 
+
+```{r}
+#install.packages("ggforce")
+library(ggforce)
+
+# use annotation
+ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
+    geom_point(aes(color = Species, shape=Species),show.legend=FALSE)+
+    geom_smooth(method="lm", color="black")+
+    geom_mark_ellipse(aes(label = Species, group = Species, color=Species),show.legend=FALSE)+ #ggforce-Function
+    scale_x_continuous(name="Petal width (cm)")+
+    scale_y_continuous(name="Petal length (cm)")+
+    annotate( #Draw curved arrow
+        geom = "curve", x = 0.5, y = 4, xend = 0.75, yend = 3, 
+        curvature = -.3, arrow = arrow(length = unit(2, "mm"))
+        ) +
+     annotate( #Print text at the end of arrow
+        geom = "text", x =0.45, y = 4, 
+        label = "Linear model\n across species", hjust = "right"
+        )
+
+
+```
+
+
+
+
+# Themes 
+
+- custom design - 'cosmetics'
+
+> Graphs have other features not strictly connected to the logical structure of the data being displayed. These include things like their background color, the typeface used for labels, or the placement of the legend on the graph. To adjust these, use the theme() function.
+> <small> Q: https://socviz.co/workgeoms.html</small>
+
+
+
+```{r}
+# Save plot to a variable
+p1 <- ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
+    geom_point(aes(color = Species))
+
+# plot by executing the variable  
+p1 
+
+# same as before with 'standard theme'
+p1 + theme_gray()
+
+
+# modifiy/extend existing plot with another theme
+p1 + theme_minimal() #white bg
+
+p1 + theme_bw() #white bg, black border
+
+p1 + theme_light() #white bg, gray border
+
+p1 + theme_classic() #white bg, no grid, no 'border' only axis
+
+
+```
+
+
+
+```{r}
+# additional packages
+#install.packages("ggthemes")
+library(ggthemes)
+
+p1 + theme_few() #larger font size, no grid, border
+
+p1 + theme_hc() # only horizontal grid, font size modification, modification of legend placement
+
+
+p1 + theme_gdocs() + # google docs theme
+     scale_color_gdocs() # plus google color palette
+
+
+# For the complete list of themes in the package check
+ls("package:ggthemes")[grepl("theme_", ls("package:ggthemes"))]
+
+```
+
+
+- `ggthemr` https://github.com/cttobin/ggthemr 
+
+
+
+
+## Customize a theme (1)
+
+
+```{r eval=FALSE}
+
+theme_grey(
+  base_size = 11,
+  base_family = "",   #=sans; alternatives: Times, Courier,...
+  base_line_size = base_size/22,
+  base_rect_size = base_size/22
+)
+
+```
+
+
+
+```{r}
+
+# Increase base size (e.g. for a presentation)
+p1 +
+    theme_classic(base_size = 20)
+
+
+# change font type to serif style and slightly decrease font size, e.g. for journal publications with default font size 10pt
+p1 +
+   theme_classic(base_size = 10,
+                  base_family="Times")
+
+
+
+```
+
+
+## Customize a theme (2)
+
+- There are many options ... https://ggplot2.tidyverse.org/reference/theme.html
+
+
+
+### Legend: Position and border
+
+
+```{r}
+# Legend to bottom
+ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
+    geom_point(aes(color = Species))+
+    theme(legend.position  = "bottom" ) 
+
+# Legend at 15% X and 85% Y [default justification: center of legend]
+ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
+    geom_point(aes(color = Species))+
+    theme(legend.position  = c(0.15,0.85) ) #percentage of figure area
+
+# Add border to legend Background-Box
+    # Change justification to 'left' - Box left Side
+    ##Justification defines which side of the legend that the legend.position coordinates refer to
+ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
+    geom_point(aes(color = Species))+
+    theme(
+          legend.position  = c(0.15,0.85), 
+          legend.justification = "left",                          
+          legend.background = element_rect(color="black")    #Add border to legend Background-Box
+          ) 
+
+# Remove fill color of background box
+ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
+    geom_point(aes(color = Species))+
+    theme(
+          legend.position  = c(0.15,0.85),   
+          legend.justification = "left",  
+          legend.background = element_rect(color="black", fill=NA) #remove fill color (default: "white")
+          ) 
+
+# Change legend direction | move legend slightly more left
+ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
+    geom_point(aes(color = Species))+
+    theme(
+          legend.position  = c(0.05,0.85),                             
+          legend.justification = "left",            
+          legend.background = element_rect(color="black", fill=NA), 
+          legend.direction = "horizontal"                            #change legend direction 
+          ) 
+
+
+```
+
+- there is more to legends...
+
+```{r eval=FALSE}
+
+legend.background, 
+legend.margin,
+legend.spacing,
+legend.spacing.x,
+legend.spacing.y,
+legend.key,
+legend.key.size,
+legend.key.height,
+legend.key.width,
+legend.text,
+legend.text.align,
+legend.title,
+legend.title.align,
+legend.position,
+legend.direction,
+legend.justification,
+legend.box,
+legend.box.just,
+legend.box.margin,
+legend.box.background,
+legend.box.spacing,
+
+```
+
+
+## Your theme
+
+- select a reference theme and modify 
+- most ggplot2 themes are themselves only modifications of the standard theme: `theme_gray`,
+dessen Definition unter: <a href=https://github.com/tidyverse/ggplot2/blob/master/R/theme-defaults.r>Link</a> 
+
+
+
+```{r}
+
+theme_DS <- function(base_size = 10,                           #set default values for the 4 "base parameters"
+                      base_family = "Palatino",
+                      base_line_size = base_size / 22,
+                      base_rect_size = base_size / 22){
+  theme_classic(base_size = base_size,                               # call your favorite theme and pass the input paremters
+                base_family = base_family,
+                base_line_size = base_line_size,
+                base_rect_size = base_rect_size
+                ) %+replace%                                     # add customized 'theme()' options (replace)
+    theme(
+      axis.title = element_text(                                 # modify axis title (name text)
+        color = rgb(0, 108, 125, maxColorValue = 255),           # hgu_petrol      <- rgb(0, 108, 125, maxColorValue = 255)
+        size = rel(1.0)),                                        # relative size to base size = 100% = 10pt
+      axis.text = element_text(                                  # modify axis text (tick text)
+        color = rgb(56, 56, 56, maxColorValue = 255),            # dark gray
+        size = rel(0.8)),                                        # relative size to base size = 80% = 8pt
+      panel.grid.major = element_line(                           # add major grid lines
+        color = rgb(197, 198, 198, maxColorValue = 255),         # hgu_lightgray   <- rgb(197, 198, 198, maxColorValue = 255)
+        linetype = "dotted",                                     # dotted line
+        size = base_line_size/1.5),                              # slighlty decreased line thickness
+      axis.line = element_line(                                  # modifiy axis lines
+        color = rgb(197, 198, 198, maxColorValue = 255),         # hgu_lightgray   <- rgb(197, 198, 198, maxColorValue = 255)
+        arrow=arrow(type = "closed",length = unit(0.125, "cm"))),# draw tiny arrow at the end of the axis lines      
+      legend.position = "bottom",                                # move legend to bottom
+      legend.key.size = unit(0.25,"cm"),                         # decrease legend key size to a square of 0.25 cm
+      complete = TRUE                                            # define this as a 'complete theme' - in this case all objects not defined here were inherited from the "superior theme"
+    )
+}
+
+
+```
+
+
+
+```{r}
+
+p1+theme_DS()
+
+```
+
+
+
+```{r eval=FALSE}
+# set your theme as a default in the current R session.
+
+theme_set(theme_DS())
+
+```
+
+
+
+# Best practices
+
+- reduce 'chartjunk' to highlight data
+
+## Grid Lines
+
+- get rid of unnecessary grid lines
+- try it out and compare with your *message*
+
+
+### Example (1)
+
+
+```{r}
+# library("rdwd")
+# #Select data from the DWD CDC FTP Server
+#   #current=TRUE - check current FTP Server Index to gather up-to-date file information
+# link <- selectDWD("Geisenheim", res="monthly", var="kl", per="historic", current=TRUE)
+# #Download data from the DWD CDC FTP Server
+# file <- dataDWD(link, read=FALSE, dir="DWDdata", quiet=TRUE, force=NA)
+# #Process data from the DWD CDC FTP Server to a data.frame
+# clim <- readDWD(file, varnames=TRUE)
+
+# #Change data.frame to data.table
+# clim <- as.data.table(clim)
+
+# fwrite(clim,file="clim_DWD_Geisenheim_historic_monthly.csv")
+
+
+clim <- fread("clim_DWD_Geisenheim_historic_monthly.csv")
+
+
+pB1 <- ggplot(clim[MESS_DATUM >= as.POSIXct("2015-01-01") & MESS_DATUM < as.POSIXct("2017-01-01")], 
+        aes(x=MESS_DATUM,y=MO_TT.Lufttemperatur))+
+    geom_line()+
+    geom_smooth(method="lm")+
+    scale_x_datetime(name="t (Month/Year)",date_breaks = "1 month", date_labels = "%m/%Y")+
+    ylab("Monthly-Mean Temperature (°C)")+
+    theme_classic()+
+        theme(axis.text.x=element_text(angle = 45, vjust=0.5))
+
+```
+
+- Plot without grid - when only the relative trend is relevant for your message 
+
+
+```{r}
+
+pB1
+
+```
+
+
+- Plot with horizontal grid only - if the absolute values are also  of interest, but not the exact timing 
+
+```{r}
+pB1  + 
+    theme(panel.grid.major.y=element_line()) 
+
+```
+
+
+
+### Example (2)
+
+- Compare February and May
+- https://www.perceptualedge.com/articles/dmreview/grid_lines.pdf [Figure 2]
+
+
+
+### Example (3) - Scatterplots
+
+- full grid when you want to talk about a specific *block*
+- trend is clearly visible without grid
+- but if you want to know the specific *Petal width* that relates to *Petal length* between 4-5\,cm, the grid can help
+
+```{r}
+
+pB3 <- ggplot(iris, aes(x=Petal.Width, y=Petal.Length))+
+        geom_point()+
+        theme_classic()+
+        scale_x_continuous(name="Petal width (cm)",breaks=seq(0,3,by=0.25), limits=c(0,2.75))+
+        scale_y_continuous(name="Petal length (cm)",breaks=0:7, limits=c(0,7))
+        
+
+
+pB3
+
+pB3  + 
+    theme(panel.grid.major=element_line()) 
+
+
+
+```
+
+
+### Example (4)
+
+- 'helper lines' instead of a full grid for orientation
+
+
+```{r}
+# add freezing point - if this is relevant to your study 
+pB1+
+    geom_hline(yintercept = 0, linetype="dashed", color="grey")
+
+
+```
+
+
+## Axis limits
+
+- Include full range or not?
+- in general: Do not *abuse* the various options to *mislead* the viewer
+- bar plots and histograms should include the *zero*
+  - horizontal lines can help pointing out smaller differences (see above) 
+  - maybe a threshold or reference value besides *0* would also be a valid limit
+- scatter plots and line plots are often used to show trends in or between data and not their absolute values, hence the zero-baseline is not always relevant
+
+
+## *Colors with a meaning*
+
+- People usually associate specific colors with *feelings* or *natural phenomena*. 
+- use this to your benefit - to improve the perception speed
+- i.e. warm colors for summer temperature, shades of blue for data related to water, indicate higher values with higher color intensities
+- if possible, do not reuse the same color for a different variable, but keep colors consistent within a document
+
+
+
+
+## 'Ten guidelines for effective data visualization in scientific publications'
+
+> Christa Kelleher, Thorsten Wagener,
+> Ten guidelines for effective data visualization in scientific publications,
+> Environmental Modelling & Software,
+> Volume 26, Issue 6,
+> 2011,
+> Pages 822-827,
+> ISSN 1364-8152,
+> https://doi.org/10.1016/j.envsoft.2010.12.006
+> (http://www.sciencedirect.com/science/article/pii/S1364815210003270)
+> (https://scholar.google.de/scholar?cluster=14672598521261445236&hl=de&as_sdt=0,5&as_vis=1)
+
+
+- ***Keep it simple*** 
+- ***Visualize the purpose*** of the plot (details versus patterns) 
+- ***Axis ranges***: absolute magnitude versus focus on differences 
+
+```{r}
+library("data.table")
+library("ggplot2")
+
+clim <- fread("clim_DWD_Geisenheim_historic_monthly.csv")
+clim[,"Year":=year(MESS_DATUM)]
+clim_lt_sub <- clim[Year > 1951]
+meanTDF <- clim_lt_sub[,.(meanT=mean(MO_TT.Lufttemperatur)),by=.(Year)]
+
+
+library("patchwork") #will come to that later
+
+p1 <- ggplot(meanTDF, aes(x=Year,y=meanT))+
+  geom_col()+
+  theme_minimal()+
+  geom_smooth(method="lm")+
+  ggtitle("Annual mean temperature increased")
+
+p2 <- ggplot(meanTDF, aes(x=Year,y=meanT-meanT[1]))+
+  geom_col()+
+  theme_minimal()+
+  ggtitle(paste("Mean T Difference to", min(meanTDF$Year)))+
+  geom_smooth(method="lm")
+
+
+p1|p2
+
+```
+
+- ***Data transformation***: plotting on log-scale to catch outliers / to capture data 
+- ***Aspect ratio*** affects visual perception of rates of change 
+- ***Handle overlapping points***: transparency / count plots 
+- ***Missing data in line plots*** of time-series: do not connect lines with data-gaps 
+- Use of ***summary statistic plots*** leads to simplicity; do not do boxplots for less than 5 data points  
+- Axis ranges between plots: keep ***consistent*** axis ranges, if similar plots/data appear in a publication 
+- ***Match color scheme and data*** 
+  - sequential colors for quantitative data, with low values in lighter tints 
+  - diverging colors for highlighting contrasts 
+  - categories can use qualitative schemes 
+
+# *"Message Trumps Beauty"*
+
+> Rule 9: Message Trumps Beauty
+> <small>Rougier NP, Droettboom M, Bourne PE (2014) Ten Simple Rules for Better Figures. PLOS Computational Biology 10(9): e1003833. https://doi.org/10.1371/journal.pcbi.1003833</small>
+
+
+
+
+
+
+# Exercise 
+
+```{r}
+library("data.table")
+library("ggplot2")
+
+clim <- fread("clim_DWD_Geisenheim_historic_monthly.csv")
+clim[,"Year":=year(MESS_DATUM)]
+clim_lt_sub <- clim[Year > 1951]
+minmaxmeanTDF <- clim_lt_sub[,.(meanT=mean(MO_TT.Lufttemperatur),minT=min(MO_TT.Lufttemperatur),maxT=max(MO_TT.Lufttemperatur)),by=.(Year)]
+m_minmaxmeanTDF <- melt(minmaxmeanTDF,id.vars="Year")
+
+ggplot(m_minmaxmeanTDF, aes(x=Year,y=value, fill=variable))+
+  geom_col(position="dodge")+
+  geom_smooth(method="lm",aes(color=variable))+
+  theme_minimal()
+
+
+```
+
+- Start from the above plot and try to improve it - show that the trend of min, max and mean air temperature increased since 1952  
+- Try to annotate instead of using a legend (e.g. lines) (***Hint***: You could use the last year's data in a mapping by providing it as a new `data` input; `geom_text(data=m_minmaxmeanTDF[Year==max(Year)],...)`)
+- Assume there is also a figure caption that contains some information, that might help you keeping the plot 'clean'/focused 
+
+```{r eval=FALSE, echo=FALSE}
+#color blind safe: https://colorbrewer2.org/#type=diverging&scheme=RdYlBu&n=6
+#       mean, min, max
+cols <- c("#fc8d59","#4575b4","#d73027")
+
+ggplot(m_minmaxmeanTDF, aes(x=Year,y=value, fill=variable))+      #
+  geom_point(shape=21,alpha=0.5)+                                 # shape=21 can be filled
+  geom_smooth(method="lm",aes(color=variable))+                   # lineare trendline, color
+  theme_minimal()+                                                # select theme
+  theme(panel.grid.major.x = element_blank(),                     # remove vertical grid
+        panel.grid.minor.x = element_blank(),                     # remove vertical grid
+        legend.position = "none")+                                # remove legend
+  scale_y_continuous(name="T (°C)",breaks=seq(-10,30,by=5))+      # Modify y axis | more breaks for differentiation within group
+  coord_fixed(ratio = 3)+                                         # Select aspect ratio | not too stretched
+  geom_text(data=m_minmaxmeanTDF[Year==max(Year)],                # annotate with geom text to use data
+              aes(y=value, x=Year+2, label=c("Mean","Min","Max"), # custom labels | !!better introduce a label variable - fail safe
+              color=variable),                                    # also assign color
+              hjust=0,                                            # horizontal align = left
+              size=3)+                                            # adjust size
+  scale_x_continuous(expand = expansion(mult = c(0.05, 0.15)))+   # expand x axis to include text
+  scale_color_manual(values=cols)+                                # color blind safe: https://colorbrewer2.org/#type=diverging&scheme=RdYlBu&n=6
+  scale_fill_manual(values=cols)                                  # same as color
+  #annotate(geom="text",y=m_minmaxmeanTDF[Year==max(Year)]$value, x=m_minmaxmeanTDF[Year==max(Year)]$Year+2, label=c("Mean","Min","Max"))
+
+# one could also use - differences to first date
+
+```
+ 
+# Additional resources
+
+- https://www.data-to-viz.com/
+- https://www.r-graph-gallery.com/
+- https://scales.r-lib.org/
+  - `pretty_breaks` -  https://scales.r-lib.org/reference/pretty_breaks.html
+  - `extendet_breaks` - https://scales.r-lib.org/reference/extended_breaks.html
+- https://cran.r-project.org/web/packages/ggrepel/vignettes/ggrepel.html
+- http://www.cookbook-r.com/Graphs/Fonts/
+- https://ggplot2.tidyverse.org/reference/theme.html
+- https://www.data-imaginist.com/2019/the-ggforce-awakens-again/
+
+#  Session Info
+
+```{r}
+
+sessionInfo()
+
+```

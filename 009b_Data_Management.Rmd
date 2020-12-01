@@ -1,0 +1,416 @@
+---
+title: "Introduction to data visualization with R and ggplot2"
+author: "Dr. Dominik Schmidt"
+date: "2020"
+output:
+  rmdformats::readthedown:
+    self_contained: true
+    thumbnails: true
+    lightbox: true
+    gallery: false
+    highlight: tango
+    toc_depth: 4    
+    css: "../custom.css"     
+    code_folding: show
+---
+```{r echo=FALSE}
+
+knitr::opts_chunk$set(
+  class.output  = "bg-success",
+  class.message = "bg-info text-info",
+  class.warning = "bg-warning text-warning",
+  class.error   = "bg-danger text-danger"
+  )
+```
+
+
+# 009b Data management
+
+
+## Package installation
+
+- Copy and paste the following code in the R-console to install necessary packages.
+
+
+```{r message=FALSE}
+
+usePackage <- function(p)   
+{ 
+  if (!is.element(p, installed.packages()[,1])) 
+    install.packages(p, dep = TRUE, repos="https://cloud.r-project.org/", lib=.libPaths()[1]) 
+  require(p, character.only = TRUE) 
+} 
+  
+usePackage("ggplot2")
+usePackage("data.table")
+usePackage("scales")   #viridis_pal
+
+
+```
+
+
+
+## Load data and subset
+
+```{r message=FALSE}
+# library("rdwd")
+# # 'recent' daily data from Geisenheim
+# link <- selectDWD("Geisenheim", res="daily", var="kl", per="historical")
+# file <- dataDWD(link, read=FALSE, dir="DWDdata", quiet=TRUE, force=NA)
+# clim_lt <- readDWD(file, varnames=TRUE)
+# clim_lt <- as.data.table(clim_lt)
+# str(clim_lt)
+
+#fwrite(clim_lt,"clim_DWD_Geisenheim_historic_daily.csv")
+
+clim_lt <- fread("clim_DWD_Geisenheim_historic_daily.csv")
+
+
+# Subset Dataset to relevant variables and slightly reformat (optional)
+clim_lt_sub <- clim_lt[,c("MESS_DATUM","TMK.Lufttemperatur","UPM.Relative_Feuchte","FM.Windgeschwindigkeit","NM.Bedeckungsgrad","RSK.Niederschlagshoehe")]
+colnames(clim_lt_sub) <- c("Date","T","phi","wind","clouds","rain")
+clim_lt_sub[,"Date":=as.Date(Date)]
+summary(clim_lt_sub)
+
+
+```
+
+
+## Introducing helper variables (faceting, aggregating, statistics)
+
+-- example: year, month, day
+
+```{r}
+
+clim_lt_sub[,"Year":=year(Date)]
+clim_lt_sub[,"Month":=month(Date)]
+clim_lt_sub[,"Day":=mday(Date)]
+
+#Alternatives 
+#clim_lt_sub[,"Year":=substr(Date,1,4)]
+# clim_lt_sub[,"Year":=as.numeric(format(Date,'%Y'))]
+# clim_lt_sub[,"Month":=as.numeric(format(Date,'%m'))]
+# clim_lt_sub[,"Day":=as.numeric(format(Date,'%d'))]
+
+#library(stringi)
+#with(clim_lt_sub, stri_split_regex(Date,pattern="-",simplify=TRUE)
+
+
+
+
+# Subset Years
+clim_lt_sub <- clim_lt_sub[Year > 1950]
+
+```
+
+
+## Introducing helper data-sets (aggregation)
+
+```{r}
+
+summary(clim_lt_sub)
+#clim_lt_sub_YMEAN <- as.data.table(with(clim_lt_sub, aggregate(list(T_Air=T_Air, phi=phi), by=list(Year=Year), FUN=function(x) {mean(x, na.rm=TRUE)})))
+
+clim_lt_sub_YMEAN <- clim_lt_sub[,lapply(.SD, function(x) {mean(x, na.rm=TRUE)}), by='Year', .SDcols=c('T','phi','wind','clouds','rain')]
+clim_lt_sub_YSD   <- clim_lt_sub[,lapply(.SD, function(x) {sd(x, na.rm=TRUE)}),   by='Year', .SDcols=c('T','phi','wind','clouds','rain')]
+
+clim_lt_sub_YMMEAN <- clim_lt_sub[,lapply(.SD, function(x) {mean(x, na.rm=TRUE)}), by=c('Year','Month'), .SDcols=c('T','phi','wind','clouds','rain')]
+clim_lt_sub_YMSD   <- clim_lt_sub[,lapply(.SD, function(x) {sd(x, na.rm=TRUE)}),   by=c('Year','Month'), .SDcols=c('T','phi','wind','clouds','rain')]
+
+
+
+# mean_sd <- function(x){
+#                         list(mean = mean(x, na.rm=TRUE), sd = sd(x, na.rm=TRUE))
+#                       }
+# clim_lt_sub[, setNames( sapply(.SD, mean_sd), paste0(c("mean.", "sd."),rep(c('T','phi','wind','clouds','rain'),each=2))), by='Year', .SDcols=c('T','phi','wind','clouds','rain')]
+
+
+```
+
+## Creat Longformat Datasets for ggplot
+
+```{r}
+
+clim_lt_sub_melt <- na.omit(melt(clim_lt_sub, id.vars=c("Date","Year","Month","Day")))
+
+#helper function
+melt_and_narm_similar <- function(dataset) { na.omit(melt(dataset, id.vars=colnames(dataset)[colnames(dataset)%in%c("Date","Year","Month","Day")])) }
+
+
+clim_lt_sub_YMEAN_melt  <- melt_and_narm_similar(clim_lt_sub_YMEAN)
+clim_lt_sub_YSD_melt    <- melt_and_narm_similar(clim_lt_sub_YSD)
+clim_lt_sub_YMMEAN_melt <- melt_and_narm_similar(clim_lt_sub_YMMEAN)
+clim_lt_sub_YMSD_melt   <- melt_and_narm_similar(clim_lt_sub_YMSD)
+
+#ADD SD to MEAN DF (merge)
+clim_lt_sub_YMEAN_melt[,"sd":=clim_lt_sub_YSD_melt$value]
+clim_lt_sub_YMMEAN_melt[,"sd":=clim_lt_sub_YMSD_melt$value]
+
+
+
+
+
+
+
+```
+
+## Some plotting options
+
+```{r}
+
+# Alltime data overview
+ggplot(clim_lt_sub_melt, aes(x=variable,y=value))+
+  geom_boxplot()+
+  #geom_violin(draw_quantiles=c(0.25,0.5,0.75))+
+  facet_wrap(~variable, scales="free")
+
+# Alltime data overview - per Year
+ggplot(clim_lt_sub_melt, aes(x=Year,y=value))+
+  geom_boxplot(aes(group=Year))+
+  #geom_violin(draw_quantiles=c(0.25,0.5,0.75))+
+  facet_wrap(~variable, scales="free")+
+  geom_smooth()+
+  geom_vline(xintercept=2001)   #change of estimation of daily data
+
+
+# YearMonth-Wise Mean data overview 
+  # Outliers "removed"
+ggplot(clim_lt_sub_YMMEAN_melt, aes(x=Year,y=value))+
+  geom_boxplot(aes(group=Year))+
+  #geom_point()+
+  #geom_violin(draw_quantiles=c(0.25,0.5,0.75))+
+  facet_wrap(~variable, scales="free")+
+  geom_smooth()+
+  geom_vline(xintercept=2001)
+
+# Year-Wise Mean data overview 
+ggplot(clim_lt_sub_YMEAN_melt, aes(x=Year,y=value))+
+  geom_point()+
+  facet_wrap(~variable, scales="free")+
+  geom_smooth()+
+  geom_vline(xintercept=2001)
+
+
+# Year-Wise Mean data overview 
+  #pointrange (sd) for RAIN yields unrealitic values)
+ggplot(clim_lt_sub_YMEAN_melt, aes(x=Year,y=value))+
+  geom_pointrange(aes(ymin=value-sd, ymax=value+sd))+       #pointrange - mean +/- sd 
+  facet_wrap(~variable, scales="free")+
+  geom_smooth()+
+  geom_vline(xintercept=2001)
+
+
+# Year-Wise Mean data overview with linear model
+ggplot(clim_lt_sub_YMEAN_melt, aes(x=Year,y=value))+
+  geom_point()+
+  facet_wrap(~variable, scales="free")+
+  geom_smooth(method="lm")+                               #linear model
+  geom_vline(xintercept=2001)
+
+
+```
+
+
+### Towards a publication ready figure
+
+- if you want to show variability between and within years and the overall trend
+- box plots based on monthly averages
+
+```{r}
+
+unique(clim_lt_sub_YMMEAN_melt$variable)
+
+levels(clim_lt_sub_YMMEAN_melt$variable)
+
+#rename variables for plotting
+clim_lt_sub_YMMEAN_melt$variable <- factor(clim_lt_sub_YMMEAN_melt$variable, 
+                                            labels = c("T[air]~('°'*C)", 
+                                                                        "phi~('%')",
+                                                                        "windspeed~('m/s')",
+                                                                        "coverage~('1/8')",
+                                                                        "precipitation~('mm')"
+                                                                        )
+                                            )
+
+
+seq_width <- 10
+minY <- round(min(clim_lt_sub_YMMEAN_melt$Year)+seq_width/2,-1)
+maxY <- round(max(clim_lt_sub_YMMEAN_melt$Year)-seq_width/2,-1)
+
+#breaks includes start/end + decades
+year_breaks <- c(min(clim_lt_sub_YMMEAN_melt$Year),
+                seq(minY,maxY,by=seq_width),
+                max(clim_lt_sub_YMMEAN_melt$Year)
+                )
+
+
+p <- 
+ggplot(clim_lt_sub_YMMEAN_melt, aes(x=Year,y=value))+
+    geom_boxplot(aes(group=Year),lwd=0.1,outlier.size = 0.1)+                     # modfiy for readability
+    facet_wrap(~variable, scales="free", strip.position="left", ncol=1, 
+                    labeller=label_parsed)+
+    geom_smooth(method="lm", aes(linetype="Trendline", color="Trendline"), se=FALSE)+         #remove error | invisible and problematic for legends
+    geom_vline(aes(xintercept=2001,linetype="DWD-Change", color="DWD-Change"), alpha=0.5)+
+    scale_linetype_manual(name="",values=c(2,1))+               #ONLY necessary if "DWD Change" is used
+    scale_colour_manual(name="", values=c("black","red"))+      #ONLY necessary if "DWD Change" is used
+    scale_x_continuous(breaks=year_breaks, expand=c(0,0))   +         #Define x-axis ticks
+    theme_minimal(base_size = 10)+
+    theme(
+              axis.title.y =element_blank()                             #remove "value" as y-axis label
+              ,strip.placement = "outside"                              #use strip text as y-axis 
+               ,legend.position="bottom"                               #move legend
+             # ,legend.position=c(0.75,0.2)                               #move legend | if multi-column setup
+              ,legend.key = element_rect(fill = 'white', color="white", size = 0.0)    #fill background and remove 
+              ,legend.key.size = unit(0.5,"cm")    #fill background and remove border of "key"
+             # ,legend.background = element_rect(color = 'black')        #draw box around legend
+              ,legend.title = element_blank()                           #remove empty title entirely
+              ,plot.margin = margin(t=0, r=0.35, b=0, l=0, "cm")                   #reduce plot margin ()
+              ,legend.margin = margin(t=0, r=0, b=0, l=0, "cm")  
+            )
+
+# if provided by a publisher
+single_column_width <- 8.5 #cm
+max_column_height <- 29.7 - 2*3.75 #cm
+
+ggsave(p,filename="Figure1.pdf", width=single_column_width, height=max_column_height, units="cm")
+
+
+
+```
+
+
+#### Plot 
+
+```{r thumbnails=FALSE}
+
+knitr::include_graphics("./Figure1.pdf")
+
+```
+
+
+
+#### Add Quarters of Year
+
+
+
+```{r}
+
+# quaŕters = cut month into 4 intervalls
+#clim_lt_sub[,"Quarter":=paste0("Q",as.numeric(factor(cut(Month,4))))]
+clim_lt_sub[,"Quarter":=paste0("Q",quarter(Date))]
+
+
+# Calculate Means
+clim_lt_sub_QMEAN <- clim_lt_sub[,lapply(.SD, function(x) {mean(x, na.rm=TRUE)}), by=c('Year','Quarter'), .SDcols=c('T','phi','wind','clouds','rain')]
+
+#remove NAs and creat long format
+clim_lt_sub_QMEAN_melt <- na.omit(melt(clim_lt_sub_QMEAN, id.vars=c("Year","Quarter")))
+
+
+levels(clim_lt_sub_QMEAN_melt$variable)
+
+#rename variables for facet strip text
+clim_lt_sub_QMEAN_melt$variable <- factor(clim_lt_sub_QMEAN_melt$variable, 
+                                            labels = c("T[air]~('°'*C)", 
+                                                                        "phi~('%')",
+                                                                        "windspeed~('m/s')",
+                                                                        "coverage~('1/8')",
+                                                                        "precipitation~('mm')"
+                                                                        )
+                                            )
+
+
+
+p <- 
+ggplot(clim_lt_sub_QMEAN_melt, aes(x=Year,y=value))+
+    geom_point(aes(fill=Quarter,shape=Quarter), alpha=0.5)+                     # modfiy for readability
+    facet_wrap(~variable, scales="free", strip.position="left", ncol=1, 
+                    labeller=label_parsed)+
+    geom_smooth(method="lm", aes(color=Quarter), se=FALSE)+         #remove error | invisible and problematic for legends (gray)
+    scale_x_continuous(breaks=year_breaks, expand=c(0,0))   +         #Define x-axis ticks
+    theme_minimal(base_size = 10)+
+    theme(
+              axis.title.y =element_blank()                             #remove "value" as y-axis label
+              ,strip.placement = "outside"                              #use strip text as y-axis 
+               ,legend.position="bottom"                               #move legend
+             # ,legend.position=c(0.75,0.2)                               #move legend | if multi-column setup
+              ,legend.key = element_rect(fill = 'white', color="white", size = 0.0)    #fill background and remove 
+              ,legend.key.size = unit(0.5,"cm")    #fill background and remove border of "key"
+             # ,legend.background = element_rect(color = 'black')        #draw box around legend
+              ,legend.title = element_blank()                           #remove empty title entirely
+              ,plot.margin = margin(t=0, r=0.35, b=0, l=0, "cm")                   #reduce plot margin ()
+              ,legend.margin = margin(t=0, r=0, b=0, l=0, "cm")  
+            )+
+     scale_fill_manual(values=viridis_pal(option="A")(5)[c(1,3,4,2)])+
+     scale_color_manual(values=viridis_pal(option="A")(5)[c(1,3,4,2)]) +  
+    scale_shape_manual(values=c(21:24))
+
+ggsave(p,filename="Figure1_1.pdf", width=8.5, height=max_column_height, units="cm")
+
+
+#Line instead of points
+p <- ggplot(clim_lt_sub_QMEAN_melt, aes(x=Year,y=value))+
+    geom_line(aes(color=Quarter), alpha=0.5)+                     # modfiy for readability
+    facet_wrap(~variable, scales="free", strip.position="left", ncol=1, 
+                    labeller=label_parsed)+
+    geom_smooth(method="lm", aes(color=Quarter),linetype="dashed", se=FALSE)+         #remove error | invisible and problematic for legends
+    scale_x_continuous(breaks=year_breaks, expand=c(0,0))   +         #Define x-axis ticks
+    theme_minimal(base_size = 10)+
+    theme(
+              axis.title.y =element_blank()                             #remove "value" as y-axis label
+              ,strip.placement = "outside"                              #use strip text as y-axis 
+               ,legend.position="bottom"                               #move legend
+              ,legend.key = element_rect(fill = 'white', color="white", size = 0.0)    #fill background and remove 
+              ,legend.key.size = unit(0.5,"cm")    #fill background and remove border of "key"
+              ,legend.title = element_blank()                           #remove empty title entirely
+              ,plot.margin = margin(t=0, r=0.35, b=0, l=0, "cm")                   #reduce plot margin ()
+              ,legend.margin = margin(t=0, r=0, b=0, l=0, "cm")  
+            )+
+     scale_fill_manual(values=viridis_pal(option="A")(5)[c(1,3,4,2)])+
+     scale_color_manual(values=viridis_pal(option="A")(5)[c(1,3,4,2)]) +  
+    scale_shape_manual(values=c(21:24))
+
+ggsave(p,filename="Figure1_2.pdf", width=8.5, height=max_column_height, units="cm")
+
+
+```
+
+
+
+#### Plot 1_1
+
+
+```{r thumbnails=FALSE}
+
+knitr::include_graphics("./Figure1_1.pdf")
+
+```
+
+#### Plot 1_2
+
+```{r thumbnails=FALSE}
+
+knitr::include_graphics("./Figure1_2.pdf")
+
+```
+
+# Resources
+
+- https://ggplot2.tidyverse.org/reference/theme_get.html
+- https://ggplot2.tidyverse.org/reference/theme.html
+
+
+
+
+
+# Additional resources
+
+- <a href=https://youtu.be/-Fs2t6P5AjY>Vector versus raster graphics</a>
+
+#  Session Info
+
+```{r}
+
+sessionInfo()
+
+```
