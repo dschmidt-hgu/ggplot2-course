@@ -1,8 +1,7 @@
 install.packages("rmarkdown") 	# to compile RMD files
 install.packages("ggplot2")		# plotting
 install.packages("data.table")	# data management
-#install.packages("rdwd")		# get DWD climate data (optional)
-remotes::install_github("brry/rdwd", build_vignettes=TRUE) # for latest version
+install.packages("rdwd")		# get DWD climate data (optional)
 install.packages("patchwork")	# align multiple plots
 install.packages("scales")      # pretty scales
 install.packages("ggforce")     # zoom facet, annotation
