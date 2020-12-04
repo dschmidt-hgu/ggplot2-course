@@ -10,7 +10,7 @@ output:
     gallery: false
     highlight: tango
     toc_depth: 4    
-    css: "../custom.css"     
+    css: "./custom.css"     
     code_folding: show
 ---
 ```{r echo=FALSE}
@@ -735,34 +735,8 @@ ggplot(m_minmaxmeanTDF, aes(x=Year,y=value, fill=variable))+
 - Try to annotate instead of using a legend (e.g. lines) (***Hint***: You could use the last year's data in a mapping by providing it as a new `data` input; `geom_text(data=m_minmaxmeanTDF[Year==max(Year)],...)`)
 - Assume there is also a figure caption that contains some information, that might help you keeping the plot 'clean'/focused 
 
-```{r eval=FALSE, echo=FALSE}
-#color blind safe: https://colorbrewer2.org/#type=diverging&scheme=RdYlBu&n=6
-#       mean, min, max
-cols <- c("#fc8d59","#4575b4","#d73027")
 
-ggplot(m_minmaxmeanTDF, aes(x=Year,y=value, fill=variable))+      #
-  geom_point(shape=21,alpha=0.5)+                                 # shape=21 can be filled
-  geom_smooth(method="lm",aes(color=variable))+                   # lineare trendline, color
-  theme_minimal()+                                                # select theme
-  theme(panel.grid.major.x = element_blank(),                     # remove vertical grid
-        panel.grid.minor.x = element_blank(),                     # remove vertical grid
-        legend.position = "none")+                                # remove legend
-  scale_y_continuous(name="T (°C)",breaks=seq(-10,30,by=5))+      # Modify y axis | more breaks for differentiation within group
-  coord_fixed(ratio = 3)+                                         # Select aspect ratio | not too stretched
-  geom_text(data=m_minmaxmeanTDF[Year==max(Year)],                # annotate with geom text to use data
-              aes(y=value, x=Year+2, label=c("Mean","Min","Max"), # custom labels | !!better introduce a label variable - fail safe
-              color=variable),                                    # also assign color
-              hjust=0,                                            # horizontal align = left
-              size=3)+                                            # adjust size
-  scale_x_continuous(expand = expansion(mult = c(0.05, 0.15)))+   # expand x axis to include text
-  scale_color_manual(values=cols)+                                # color blind safe: https://colorbrewer2.org/#type=diverging&scheme=RdYlBu&n=6
-  scale_fill_manual(values=cols)                                  # same as color
-  #annotate(geom="text",y=m_minmaxmeanTDF[Year==max(Year)]$value, x=m_minmaxmeanTDF[Year==max(Year)]$Year+2, label=c("Mean","Min","Max"))
 
-# one could also use - differences to first date
-
-```
- 
 # Additional resources
 
 - https://www.data-to-viz.com/

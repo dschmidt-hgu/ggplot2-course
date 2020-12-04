@@ -10,7 +10,7 @@ output:
     gallery: false
     highlight: tango
     toc_depth: 4    
-    css: "../custom.css"     
+    css: "./custom.css"     
     code_folding: show
 ---
 ```{r echo=FALSE}
@@ -233,21 +233,6 @@ ggplot(data=clim[-c(100:150),], aes(x=MESS_DATUM, y=TMK.Lufttemperatur))+
 - Play around with their options (density: `adjust=`, histogram and frequency polygon: `binwidth=`)
 - more options can be found in the help of the respective `?geom_...`
 
-
-```{r eval=FALSE, echo=FALSE}
-ggplot(data=clim, aes(x=TMK.Lufttemperatur))+
-  geom_density()
-
-ggplot(data=clim, aes(x=TMK.Lufttemperatur))+
-  geom_density(adjust=0.5)
-
-ggplot(data=clim, aes(x=TMK.Lufttemperatur))+
-  geom_freqpoly(binwidth=1)  
-
-ggplot(data=clim, aes(x=TMK.Lufttemperatur))+
-  geom_histogram(binwidth=1)  
-
-```
 
 
 # Additional resources

@@ -10,7 +10,7 @@ output:
     gallery: false
     highlight: tango
     toc_depth: 4    
-    css: "../custom.css"     
+    css: "./custom.css"     
     code_folding: show
 ---
 ```{r echo=FALSE}

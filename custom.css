@@ -1,0 +1,35 @@
+#main .nav-pills > li.active > a,
+#main .nav-pills > li.active > a:hover,
+#main .nav-pills > li.active > a:focus {
+   background-color: #148a52;
+}
+
+#main .nav-pills > li > a:hover {
+  background-color: #148a52;
+}
+
+h1,h2,h3,h4,h5,h6,legend{
+    color: #148a52;
+}
+
+
+#sidebar h2 {
+  background-color: #148a52
+}
+
+#sidebar {
+  background-color: #575656
+
+}
+#postamble {
+border-top: solid 10px #148a52;
+}
+
+a:hover{
+    color:#929292
+}
+
+a:visited{
+    color:#929292
+}
+
