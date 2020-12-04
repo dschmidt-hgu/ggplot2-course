@@ -44,6 +44,7 @@ usePackage("ggplot2")
 
 
 clim <- fread("clim_DWD_Geisenheim_historic_monthly.csv")
+clim[,"MESS_DATUM":=as.POSIXct(MESS_DATUM)] 
 
 
 pB1 <- ggplot(clim[MESS_DATUM >= as.POSIXct("2015-01-01") & MESS_DATUM < as.POSIXct("2017-01-01")], 

@@ -394,18 +394,12 @@ knitr::include_graphics("./Figure1_2.pdf")
 
 ```
 
-# Resources
-
-- https://ggplot2.tidyverse.org/reference/theme_get.html
-- https://ggplot2.tidyverse.org/reference/theme.html
-
-
-
-
 
 # Additional resources
 
-- <a href=https://youtu.be/-Fs2t6P5AjY>Vector versus raster graphics</a>
+- https://cran.r-project.org/web/packages/data.table/vignettes/datatable-reshape.html
+- http://brooksandrew.github.io/simpleblog/articles/advanced-data-table/
+
 
 #  Session Info
 

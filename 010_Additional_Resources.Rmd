@@ -166,7 +166,6 @@ ggplot(d[-13,],aes(x=x,y=y))+
 
 ```{r}
 library("rgl")   #interative 3D plots
-library("rglwidget")  #HTML output widget
   options(rgl.useNULL = TRUE) #only for markdown output
 
 # Pointcloud
