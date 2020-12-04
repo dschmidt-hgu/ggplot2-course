@@ -1,9 +1,5 @@
-r-cran-rmarkdown
 r-cran-ggplot2
 r-cran-data.table
 r-cran-scales
-r-cran-sf
-r-cran-ggforce
-r-cran-ggthemes
 r-cran-rgl
 r-cran-plotly
