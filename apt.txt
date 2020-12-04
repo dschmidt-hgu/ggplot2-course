@@ -1,5 +1,0 @@
-r-cran-ggplot2
-r-cran-data.table
-r-cran-scales
-r-cran-rgl
-r-cran-plotly

@@ -146,7 +146,6 @@ usePackage("sf")            # req. for gganmiate example
 usePackage("gganimate")     # animate ggplot2s
 usePackage("ggthemes")      # themes for ggplot2
 usePackage("rgl")           # 3D plotting
-usePackage("rglwidget")     # 3D plotting in HTML
 usePackage("plotly")        # Interactive graphs
 
 
