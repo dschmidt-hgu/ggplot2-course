@@ -46,7 +46,7 @@ knitr::opts_chunk$set(
 - Optional: Data structure and management for plotting 
 
 
-## Vote for optional settings
+## Vote for optional topic
 
 
 # Schedule 
@@ -73,7 +73,7 @@ schedule <- data.table(
 						"09:45 -- 10:15", #"Exercise (2) + short break",
 						"10:15 -- 10:30", #"4 Layers "
 						"10:30 -- 11:00", #"5 Colors, Shapes, Linetypes",
-						"11:00 -- 12:00", #	"Exercise (3)"
+						"11:00 -- 12:00", #"Exercise (3)"
 						"12:00 -- 13:00", #break
 						"13:00 -- 13:30", #"6 Scientific figures",	
 						"13:30 -- 13:45", #"Exercise (4)"

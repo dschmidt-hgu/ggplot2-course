@@ -141,6 +141,7 @@ library("sf")
 
 
 clim <- fread("clim_DWD_Geisenheim_historic_monthly.csv")
+clim[,"MESS_DATUM":=as.POSIXct(MESS_DATUM)]
 
 clim[,"Year":=year(MESS_DATUM)] 
 clim[,"Month":=month(MESS_DATUM)]

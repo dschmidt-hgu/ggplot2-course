@@ -579,7 +579,7 @@ pB1  +
 ### Example (2)
 
 - Compare February and May
-- https://www.perceptualedge.com/articles/dmreview/grid_lines.pdf [Figure 2]
+- [Figure 2]: https://www.perceptualedge.com/articles/dmreview/grid_lines.pdf 
 
 
 
@@ -666,6 +666,8 @@ library("data.table")
 library("ggplot2")
 
 clim <- fread("clim_DWD_Geisenheim_historic_monthly.csv")
+clim[,"MESS_DATUM":=as.POSIXct(MESS_DATUM)] 
+
 clim[,"Year":=year(MESS_DATUM)]
 clim_lt_sub <- clim[Year > 1951]
 meanTDF <- clim_lt_sub[,.(meanT=mean(MO_TT.Lufttemperatur)),by=.(Year)]
@@ -718,6 +720,8 @@ library("data.table")
 library("ggplot2")
 
 clim <- fread("clim_DWD_Geisenheim_historic_monthly.csv")
+clim[,"MESS_DATUM":=as.POSIXct(MESS_DATUM)] 
+
 clim[,"Year":=year(MESS_DATUM)]
 clim_lt_sub <- clim[Year > 1951]
 minmaxmeanTDF <- clim_lt_sub[,.(meanT=mean(MO_TT.Lufttemperatur),minT=min(MO_TT.Lufttemperatur),maxT=max(MO_TT.Lufttemperatur)),by=.(Year)]

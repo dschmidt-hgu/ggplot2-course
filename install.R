@@ -10,8 +10,8 @@ usePackage("rmdformats") 	# to compile RMD files
 usePackage("ggplot2")  		# plotting
 usePackage("data.table")    # data management
 usePackage("rdwd")         # get DWD climate data (optional)
-#usePackage("remotes")         # get DWD climate data (optional)
-#remotes::install_github("brry/rdwd", build_vignettes=TRUE) # for latest version
+#usePackage("remotes")         # for latest version of rdwd
+#remotes::install_github("brry/rdwd", build_vignettes=TRUE) # for latest version  of rdwd
 usePackage("patchwork")     # align multiple plots
 usePackage("scales")        # pretty scales
 usePackage("ggforce")       # zoom facet, annotation

@@ -185,11 +185,14 @@ ggplot(data=iris, aes(x=Species,y=Petal.Width))+
 # Read file (for BINDER USERS)
 ##########################################################################################
 clim <- fread("clim_DWD_Geisenheim_current.csv")
+clim[,"MESS_DATUM":=as.POSIXct(MESS_DATUM)] 
 ##########################################################################################
 
 str(clim)
 
 summary(clim)
+
+
 
 #MESS_DATUM  = Measurement Date
 #TMK.Lufttemperatur = Daily Mean Air Temperature 2 m above ground 

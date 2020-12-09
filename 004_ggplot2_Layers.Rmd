@@ -112,6 +112,8 @@ library("data.table")
 # Read file
 ##########################################################################################
 clim <- fread("clim_DWD_Geisenheim_current.csv")
+clim[,"MESS_DATUM":=as.POSIXct(MESS_DATUM)] 
+
 ##########################################################################################
 
 # combine plots

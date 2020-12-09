@@ -512,6 +512,7 @@ library("ggplot2")
 library("rdwd")
 
 clim <- fread("clim_DWD_Geisenheim_historic_monthly.csv")
+clim[,"MESS_DATUM":=as.POSIXct(MESS_DATUM)]
 
 
 #Create a new year variable from date 
