@@ -1,7 +1,7 @@
 ---
 title: "Introduction to data visualization with R and ggplot2"
 author: "Dr. Dominik Schmidt"
-date: "2020"
+date: "`r substr((Sys.Date()),1,4)`"
 output:
   rmdformats::readthedown:
     self_contained: true
@@ -64,7 +64,7 @@ knitr::opts_chunk$set(
 
 ## More add-ons/extensions/features
 
-- http://www.ggplot2-exts.org/
+- https://exts.ggplot2.tidyverse.org/gallery/
 - https://ggvis.rstudio.com/
 - http://www.sthda.com/english/articles/24-ggpubr-publication-ready-plots/
 - https://eriqande.github.io/rep-res-web/lectures/making-maps-with-R.html

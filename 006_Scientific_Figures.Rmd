@@ -1,7 +1,7 @@
 ---
 title: "Introduction to data visualization with R and ggplot2"
 author: "Dr. Dominik Schmidt"
-date: "2020"
+date: "`r substr((Sys.Date()),1,4)`"
 output:
   rmdformats::readthedown:
     self_contained: true
@@ -740,7 +740,7 @@ ggplot(m_minmaxmeanTDF, aes(x=Year,y=value, fill=variable))+
 - Assume there is also a figure caption that contains some information, that might help you keeping the plot 'clean'/focused 
 
 
-
+ 
 # Additional resources
 
 - https://www.data-to-viz.com/

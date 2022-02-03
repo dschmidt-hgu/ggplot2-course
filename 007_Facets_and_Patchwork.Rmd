@@ -1,7 +1,7 @@
 ---
 title: "Introduction to data visualization with R and ggplot2"
 author: "Dr. Dominik Schmidt"
-date: "2020"
+date: "`r substr((Sys.Date()),1,4)`"
 output:
   rmdformats::readthedown:
     self_contained: true
@@ -496,6 +496,9 @@ trees[,"Group":=rep(c("1","2"), length.out=nrow(trees))]
 
 
 
+
+
+
 # Exercise (2)
 
 
@@ -536,6 +539,10 @@ climSub.m <- melt(climSub[,c("MESS_DATUM","Year","MO_TT.Lufttemperatur","MO_RR.N
 str(climSub.m)
 
 ```
+
+
+
+
 
 
 

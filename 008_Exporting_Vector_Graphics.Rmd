@@ -1,7 +1,7 @@
 ---
 title: "Introduction to data visualization with R and ggplot2"
 author: "Dr. Dominik Schmidt"
-date: "2020"
+date: "`r substr((Sys.Date()),1,4)`"
 output:
   rmdformats::readthedown:
     self_contained: true
@@ -62,7 +62,7 @@ pB1 <- ggplot(clim[MESS_DATUM >= as.POSIXct("2015-01-01") & MESS_DATUM < as.POSI
 # Export to file
 
 - `ggsave()`
-- if possible - export in the same dimensions you will use it (i.e. text/column width of a paper)
+- if possible, export in the same dimensions in which you will use it (i.e. text/column width of a paper)
 
 
 ```{r}
