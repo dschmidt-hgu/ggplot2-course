@@ -26,10 +26,17 @@ knitr::opts_chunk$set(
 
 # 003: Plot types
 
+
+## Vote
+
+- What is your most used plot type?
+- scatterplot / barplot /  boxplot / other
+
+
 ## Cheatsheet 
 
 - https://github.com/rstudio/cheatsheets/raw/master/data-visualization-2.1.pdf
-
+- https://www.data-to-viz.com/
 
 
 
@@ -242,7 +249,7 @@ ggplot(data=clim[-c(100:150),], aes(x=MESS_DATUM, y=TMK.Lufttemperatur))+
 
 
 - http://www.sthda.com/english/wiki/ggplot2-essentials
-
+- https://www.data-to-viz.com/
 
 
 #  Session Info

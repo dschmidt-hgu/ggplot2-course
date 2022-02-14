@@ -34,6 +34,7 @@ knitr::opts_chunk$set(
 - Figure legends and annotations 
 - Combining and arranging multiple figures 
 - Exporting high-quality figures (vector images) 
+- Optional: Advanced boxplots
 - Optional: Interactive plots in HTML documents 
 - Optional: Data structure and management for plotting 
 
