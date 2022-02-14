@@ -1,0 +1,380 @@
+---
+title: "Introduction to data visualization with R and ggplot2"
+author: "Dr. Dominik Schmidt"
+date: "`r substr((Sys.Date()),1,4)`"
+output:
+  rmdformats::readthedown:
+    self_contained: true
+    thumbnails: true
+    lightbox: true
+    gallery: false
+    highlight: tango
+    toc_depth: 4    
+    css: "./custom.css"     
+    code_folding: show
+---
+```{r echo=FALSE}
+
+knitr::opts_chunk$set(
+  class.output  = "bg-success",
+  class.message = "bg-info text-info",
+  class.warning = "bg-warning text-warning",
+  class.error   = "bg-danger text-danger"
+  )
+```
+
+
+# 009c Advanced Box Plots
+
+
+## Package installation
+
+- Copy and paste the following code in the R-console to install necessary packages.
+
+
+```{r message=FALSE}
+
+usePackage <- function(p)   
+{ 
+  if (!is.element(p, installed.packages()[,1])) 
+    install.packages(p, dep = TRUE, repos="https://cloud.r-project.org/", lib=.libPaths()[1]) 
+  require(p, character.only = TRUE) 
+} 
+  
+usePackage("ggplot2")
+usePackage("data.table")
+usePackage("lvplot")   #letter value plot / boxenplot
+usePackage("gghalves") #half_plots
+usePackage("ggdist")   #distribution plots
+usePackage("patchwork")#combine plots 
+usePackage("ggridges") #ridgelines
+
+```
+
+
+
+## Load data and subset
+
+```{r message=FALSE}
+
+iris <- as.data.table(iris)
+
+
+```
+
+
+# Why boxplot ?
+
+- to compare multiple groups
+- **and** ideally also the data distribution
+
+
+# Good practice
+
+... but not covered here
+
+- not-use for $<=$ 5 data points
+- annotate number of observations (per plot; if these differ between variants)
+  - possibility to scale by 'number'
+-  
+
+
+# Boxplot and data
+
+```{r}
+
+ggplot(data=iris, aes(x=Species,y=Sepal.Width))+
+  geom_boxplot()+
+  geom_jitter( height = 0,alpha=0.5)   #do not allow random positions in y-direction
+
+
+```
+
+
+```{r}
+
+library("gghalves")
+#https://cran.r-project.org/web/packages/gghalves/vignettes/gghalves.html
+
+ggplot(iris, aes(x = Species, y = Sepal.Width)) +
+  geom_half_boxplot() +
+  geom_half_point(transformation = position_jitter(height = 0, width = 0.1, seed = 1),alpha=0.5)
+
+
+ggplot(iris, aes(x = Species, y = Sepal.Width)) +
+  geom_half_boxplot() +
+  geom_dotplot(binaxis = "y", method="histodot", stackdir="up",binwidth=0.1,alpha=0.5)
+
+
+ggplot(iris, aes(x = Species, y = Sepal.Width)) +
+  geom_half_violin() +
+  geom_dotplot(binaxis = "y", method="histodot", stackdir="up",binwidth=0.1,alpha=0.5)
+
+```
+
+
+# Re-order Boxplot
+
+```{r}
+# Patchwork / quick and dirty
+
+punsort <- ggplot(iris, aes(x = Species, y = Sepal.Width)) +
+  geom_boxplot()+
+  ggtitle("sort by Species (default)")
+
+preord <- ggplot(iris, aes(x = reorder(Species,Sepal.Width), y = Sepal.Width)) +
+  geom_boxplot()+ 
+  ggtitle("sort by mean sepal width")
+
+
+punsort | preord
+
+```
+
+
+# Vertical vs. horizontal
+
+- consider:
+  - *flip*: long/multiple categories (names) on the 'x-axis' 
+  - *not flip*: chronological order 
+
+
+```{r}
+# How to:
+# with coord flip
+ggplot(iris, aes(x = Species, y = Petal.Width)) +
+  geom_boxplot() +
+  coord_flip()
+
+# by chaning x/y input 
+ggplot(iris, aes(y = Species, x = Petal.Width)) +
+  geom_boxplot() 
+
+```
+
+
+
+
+
+# Boxenplot / Letter value plot
+
+- Heike Hofmann, Hadley Wickham & Karen Kafadar (2017) Letter-Value Plots: Boxplots for Large Data, *Journal of Computational and Graphical Statistics*, 26:3, 469-477, DOI: https://doi.org/10.1080/10618600.2017.1305277
+- Preprint: https://vita.had.co.nz/papers/letter-value-plot.html
+- https://www.r-project.org/conferences/useR-2006/Slides/HofmannEtAl.pdf
+- for large data sets, as number of outliers in a boxplot scale with data size  
+
+
+```{r message=FALSE}
+
+library("lvplot")
+
+boxenPlot0 <- 
+  ggplot(iris, aes(x=Species,y=Petal.Length))+
+      geom_lv()+
+      ggtitle("default")
+
+# specify number of 'boxen'
+
+boxenPlot_k1 <- 
+  ggplot(iris, aes(x=Species,y=Petal.Length))+
+      geom_lv(k=1)+ #only median
+      ggtitle("k=1; only median")   
+
+boxenPlot_k2 <- 
+  ggplot(iris, aes(x=Species,y=Petal.Length))+
+      geom_lv(k=2,color="black")+  #median + 50% / color to see median
+      ggtitle("k=2; median + 50 %")     
+
+#Letters represent ‘median’, ‘fourths’, ‘eights’ etc.    
+boxenPlot_k3_fill <- 
+  ggplot(iris, aes(x=Species,y=Petal.Length))+
+      geom_lv(k=3,aes(fill = ..LV.. ))  +
+      ggtitle("k=3; median + 50 % + 25%")    
+
+boxenPlot0 + boxenPlot_k1 + boxenPlot_k2 + boxenPlot_k3_fill
+
+
+
+```
+
+## Boxenplot with data
+
+
+
+```{r}
+
+ggplot(iris, aes(x=Species,y=Petal.Length))+
+      geom_lv(k=5,aes(fill=Species),alpha=0.75)  +
+      geom_jitter(height=0,width=0.075)
+
+```
+
+
+
+## Comparing distributions
+
+
+```{r}
+# generating new theme
+theme_clean <- function(base_size = 9,
+                      base_family = ""){
+  theme_bw(base_size = base_size, 
+                base_family = base_family) %+replace%
+    theme(
+      axis.title.x=element_blank(),
+      axis.text.y=element_blank(),
+      axis.title.y=element_blank(),
+      complete = TRUE
+    ) 
+}
+
+colorblindsafecolors <- c("#000000","#D55E00","#0072B2","#009E73","#CC79A7","#56B4E9","#E69F00","#F0E442")[c(6:5,1:4,7:8)]
+
+# Simulate Data
+set.seed(1)
+data_normal <- data.table(x="obs",y=rnorm(n=10000,mean=0,sd=1))
+data_exponential <- data.table(x="obs",y=rexp(n=10000,rate=1))
+data_uniform <- data.table(x="obs",y=runif(n=10000,min=0,max=1))
+
+# Create plots
+#Boxplots
+BN <- ggplot(data_normal, aes(x=x,y=y))+ geom_boxplot(fill=colorblindsafecolors[4])  + theme_clean() + coord_flip() + ggtitle("Normal(0,1)")
+BE <- ggplot(data_exponential, aes(x=x,y=y))+ geom_boxplot(fill=colorblindsafecolors[5]) + theme_clean() + coord_flip()  + ggtitle("Exponential(1)")
+BU <- ggplot(data_uniform, aes(x=x,y=y))+ geom_boxplot(fill=colorblindsafecolors[6])  + theme_clean() + coord_flip() + ggtitle("Uniform(0,1)")
+
+# Violin plots
+VN <- ggplot(data_normal, aes(x=x,y=y))+ geom_violin(fill=colorblindsafecolors[4],draw_quantiles=c(0.25,0.75),linetype="dashed") +
+                                         geom_violin(fill="transparent",draw_quantiles=c(0.5))  + theme_clean() + coord_flip()
+VE <- ggplot(data_exponential, aes(x=x,y=y))+ geom_violin(fill=colorblindsafecolors[5],draw_quantiles=c(0.25,0.75),linetype="dashed") +
+                                              geom_violin(fill="transparent",draw_quantiles=c(0.5))  + theme_clean() + coord_flip()
+VU <- ggplot(data_uniform, aes(x=x,y=y))+ geom_violin(fill=colorblindsafecolors[6],draw_quantiles=c(0.25,0.75),linetype="dashed") +
+                                          geom_violin(fill="transparent",draw_quantiles=c(0.5))  + theme_clean() + coord_flip()
+# Letter Value plots
+LN <- ggplot(data_normal, aes(x=x,y=y))+ geom_lv(fill=colorblindsafecolors[4],color="black")  + theme_clean() + coord_flip()
+LE <- ggplot(data_exponential, aes(x=x,y=y))+ geom_lv(fill=colorblindsafecolors[5],color="black") + theme_clean() + coord_flip() 
+LU <- ggplot(data_uniform, aes(x=x,y=y))+ geom_lv(fill=colorblindsafecolors[6],color="black")  + theme_clean() + coord_flip()
+
+
+# Combine Plots
+(BN|BE|BU)/(VN|VE|VU)/(LN|LE|LU)
+
+
+```
+
+
+
+
+
+
+
+
+
+
+# Additional packages
+
+-  `gghalves`  https://erocoar.github.io/gghalves/ 
+-  `ggdist`   https://mjskay.github.io/ggdist/
+
+```{r}
+
+clim_lt <- fread("clim_DWD_Geisenheim_historic_daily.csv")
+
+clim_lt[,"Month":=factor(month(MESS_DATUM))]
+
+library("ggdist")
+#TMK.Lufttemperatur
+
+ggplot(clim_lt, aes(y=Month,x=TMK.Lufttemperatur))+ 
+  stat_halfeye()
+
+# chronological [maybe better horizontal alignment]
+ggplot(clim_lt, aes(x=Month,y=TMK.Lufttemperatur))+ 
+  stat_halfeye()
+
+# Combine with 'classic' boxplot
+ggplot(clim_lt, aes(x=Month,y=TMK.Lufttemperatur))+ 
+  stat_interval(point_interval = median_qi,.width = c(0.5, 0.8, 0.95),alpha=0.5)+
+  geom_boxplot(alpha=0.25)
+
+
+# Combine some more ... | needs some fine tuning
+ggplot(clim_lt, aes(x=Month,y=TMK.Lufttemperatur))+ 
+  geom_half_violin(alpha=0.25,color=NA,fill="black")+
+  stat_interval(point_interval = median_qi,.width = c(0.5, 0.8, 0.95),alpha=0.5)+
+  #stat_summary( geom = "point",  fun = "median", color = "black", shape = 21, size=3)+
+  stat_pointinterval(point_interval = median_qi,.width = c(0.5, 0.8, 0.95))+
+  geom_half_point(transformation = position_jitter(height = 0, width = 0.1, seed = 1),alpha=0.02)+
+  scale_color_viridis_d(option="A", begin=0.25,end=0.7)+
+  theme_minimal()+
+  theme(panel.grid.major.x=element_blank())
+
+
+# another example
+# code adapted from https://www.cedricscherer.com/2021/06/06/visualizing-distributions-with-raincloud-plots-and-how-to-create-them-with-ggplot2/
+ggplot(clim_lt, aes(x = Month, y = TMK.Lufttemperatur)) + 
+  ggdist::stat_halfeye(
+    adjust = .5, 
+    width = .6, 
+    .width = 0, 
+    justification = -.2, 
+    point_colour = NA
+  ) + 
+  geom_boxplot(
+    width = .15, 
+    outlier.shape = NA
+  ) +
+  ## add justified jitter from the {gghalves} package
+  gghalves::geom_half_point(
+    ## draw jitter on the left
+    side = "l", 
+    ## control range of jitter
+    range_scale = .4, 
+    ## add some transparency
+    alpha = .3
+  ) +
+  coord_cartesian(xlim = c(1.2, NA), clip = "off")
+
+
+```
+
+
+
+## `ggridges`
+
+- 'overlapping' density plots
+- https://cran.r-project.org/web/packages/ggridges/vignettes/introduction.html
+
+```{r}
+
+ggplot(clim_lt, aes(x = TMK.Lufttemperatur, y = Month, fill = stat(x))) +
+  geom_density_ridges_gradient(scale = 3, rel_min_height = 0.01) +
+  scale_fill_viridis_c(name="T (°C)",option = "C") 
+
+ggplot(clim_lt, aes(x = TMK.Lufttemperatur, y = Month,fill = factor(stat(quantile)))) +
+  stat_density_ridges(geom = "density_ridges_gradient", calc_ecdf = TRUE,  quantiles = 4, quantile_lines = TRUE) +
+  scale_fill_viridis_d(name = "Quartiles")
+
+
+```
+
+
+
+
+# Additional resources
+
+- https://vita.had.co.nz/papers/letter-value-plot.html
+- https://chartio.com/learn/charts/box-plot-complete-guide/
+- https://www.cedricscherer.com/2021/06/06/visualizing-distributions-with-raincloud-plots-and-how-to-create-them-with-ggplot2/
+- https://brshallo.github.io/r4ds_solutions/07-exploratory-data-analysis.html
+- https://towardsdatascience.com/letter-value-plot-the-easy-to-understand-boxplot-for-large-datasets-12d6c1279c97
+- https://github.com/easystats/see
+- https://cran.r-project.org/web/packages/ggridges/vignettes/introduction.html
+- https://github.com/mjskay/ggdist/blob/master/figures-source/cheat_sheet-slabinterval.pdf
+
+#  Session Info
+
+```{r}
+
+sessionInfo()
+
+```
