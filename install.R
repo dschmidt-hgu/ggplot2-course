@@ -21,3 +21,5 @@ usePackage("gganimate")     # animate ggplot2s
 usePackage("ggthemes")      # themes for ggplot2
 usePackage("rgl")           # 3D plotting
 usePackage("plotly")        # Interactive graphs
+usePackage("gghalves")      # half-box-plot etc.
+usePackage("lvplot")        # boxenplot/letter value plot
