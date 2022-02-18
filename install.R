@@ -24,3 +24,4 @@ usePackage("plotly")        # Interactive graphs
 usePackage("gghalves")      # half-box-plot etc.
 usePackage("lvplot")        # boxenplot/letter value plot
 usePackage("ggridges")      # ridgeline plots
+usePackage("ggpubr")        # helper functions
