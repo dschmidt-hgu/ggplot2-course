@@ -119,7 +119,7 @@ clim[,"MESS_DATUM":=as.POSIXct(MESS_DATUM)]
 # combine plots
 ggplot(data=clim[-c(100:150),], aes(x=MESS_DATUM, y=TMK.Lufttemperatur))+ # Init Data
   geom_point()+ # Layer 1
-  geom_line()   # Layer 2 [above Layer 1]
+  geom_line()   # Layer 2 [on top of Layer 1]
 
 
 ```

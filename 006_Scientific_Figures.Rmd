@@ -515,7 +515,9 @@ theme_set(theme_DS())
 
 # Best practices
 
-- reduce 'chartjunk' to highlight data
+- reduce 'chartjunk' to highlight data (https://en.wikipedia.org/wiki/Chartjunk)
+- 'Simplify to clarify' (Wong, B. Simplify to clarify. Nat Methods 8, 611 (2011). https://doi.org/10.1038/nmeth.1660)
+- 'effective' graphics (https://stat545.com/effective-graphs.html)
 
 ## Grid Lines
 
@@ -693,7 +695,7 @@ p1|p2
 ```
 
 - ***Data transformation***: plotting on log-scale to catch outliers / to capture data 
-- ***Aspect ratio*** affects visual perception of rates of change 
+- ***Aspect ratio*** affects visual perception of rates of change     
 - ***Handle overlapping points***: transparency / count plots 
 - ***Missing data in line plots*** of time-series: do not connect lines with data-gaps 
 - Use of ***summary statistic plots*** leads to simplicity; do not do boxplots for less than 5 data points  
@@ -752,6 +754,11 @@ ggplot(m_minmaxmeanTDF, aes(x=Year,y=value, fill=variable))+
 - http://www.cookbook-r.com/Graphs/Fonts/
 - https://ggplot2.tidyverse.org/reference/theme.html
 - https://www.data-imaginist.com/2019/the-ggforce-awakens-again/
+- Nature Methods Column 'Points of view'
+ - http://blogs.nature.com/methagora/2013/07/data-visualization-points-of-view.html?WT.mc_id=TWT_NatureMethods
+- https://www.data-to-viz.com/caveats.html
+- https://blog.datawrapper.de/colors/
+
 
 #  Session Info
 

@@ -23,3 +23,4 @@ usePackage("rgl")           # 3D plotting
 usePackage("plotly")        # Interactive graphs
 usePackage("gghalves")      # half-box-plot etc.
 usePackage("lvplot")        # boxenplot/letter value plot
+usePackage("ggridges")      # ridgeline plots

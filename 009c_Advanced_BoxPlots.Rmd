@@ -370,6 +370,7 @@ ggplot(clim_lt, aes(x = TMK.Lufttemperatur, y = Month,fill = factor(stat(quantil
 - https://github.com/easystats/see
 - https://cran.r-project.org/web/packages/ggridges/vignettes/introduction.html
 - https://github.com/mjskay/ggdist/blob/master/figures-source/cheat_sheet-slabinterval.pdf
+- https://www.data-to-viz.com/caveat/boxplot.html
 
 #  Session Info
 

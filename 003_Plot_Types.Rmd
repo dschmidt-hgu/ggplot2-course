@@ -24,13 +24,14 @@ knitr::opts_chunk$set(
 ```
 
 
-# 003: Plot types
+# 003: Basic plot types 
 
+- in base `ggplot2`
 
 ## Vote
 
 - What is your most used plot type?
-- scatterplot / barplot /  boxplot / other
+- scatterplot / barplot /  boxplot / lineplot / other
 
 
 ## Cheatsheet 
@@ -79,17 +80,22 @@ ggplot(data=iris, aes(x=Sepal.Length))+
   geom_histogram(binwidth=0.1)
 
 ggplot(data=iris, aes(x=Sepal.Length))+
-  geom_histogram(binwidth=0.2, aes(fill=Species))
+  geom_histogram(binwidth=0.2
+                ,aes(fill=Species)
+                )
 
 ggplot(data=iris, aes(x=Sepal.Length))+
-  geom_histogram(binwidth=0.2, aes(fill=Species), position="dodge")
+  geom_histogram(binwidth=0.2
+              , aes(fill=Species)
+              , position="dodge"
+              )
 
 
-# Smoothed 'Histogram'
+# 'Smoothed' histogram / Kernel density estimation
 ggplot(data=iris, aes(x=Sepal.Length,color=Species))+
   geom_density()
 
-# Rotated Density
+# Rotated density
 ggplot(data=iris, aes(x=Species,y=Sepal.Length))+
   geom_violin()
 
@@ -107,25 +113,11 @@ ggplot(data=iris, aes(x=Sepal.Length, color=Species))+
 ```
 
 
-## Bar plot
-
-- counts of discrete variables/factors
-
-```{r}
-
-ggplot(data=iris, aes(x=Species))+
-  geom_bar()
-
-ggplot(data=iris, aes(x=as.character(Species)))+
-  geom_bar()
-
-```
-
 
 ## Scatterplot + Count
 
 - measurement precision of iris data set = 0.1 cm
-- problem: overlapping observations in scatter plot
+- **problem**: *overlapping* observations in scatter plot
 
 ```{r}
 
@@ -138,28 +130,111 @@ ggplot(data=iris, aes(x=Petal.Length,y=Petal.Width))+
   geom_count()
 
 
+# hex-bin 
+ggplot(data=iris, aes(x=Petal.Length,y=Petal.Width))+
+  geom_hex()
+
+
 ```
 
 
 ## Boxplot alternatives
 
-```{r}
 
+- besides histogram etc...
+- more in 'Advanced boxplots' (optional topic)
+
+
+```{r}
+# original boxplot
 ggplot(data=iris, aes(x=Species,y=Petal.Width))+
   geom_boxplot()
+
+# Rotated density
+ggplot(data=iris, aes(x=Species,y=Petal.Width))+
+  geom_violin()
+
+# add quantiles
+ggplot(data=iris, aes(x=Species,y=Petal.Width))+
+  geom_violin(draw_quantiles=c(0.25,0.5,0.75))
+
+# 'semi-continuous' measurement 
+sort(unique(iris$Petal.Width))
 
 ggplot(data=iris, aes(x=Species,y=Petal.Width))+
   geom_count()
 
+# or simply the data with some 'random' x-component
 ggplot(data=iris, aes(x=Species,y=Petal.Width))+
-  geom_violin()
+  geom_jitter(height=0, width=0.25)
 
-ggplot(data=iris, aes(x=Species,y=Petal.Width))+
-  geom_violin(draw_quantiles=c(0.25,0.5,0.75))
+```
 
+
+
+# Bar plot
+
+- implicitly counts occurrences of discrete variables/factors
+
+```{r}
+
+ggplot(data=iris, aes(x=Species))+
+  geom_bar()
+
+# automatically detects characters as 'grouping'
+ggplot(data=iris, aes(x=as.character(Species)))+
+  geom_bar()
 
 
 ```
+
+
+# Bar plot and dot plot
+
+- for counts, but also for other summary statistics
+- Dataset: USArrests - arrests per 100.000 residents
+
+```{r}
+USArrests <- as.data.table(USArrests,keep.rownames = TRUE)
+colnames(USArrests)[1] = "State"
+
+# bar plot
+ggplot(USArrests,aes(x = State, y = Assault)) +
+    geom_col() 
+
+# dot plot
+ggplot(USArrests,aes(x = State, y = Assault)) +
+    geom_point()+
+    scale_y_continuous(limits=c(0,NA)                       # include zero
+                      ,expand = expansion(mult = c(0, .1))) # expand top    
+
+# rotate bar
+ggplot(USArrests,aes(y = State, x = Assault)) +
+    geom_col()
+ 
+# rotate dot 
+ggplot(USArrests,aes(y = State, x = Assault)) +
+    geom_point()+
+    scale_x_continuous(limits=c(0,NA)                       # include zero
+                      ,expand = expansion(mult = c(0, .1))) # expand right
+
+
+# Reorder States 
+# bar    
+ggplot(USArrests,aes(y = reorder(x=State,X=Assault,FUN=max), x = Assault)) +
+    geom_col()+
+    scale_x_continuous(limits=c(0,NA)                       # include zero
+                      ,expand = expansion(mult = c(0, .1))) # expand right 
+
+
+# dot
+ggplot(USArrests,aes(y = reorder(x=State,X=Assault,FUN=max), x = Assault)) +
+    geom_point()+
+    scale_x_continuous(limits=c(0,NA)                       # include zero
+                      ,expand = expansion(mult = c(0, .1))) # expand right    
+
+```
+
 
 
 # Time-series data
@@ -218,7 +293,7 @@ ggplot(data=clim, aes(x=MESS_DATUM, y=TMK.Lufttemperatur))+
   geom_line()
 
 
-# Missing data 
+# 'introduce' missing data 
 nrow(clim)
 
 ggplot(data=clim[-c(100:150),], aes(x=MESS_DATUM, y=TMK.Lufttemperatur))+
@@ -237,6 +312,53 @@ ggplot(data=clim[-c(100:150),], aes(x=MESS_DATUM, y=TMK.Lufttemperatur))+
 ```
 
 
+
+
+# High density scatterplots
+
+- binning to account for overlaps
+- no 'discrete' overlaps (no truncation of floating point numbers)
+
+```{r}
+set.seed(1) #fix random sampling with 'seed'
+dRandom <- data.table( 
+                        x=rnorm(n=1000,mean=0,sd=0.5),
+                        y=rnorm(n=1000,mean=0,sd=0.5)
+                      )
+ggplot(dRandom, aes(x=x, y=y))+
+  geom_point()
+
+# binning
+# hex (automatic)
+ggplot(dRandom, aes(x=x, y=y))+
+  geom_hex()
+
+# box (automatic)
+ggplot(dRandom, aes(x=x, y=y))+
+  geom_bin2d()
+
+# density (automatic)
+ggplot(dRandom, aes(x=x, y=y))+
+  geom_density_2d_filled()
+
+# count (manual; round data)
+ggplot(dRandom, aes(x=round(x,1), y=round(y,1)))+
+  geom_count()
+
+```
+
+
+
+- see also https://github.com/LKremer/ggpointdensity
+
+
+
+
+
+
+
+
+
 # Exercise
 
 - Create different visualization of the distribution of daily mean air temperature (`TMK.Lufttemperatur`) using density, histogram and frequency polygon plots
@@ -250,7 +372,13 @@ ggplot(data=clim[-c(100:150),], aes(x=MESS_DATUM, y=TMK.Lufttemperatur))+
 
 - http://www.sthda.com/english/wiki/ggplot2-essentials
 - https://www.data-to-viz.com/
-
+- http://www.chadskelton.com/2018/06/bar-charts-should-always-start-at-zero.html
+- http://www.chadskelton.com/2015/12/in-defence-of-data-visualization-rules.html
+- https://arxiv.org/pdf/1907.02035.pdf
+- https://www.vis4.net/blog/2019/05/line-chart-y-axis/
+- https://youtu.be/14VYnFhBKcY (Shut up about the y-axis. It shouldn’t always start at zero.)
+- https://github.com/LKremer/ggpointdensity
+- https://ggplot2.tidyverse.org/reference/geom_density_2d.html
 
 #  Session Info
 

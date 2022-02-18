@@ -27,8 +27,6 @@ knitr::opts_chunk$set(
 # 002: First plot
 
 
-
-
 # R and RStudio
 
 ## Package installation
@@ -50,6 +48,71 @@ usePackage("ggplot2")
 
 
 ```
+
+
+
+# Why visualizing data - Exploratory data analysis
+
+```{r echo=FALSE, message=FALSE}
+
+anscombe <- datasets::anscombe
+anscombe.long <- data.table(x=unlist(anscombe[,substr(colnames(anscombe),1,1)=="x"])
+                           ,y=unlist(anscombe[,substr(colnames(anscombe),1,1)=="y"])
+                           ,dataset=factor(rep(1:4,each=nrow(anscombe)))
+                           )
+
+
+ggplot(anscombe.long, aes(x=x,y=y))+
+  geom_point()+
+  geom_smooth(method="lm",se=FALSE,fullrange=TRUE)+
+  facet_wrap(dataset~.,labeller="label_both")+
+  theme_minimal()+
+  ggtitle("Anscombe's quartet")+
+  ggpubr::stat_cor(label.x = min(anscombe.long$x)
+                  ,label.y = max(anscombe.long$x)
+                  ,cor.coef.name="cor"
+                  ,aes(label = ..r.label..)
+                  ,size=2.75) +
+  ggpubr::stat_regline_equation(label.x = min(anscombe.long$x)
+                               ,label.y = max(anscombe.long$x)-2
+                               ,size=2.75)+
+  coord_fixed()
+
+
+
+
+```
+
+## *Anscombe's quartet* 
+
+- Anscombe, F. J. (1973). "Graphs in Statistical Analysis". American Statistician. 27 (1): 17–21. doi:10.1080/00031305.1973.10478966. JSTOR 2682899.
+
+```{r, echo=FALSE}
+
+knitr::kable(anscombe)
+
+anscombe.summary <- anscombe.long[,list("mean_x"=mean(x)
+                    ,"var_x"=var(x)
+                    ,"mean_y"=round(mean(y),2)
+                    ,"var_y"=round(var(y),3)
+                    ,"corr(x,y)"=round(cor(x,y),3)
+                    ,"lm"=paste0("y = ",sprintf(round(coef(lm(y~x)),2)[1],fmt="%1.2f")," + ",sprintf(round(coef(lm(y~x)),3)[2],fmt="%1.3f"),"x")
+                    #,"lm_R2"=round(summary(lm(y~x))$r.squared,2)
+                    )
+              , by="dataset"]
+
+knitr::kable(anscombe.summary)
+
+
+
+
+```
+
+
+## More illustrations on data patterns and correlation coefficients
+
+- https://janhove.github.io/teaching/2016/11/21/what-correlations-look-like
+
 
 
 
@@ -125,6 +188,12 @@ ggplot(data=iris[1:5,], aes(x=Species, y=Sepal.Length))+
 
 
 
+
+
+# Additional resources
+
+- https://en.wikipedia.org/wiki/Anscombe%27s_quartet
+- https://style.tidyverse.org/ggplot2.html
 
 #  Session Info
 

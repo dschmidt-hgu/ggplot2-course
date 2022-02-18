@@ -26,6 +26,10 @@ knitr::opts_chunk$set(
 
 # 009b Data management
 
+- R-internals for plotting with `ggplot2`
+- not covered here: FAIR data principles ("**F**indable, **A**ccessible, **I**nteroperable, and **R**e-usable") (https://www.forschungsdaten.org/index.php/FAIR_data_principles)
+
+
 
 ## Package installation
 

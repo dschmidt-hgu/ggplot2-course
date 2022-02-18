@@ -86,9 +86,10 @@ knitr::opts_chunk$set(
 - http://genomicsclass.github.io/book/pages/plots_to_avoid.html
 - Christa Kelleher, Thorsten Wagener, Ten guidelines for effective data visualization in scientific publications, Environmental Modelling & Software, Volume 26, Issue 6, 2011, Pages 822-827, ISSN 1364-8152, https://doi.org/10.1016/j.envsoft.2010.12.006 (http://www.sciencedirect.com/science/article/pii/S1364815210003270)
 - Rougier NP, Droettboom M, Bourne PE (2014) Ten Simple Rules for Better Figures. PLoS Comput Biol 10(9): e1003833. https://doi.org/10.1371/journal.pcbi.1003833
-
-
-
+- http://blogs.nature.com/methagora/2013/07/data-visualization-points-of-view.html?WT.mc_id=TWT_NatureMethods
+- https://stat545.com/effective-graphs.html
+- https://visguides.org/
+- https://eagereyes.org/talk/how-do-we-know-that
 
 ## More Dimension (3D, 4D, ...)
 
