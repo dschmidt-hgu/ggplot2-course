@@ -217,7 +217,39 @@ ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) +
 ```
 
 
+## Question: How to reorder legend items
 
+- here both shape + color
+
+```{r}
+ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
+    geom_point(aes(color = Species, shape=Species))
+
+# manual breaks + manual reorder (not recommended; prone to error)
+ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
+    geom_point(aes(color = Species, shape=Species))+
+    scale_colour_discrete(breaks=c("setosa","versicolor","virginica")[c(3,1,2)])+
+    scale_shape_discrete(breaks=c("setosa","versicolor","virginica")[c(3,1,2)])
+
+# reorder levels
+ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
+    geom_point(aes(color = Species, shape=Species))+
+    scale_colour_discrete(breaks=levels(iris$Species)[c(3,1,2)])+
+    scale_shape_discrete(breaks=levels(iris$Species)[c(3,1,2)])
+
+# reorder factor [can also be done in date frame, for consistency]
+ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
+    geom_point(aes(color = factor(Species,levels(iris$Species)[c(3,1,2)])
+        , shape=factor(Species,levels(iris$Species)[c(3,1,2)])))
+
+# Modifiy factor in data table
+iris2 <- copy(as.data.table(iris))
+iris2[,"Species_reord":=factor(Species,levels(Species)[c(3,1,2)])]
+
+ggplot(data = iris2, aes(x = Petal.Width, y = Petal.Length)) + 
+    geom_point(aes(color = Species_reord, shape=Species_reord))
+
+```
 
 # Annotation
 
