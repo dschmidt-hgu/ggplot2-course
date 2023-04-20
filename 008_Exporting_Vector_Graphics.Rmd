@@ -1,7 +1,7 @@
 ---
 title: "Introduction to data visualization with R and ggplot2"
 author: "Dr. Dominik Schmidt"
-date: "`r substr((Sys.Date()),1,4)`"
+date: "`r format(Sys.time(), '%Y')`"
 output:
   rmdformats::readthedown:
     self_contained: true
@@ -10,7 +10,7 @@ output:
     gallery: false
     highlight: tango
     toc_depth: 4    
-    css: "./custom.css"     
+    css: "./custom.css"       
     code_folding: show
 ---
 ```{r echo=FALSE}
@@ -26,35 +26,37 @@ knitr::opts_chunk$set(
 
 # 008 Exporting Vector Graphics
 
+## Package installation
+
+- Copy and paste the following code in the R-console to install necessary packages.
+
+
+```{r message=FALSE}
+
+if (!require("pacman")) install.packages("pacman")
+  
+pacman::p_load("data.table")
+pacman::p_load("ggplot2")
+
+
+```
 
 # Plot preparation
 
 
 ```{r message=FALSE}
 
-usePackage <- function(p)   
-{ 
-  if (!is.element(p, installed.packages()[,1])) 
-    install.packages(p, dep = TRUE, repos="https://cloud.r-project.org/", lib=.libPaths()[1]) 
-  require(p, character.only = TRUE) 
-} 
-  
-usePackage("data.table")
-usePackage("ggplot2")
-
-
 clim <- fread("clim_DWD_Geisenheim_historic_monthly.csv")
 clim[,"MESS_DATUM":=as.POSIXct(MESS_DATUM)] 
+clim[,"month":=month(MESS_DATUM)]
 
-
-pB1 <- ggplot(clim[MESS_DATUM >= as.POSIXct("2015-01-01") & MESS_DATUM < as.POSIXct("2017-01-01")], 
+pB1 <- ggplot(clim[month=="1"][MESS_DATUM >= as.POSIXct("1980-01-01") & MESS_DATUM < as.POSIXct("2017-01-01")], 
         aes(x=MESS_DATUM,y=MO_TT.Lufttemperatur))+
-        geom_line()+
-        geom_smooth(method="lm")+
-        scale_x_datetime(name="t (Month/Year)",date_breaks = "1 month", date_labels = "%m/%Y")+
-        ylab("Monthly-Mean Temperature (°C)")+
-        theme_classic()+
-            theme(axis.text.x=element_text(angle = 45, vjust=0.5))
+    geom_line()+
+    geom_smooth(method="lm")+
+    scale_x_datetime(name="t (Month/Year)",date_breaks = "5 year", date_labels = "%m/%Y")+
+    ylab("January Monthly-Mean Air Temperature (°C)")+
+    theme_classic()
 
 ```
 

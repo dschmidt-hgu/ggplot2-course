@@ -1,7 +1,7 @@
 ---
 title: "Introduction to data visualization with R and ggplot2"
 author: "Dr. Dominik Schmidt"
-date: "`r substr((Sys.Date()),1,4)`"
+date: "`r format(Sys.time(), '%Y')`"
 output:
   rmdformats::readthedown:
     self_contained: true
@@ -10,7 +10,7 @@ output:
     gallery: false
     highlight: tango
     toc_depth: 4    
-    css: "./custom.css"     
+    css: "./custom.css"      
     code_folding: show
 ---
 ```{r echo=FALSE}
@@ -34,17 +34,15 @@ knitr::opts_chunk$set(
 
 ```{r message=FALSE}
 
-usePackage <- function(p)   
-{ 
-  if (!is.element(p, installed.packages()[,1])) 
-    install.packages(p, dep = TRUE, repos="https://cloud.r-project.org/", lib=.libPaths()[1]) 
-  require(p, character.only = TRUE) 
-} 
-  
-usePackage("plotly")
-usePackage("gganimate")
-usePackage("transformr")
-usePackage("sf")
+
+if (!require("pacman")) install.packages("pacman")
+
+pacman::p_load("data.table")  
+pacman::p_load("ggplot2")  
+pacman::p_load("plotly")
+pacman::p_load("gganimate")
+pacman::p_load("transformr")
+pacman::p_load("sf")
 
 
 ```
@@ -63,10 +61,6 @@ usePackage("sf")
 
 
 ```{r}
-
-library("data.table")
-library("ggplot2")
-library("plotly")
 
 iris <- as.data.table(iris)
 
@@ -133,11 +127,6 @@ ggplotly(pF)
 A not too useful example:
 
 ```{r message=FALSE}
-library("data.table")
-library("ggplot2")
-library("gganimate")
-library("transformr")
-library("sf")
 
 
 clim <- fread("clim_DWD_Geisenheim_historic_monthly.csv")

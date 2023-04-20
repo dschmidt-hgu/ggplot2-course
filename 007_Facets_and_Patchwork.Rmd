@@ -1,7 +1,7 @@
 ---
 title: "Introduction to data visualization with R and ggplot2"
 author: "Dr. Dominik Schmidt"
-date: "`r substr((Sys.Date()),1,4)`"
+date: "`r format(Sys.time(), '%Y')`"
 output:
   rmdformats::readthedown:
     self_contained: true
@@ -10,7 +10,7 @@ output:
     gallery: false
     highlight: tango
     toc_depth: 4    
-    css: "./custom.css"     
+    css: "./custom.css"      
     code_folding: show
 ---
 ```{r echo=FALSE}
@@ -21,7 +21,6 @@ knitr::opts_chunk$set(
   class.warning = "bg-warning text-warning",
   class.error   = "bg-danger text-danger"
   )
-
 ```
 
 
@@ -38,17 +37,12 @@ knitr::opts_chunk$set(
 
 ```{r message=FALSE}
 
-usePackage <- function(p)   
-{ 
-  if (!is.element(p, installed.packages()[,1])) 
-    install.packages(p, dep = TRUE, repos="https://cloud.r-project.org/", lib=.libPaths()[1]) 
-  require(p, character.only = TRUE) 
-} 
+if (!require("pacman")) install.packages("pacman")
   
-usePackage("data.table")
-usePackage("ggplot2")
-usePackage("patchwork")
-usePackage("rdwd")
+pacman::p_load("data.table")
+pacman::p_load("ggplot2")
+pacman::p_load("patchwork")
+pacman::p_load("rdwd")
 
 ```
 
@@ -64,9 +58,6 @@ usePackage("rdwd")
 
 
 ```{r}
-library("ggplot2")
-library("patchwork")
-
 # generate 4 arbitrary plots
 # Boxplot
 p1 <- ggplot(data = iris, aes(x = Species, y = Petal.Length)) + 
@@ -231,7 +222,7 @@ If alternative packages and their tutorials are addressing your grid arrangement
 # Facets for multidimensional visualizations in `ggplot2`
 
 - no additional package necessary
-- requires data in long format as an input
+- requires data in *long format* as an input
 
 
 ## `facet_grid` - 1 dimension
@@ -291,7 +282,7 @@ ggplot(iris.m, aes(x=Species,y=value, color=Species))+
 
 
 # put on a grid | use a row for each variable
- # AND allow different y-axis
+ # AND allow different y-axis [if justified]
 ggplot(iris.m, aes(x=Species,y=value, color=Species))+
  geom_boxplot()+
  facet_grid(variable~., scales="free_y")
@@ -330,6 +321,7 @@ dFACE
 
 
 ```{r}
+
 # Split by Ring_Pair [rows] + Treatment [cols]
   # plus: Color by Treatment
 ggplot(dFACE, aes(x=Day, y=Measurement,color=Treatment))+
@@ -372,6 +364,7 @@ ggplot(dFACE, aes(x=Day, y=Measurement,fill=Ring_Pair))+
     facet_wrap(.~Treatment)+
     scale_fill_viridis_d()+
     theme_classic() 
+
 ```
 
 ```{r}
@@ -435,11 +428,13 @@ ggplot(iris.m, aes(x=Species,y=value, color=Species))+
 - `?labellers`
 
 ```{r}
+
 ggplot(dFACE, aes(x=Day, y=Measurement,color=Treatment))+
     geom_point()+
     facet_grid(Ring_Pair~Treatment, label="label_both")+
     scale_color_manual(values=c("blue","red"))+
     theme_classic() 
+
 ```
 
 For mathemaical symbols use, e.g.
@@ -456,15 +451,15 @@ For mathemaical symbols use, e.g.
 - `theme()` options (`?theme`), some examples:
 
 ```{r eval=FALSE}
-  strip.background,
-  strip.background.x,
-  strip.background.y,
-  strip.placement,
-  strip.text,
-  strip.text.x,
-  strip.text.y,
-  strip.switch.pad.grid,
-  strip.switch.pad.wrap,
+...
+strip.background,
+strip.background.x,
+strip.background.y,
+strip.placement,
+strip.text,
+strip.text.x,
+strip.text.y,
+...
 
 ```
 
@@ -472,7 +467,7 @@ For mathemaical symbols use, e.g.
 
 # Exercise (1)
 
-1. Use the following code to load the 'tree'-dataset, transfer it into a `data.table` and to add two artificial groups (experiments):
+1. Use the following code to load the 'tree'-dataset and transfer it into a `data.table` and to add two artificial groups (experiments):
 
 ```{r}
 library("data.table")
@@ -493,8 +488,6 @@ trees[,"Group":=rep(c("1","2"), length.out=nrow(trees))]
 3. Create a plot to each of the three variables showing their distribution and merge theme to a single plot using `patchwork`
 4. Modify the axis titles to match scientific standards
 5. Optional: Customize the appearance according to your preferences
-
-
 
 
 
@@ -540,7 +533,6 @@ climSub.m <- melt(climSub[,c("MESS_DATUM","Year","MO_TT.Lufttemperatur","MO_RR.N
 str(climSub.m)
 
 ```
-
 
 
 

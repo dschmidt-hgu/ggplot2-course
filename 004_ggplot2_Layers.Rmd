@@ -1,7 +1,7 @@
 ---
 title: "Introduction to data visualization with R and ggplot2"
 author: "Dr. Dominik Schmidt"
-date: "`r substr((Sys.Date()),1,4)`"
+date: "`r format(Sys.time(), '%Y')`"
 output:
   rmdformats::readthedown:
     self_contained: true
@@ -10,7 +10,7 @@ output:
     gallery: false
     highlight: tango
     toc_depth: 4    
-    css: "./custom.css"     
+    css: "./custom.css"       
     code_folding: show
 ---
 ```{r echo=FALSE}
@@ -33,15 +33,11 @@ knitr::opts_chunk$set(
 
 ```{r message=FALSE}
 
-usePackage <- function(p)   
-{ 
-  if (!is.element(p, installed.packages()[,1])) 
-    install.packages(p, dep = TRUE, repos="https://cloud.r-project.org/", lib=.libPaths()[1]) 
-  require(p, character.only = TRUE) 
-} 
+if (!require("pacman")) install.packages("pacman")
   
-usePackage("data.table")
-usePackage("ggplot2")
+pacman::p_load("data.table")
+pacman::p_load("ggplot2")
+
 
 ```
 
@@ -51,12 +47,12 @@ usePackage("ggplot2")
 - when working in R it's the most comprehensive plotting environment 
 - free and open source
 - large community (problem solving) 
-- reproducible results (R-script/project) 
+- reproducible results (Script/Rmarkdown/Quarto) 
 - very flexible ***A Layered Grammar of Graphics*** 
   - syntax based on ***Wilkinson, Leland. 2005. The Grammar of Graphics. 2nd ed. Statistics and Computing. Springer***. 
   - transferred to R mainly by Hadley Wickham (http://hadley.nz/, https://ggplot2-book.org/, https://ggplot2.tidyverse.org/)  
   - 'A Layered Grammar of Graphics. (Wickham, Hadley. 2009. 'A Layered Grammar of Graphics.' Journal of Computational and Graphical Statistics.) 
-- `ggplot2` is also part of the `tidyverse` - alternative coding style with pipes `%>%` 
+- `ggplot2` is also part of the `tidyverse` - alternative coding style with pipes `%>%` applicable
 
 
 
@@ -105,8 +101,7 @@ You cannot assign a linetype to a point representation.
 - add new layers with a `+`
 
 ```{r}
-library("ggplot2")
-library("data.table")
+
 
 ##########################################################################################
 # Read file
@@ -127,7 +122,7 @@ ggplot(data=clim[-c(100:150),], aes(x=MESS_DATUM, y=TMK.Lufttemperatur))+ # Init
 
 # Regression line
 
-- "Trendlinie" 
+- *Trendlinie*
 
 ```{r}
 
@@ -141,9 +136,11 @@ ggplot(data=iris, aes(x=Sepal.Length, y=Sepal.Width))+
   geom_point()+
   geom_smooth()
 
-# LM: Linear regression model  
-# LOESS (locally estimated scatterplot smoothing) 
-# Alternative: generalized additive model (GAM) 
+# Methods
+# "lm":   Linear regression model [stats::lm]
+# "glm":  Generalized linear model [MASS::rlm]
+# "loess" (Local Polynomial Regression Fitting) [stats::loess]
+# "gam":  generalized additive model (GAM) [mgcv::gam]
 
 # Regression line for subsets [grouped by color = species] 
 ggplot(data=iris, aes(x=Sepal.Length, y=Sepal.Width, color=Species))+
@@ -152,6 +149,8 @@ ggplot(data=iris, aes(x=Sepal.Length, y=Sepal.Width, color=Species))+
 
 
 ```
+
+
 
 
 # Boxplot + jitter
@@ -166,7 +165,7 @@ ggplot(data=iris, aes(x=Species,y=Petal.Width))+
   geom_boxplot()+
   geom_jitter( height = 0)   #do not allow random positions in y-direction
 
-# better alternative dotplot
+# alternative: dotplot [histogram equivalent]
 ggplot(data=iris, aes(x=Species,y=Petal.Width))+
   geom_boxplot()+
   geom_dotplot(binaxis='y', stackdir='center', binwidth = 0.1,dotsize=0.25)
@@ -222,10 +221,9 @@ p00 + geom_violin()
 
 # Additional resources
 
+- https://ggplot2.tidyverse.org/reference/geom_smooth.html
 
-- https://en.wikipedia.org/wiki/Local_regression
-- https://en.wikipedia.org/wiki/Generalized_additive_model
-- http://www.sthda.com/english/wiki/ggplot2-dot-plot-quick-start-guide-r-software-and-data-visualization
+
 
 #  Session Info
 

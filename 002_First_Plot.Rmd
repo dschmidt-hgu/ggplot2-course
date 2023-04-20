@@ -1,7 +1,7 @@
 ---
 title: "Introduction to data visualization with R and ggplot2"
 author: "Dr. Dominik Schmidt"
-date: "`r substr((Sys.Date()),1,4)`"
+date: "`r format(Sys.time(), '%Y')`"
 output:
   rmdformats::readthedown:
     self_contained: true
@@ -27,6 +27,8 @@ knitr::opts_chunk$set(
 # 002: First plot
 
 
+
+
 # R and RStudio
 
 ## Package installation
@@ -36,18 +38,14 @@ knitr::opts_chunk$set(
 
 ```{r message=FALSE}
 
-usePackage <- function(p) 	
-{	
-  if (!is.element(p, installed.packages()[,1]))	
-    install.packages(p, dep = TRUE, repos="https://cloud.r-project.org/", lib=.libPaths()[1])	
-  require(p, character.only = TRUE)	
-}	
+if (!require("pacman")) install.packages("pacman")
 	
-usePackage("data.table")
-usePackage("ggplot2")
+pacman::p_load("data.table")
+pacman::p_load("ggplot2")
 
 
 ```
+
 
 
 
@@ -106,13 +104,13 @@ knitr::kable(anscombe.summary)
 
 
 
+
 ```
 
 
 ## More illustrations on data patterns and correlation coefficients
 
 - https://janhove.github.io/teaching/2016/11/21/what-correlations-look-like
-
 
 
 
@@ -125,8 +123,9 @@ knitr::kable(anscombe.summary)
 
 ```{r}
 # load packages
-library(data.table)
-library(ggplot2)
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load("data.table")
+pacman::p_load("ggplot2")
 
 # to data table [for data management](optional)
 iris <- as.data.table(iris)

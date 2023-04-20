@@ -1,7 +1,7 @@
 ---
 title: "Introduction to data visualization with R and ggplot2"
 author: "Dr. Dominik Schmidt"
-date: "`r substr((Sys.Date()),1,4)`"
+date: "`r format(Sys.time(), '%Y')`"
 output:
   rmdformats::readthedown:
     self_contained: true
@@ -10,7 +10,7 @@ output:
     gallery: false
     highlight: tango
     toc_depth: 4    
-    css: "./custom.css"     
+    css: "./custom.css"       
     code_folding: show
 ---
 ```{r echo=FALSE}
@@ -39,15 +39,10 @@ knitr::opts_chunk$set(
 
 ```{r message=FALSE}
 
-usePackage <- function(p)   
-{ 
-  if (!is.element(p, installed.packages()[,1])) 
-    install.packages(p, dep = TRUE, repos="https://cloud.r-project.org/", lib=.libPaths()[1]) 
-  require(p, character.only = TRUE) 
-} 
+if (!require("pacman")) install.packages("pacman")
   
-usePackage("data.table")
-usePackage("ggplot2")
+pacman::p_load("data.table")
+pacman::p_load("ggplot2")
 
 ```
 
@@ -59,8 +54,7 @@ usePackage("ggplot2")
 - `color` can act as a grouping variable
 
 ```{r}
-library("data.table")
-library("ggplot2")
+
 
 iris <- as.data.table(iris)
 
@@ -235,7 +229,7 @@ ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
 
 ```{r echo=FALSE, message=FALSE, fig.cap="*Searching for the red dot becomes progressively harder.*"}
 
-set.seed(1)
+set.seed(2)
 d20 <- data.table(x=sample(x = seq(0,30,by=0.01), size=20),
                   y=sample(x = seq(0,100,by=0.01), size=20),
                   color=c(rep("B",times=19),"A"),
@@ -247,7 +241,9 @@ d100 <- data.table(x=sample(x = seq(0,30,by=0.01), size=100),
                   color1=c(rep("B",times=99),"A"),
                   shape1=c(rep("Y",times=99),"X"),
                   color2=c(rep("A",times=51),rep("B",times=49)),
-                  shape2=c(rep("Y",times=50),rep("X",times=50))
+                  shape2=c(rep("Y",times=50),rep("X",times=50)),
+                  color3=c(rep("B",times=25)            ,rep("A",times=26)    ,rep("B",times=24),rep("A",times=25)),
+                  shape3=c(rep(c("X","Y"),length.out=25),"X",rep("Y",times=25),rep(c("X","Y"),length.out=24),rep("Y",times=25))                  
                   )
 
 
@@ -325,12 +321,12 @@ p1|p2|p3|p4|p5
 ```
 
 
-## Find the red dot 2
+## Find the red dot (2)
 
 
 ```{r echo=FALSE, message=FALSE}
 
-p5 <- ggplot(d100,aes(x=x,y=y,color=color2,shape=shape2))+
+p5 <- ggplot(d100,aes(x=x,y=y,color=color3,shape=shape3))+
   geom_point()+
   theme_minimal(base_size = 8)+
   theme(
@@ -343,7 +339,7 @@ p5 <- ggplot(d100,aes(x=x,y=y,color=color2,shape=shape2))+
   ggtitle("Farbe+Form, N=100")+
   xlim(0,30)+ylim(0,100)
 
-p6 <- ggplot(d100,aes(x=x,y=y,color=paste(color2,shape2)))+
+p6 <- ggplot(d100,aes(x=x,y=y,color=paste(color3,shape3)))+
   geom_point()+
   theme_minimal(base_size = 8)+
   theme(axis.line=element_blank(),
@@ -360,7 +356,7 @@ p5|p6
 
 
 
-## `alpha` - for overlaps and appearance 
+## `alpha` - for overlaps and *appearance* 
 
 - parameter `alpha` is limited between 0 - 1 
 - `alpha=0` is *invisible*/*transparent* object  
@@ -370,8 +366,6 @@ p5|p6
 
 ```{r}
 
-library(ggplot2)
-library(data.table)
 #generate overlapping scatterplot data by sampling from a normal distribution for x+y
 set.seed(1) #fix random sampling with 'seed'
 dRandom <- data.table( 
@@ -396,8 +390,8 @@ ggplot(dRandom, aes(x=x, y=y))+
 ggplot(dRandom, aes(x=x, y=y))+
   geom_point(aes(alpha=x))
 
-
 ```
+
 
 
 # Color palettes
@@ -412,7 +406,6 @@ ggplot(dRandom, aes(x=x, y=y))+
 
 ```{r}
 # With color names
-
 
 #internal definition
 ggplot(data=iris, aes(x=Sepal.Length,y=Sepal.Width))+
@@ -506,10 +499,7 @@ ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
   geom_point(aes(color=Species))+
   scale_colour_hue()
 
-# modification of h range -- check ?scale_colour_hue
-ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
-  geom_point(aes(color=Species))+
-  scale_colour_hue(h=c(0,50))
+
 ```
 
 ```{r}
@@ -522,6 +512,7 @@ ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
 
 
 - `scale_colour_brewer()` palettes
+- https://colorbrewer2.org
 
 ```{r  echo=FALSE}
 par(cex=0.5)
@@ -557,35 +548,50 @@ ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
   scale_colour_viridis_d()
 
 
-# improve visibility with fill+shape for light colors
+# possibly improve visibility of light colors with fill+shape 
 ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
      geom_point(aes(fill=Species), shape=21)+
-     scale_fill_viridis_d(option="C")
+     scale_fill_viridis_d(option="C")   # fill scale
+
+
+# or change the range
+ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
+     geom_point(aes(color=Species))+
+     scale_color_viridis_d(option="C", begin=0, end=0.75)
 
 ```
+
+
+## `#endrainbow`
+
+- https://www.fabiocrameri.ch/endrainbow/
+- Crameri, F., Shephard, G.E. & Heron, P.J. The misuse of colour in science communication. Nat Commun 11, 5444 (2020). 
+https://doi.org/10.1038/s41467-020-19160-7
 
 
 ### more packages with color palettes
 
 * `colorBlindness` https://cran.r-project.org/web/packages/colorBlindness/vignettes/colorBlindness.html
-* `ggsci` -- https://nanx.me/ggsci/
+* `scico` -- https://github.com/thomasp85/scico inspired by https://www.fabiocrameri.ch/colourmaps/
 * `wesanderson` -- https://github.com/karthik/wesanderson
 * `unikn` -- https://cran.r-project.org/web/packages/unikn/vignettes/colors.html
 * ...
 
-Longer list: https://github.com/EmilHvitfeldt/r-color-palettes
+Extensive list: https://github.com/EmilHvitfeldt/r-color-palettes
+
 
 
 ## Best practices
 
+
 * do use professionally composed color palettes (suited for color blindness)
 * do not 'overuse' color
 
-- http://colorbrewer2.org/) 
 - Gehlenborg, N., Wong, B. Mapping quantitative data to color. Nat Methods 9, 769 (2012). https://doi.org/10.1038/nmeth.2134
 - Wong, B. Avoiding color. Nat Methods 8, 525 (2011). https://doi.org/10.1038/nmeth.1642
 - Wong, B. Points of view: Points of review (part 2). Nat Methods 8, 189 (2011). https://doi.org/10.1038/nmeth0311-189
 - https://colorusage.arc.nasa.gov/GuidelinesHierarchy.php
+
 
 
 
@@ -608,6 +614,7 @@ ggplot(df_shapes, aes(0, 0, shape = shape)) +
   facet_wrap(~shape) +
   theme_void()
 
+
 ```
 
 
@@ -620,8 +627,6 @@ ggplot(df_shapes, aes(0, 0, shape = shape)) +
 > "The hollow circle is a flexible and robust plotting symbol"
 
 - Krzywinski, M., Wong, B. Plotting symbols. Nat Methods 10, 451 (2013). https://doi.org/10.1038/nmeth.2490
-
-
 
 
 
@@ -665,6 +670,7 @@ ggplot() + scale_x_continuous(name = "", limits = c(0, 1),
 
 
 
+
 # Exercise
 
 - Play around with some options from the latest input 
@@ -675,7 +681,6 @@ ggplot() + scale_x_continuous(name = "", limits = c(0, 1),
 
 # Additional resources
 
-
 - https://socviz.co/lookatdata.html
 - https://en.wikipedia.org/wiki/Alpha_compositing
 - https://en.wikipedia.org/wiki/Web_colors#Hex_triplet
@@ -683,9 +688,9 @@ ggplot() + scale_x_continuous(name = "", limits = c(0, 1),
 - https://ggplot2.tidyverse.org/reference/aes_linetype_size_shape.html
 - https://www.rdocumentation.org/packages/ggthemes/versions/3.5.0/topics/scale_colour_few
 - https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html
-- https://nanx.me/ggsci/
 - https://lisacharlotterost.de/2016/04/22/Colors-for-DataVis/
 - https://socviz.co/workgeoms.html
+- https://ggplot2-book.org/scale-colour.html
 - https://github.com/LKremer/ggpointdensity
 - Krzywinski, M., Wong, B. Plotting symbols. Nat Methods 10, 451 (2013). https://doi.org/10.1038/nmeth.2490
 - Wong, B. Avoiding color. Nat Methods 8, 525 (2011). https://doi.org/10.1038/nmeth.1642
@@ -694,7 +699,6 @@ ggplot() + scale_x_continuous(name = "", limits = c(0, 1),
 - http://mkweb.bcgsc.ca/biovis2012/krzywinski-visualizing-biological-data.pdf
 - https://blog.datawrapper.de/10-ways-to-use-fewer-colors-in-your-data-visualizations/
 - https://observablehq.com/@frankelavsky/no-use-of-color-alone-in-data-visualization
-
 
 #  Session Info
 

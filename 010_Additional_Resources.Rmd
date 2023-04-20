@@ -1,7 +1,7 @@
 ---
 title: "Introduction to data visualization with R and ggplot2"
 author: "Dr. Dominik Schmidt"
-date: "`r substr((Sys.Date()),1,4)`"
+date: "`r format(Sys.time(), '%Y')`"
 output:
   rmdformats::readthedown:
     self_contained: true
@@ -10,7 +10,7 @@ output:
     gallery: false
     highlight: tango
     toc_depth: 4    
-    css: "./custom.css"     
+    css: "./custom.css"    
     code_folding: show
 ---
 ```{r echo=FALSE}
@@ -65,7 +65,6 @@ knitr::opts_chunk$set(
 ## More add-ons/extensions/features
 
 - https://exts.ggplot2.tidyverse.org/gallery/
-- https://ggvis.rstudio.com/
 - http://www.sthda.com/english/articles/24-ggpubr-publication-ready-plots/
 - https://eriqande.github.io/rep-res-web/lectures/making-maps-with-R.html
 - https://github.com/thomasp85/ggforce
@@ -91,6 +90,8 @@ knitr::opts_chunk$set(
 - https://visguides.org/
 - https://eagereyes.org/talk/how-do-we-know-that
 
+
+
 ## More Dimension (3D, 4D, ...)
 
 - https://towardsdatascience.com/a-comprehensive-guide-to-the-grammar-of-graphics-for-effective-visualization-of-multi-dimensional-1f92b4ed4149
@@ -109,14 +110,14 @@ library("data.table")
 #### Create data 
 # Measurements over a rectangular surface
 
-x <- 0:10
+x <- -5:5
 y <- x
 
 set.seed(2019)
-value <- rnorm(mean=100,sd=10, n=length(x) * length(y))
+value <- abs(x*y)+rnorm(mean=0,sd=1, n=length(x) * length(y))
 
 d <- as.data.table(expand.grid(x=x,y=y))
-d[,"value":=value*x/(y+1)]
+d[,"value":=value]
 
 
 ```
@@ -162,17 +163,37 @@ ggplot(d[-13,],aes(x=x,y=y))+
 
 ```
 
-### Real 3D
+### Real 3D [rgl]
 
 
 ```{r}
-library("rgl")   #interative 3D plots
+pacman::p_load("rgl")     #interactive 3D plots
   options(rgl.useNULL = TRUE) #only for markdown output
 
 # Pointcloud
 plot3d(d)
+aspect3d("iso")               #set  aspect ratio
 rgl_scene <- scene3d()        #only for markdown output
 rglwidget(x=rgl_scene)        #only for markdown output
+
+```
+
+
+
+### Real 3D [plotly]
+
+
+```{r}
+
+pacman::p_load("plotly")      #interactive 3D plots
+
+fig <- plot_ly(d, x = ~x, y = ~y, z = ~value
+  #, color = ~x*y*z, colors = c('#BF382A', '#0C4B8E')
+  )
+fig <- fig %>% add_markers()
+
+fig
+
 
 ```
 
@@ -186,6 +207,7 @@ rglwidget(x=rgl_scene)        #only for markdown output
 - +size (cyl)
 
 
+
 ```{r}
 
 ggplot(mtcars, aes(x=wt, y=mpg, color=factor(gear), size=cyl))+
@@ -195,7 +217,7 @@ ggplot(mtcars, aes(x=wt, y=mpg, color=factor(gear), size=cyl))+
 
 ```
 
-
+- Not very *clear*!
 
 #  Session Info
 

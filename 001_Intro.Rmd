@@ -1,7 +1,7 @@
 ---
 title: "Introduction to data visualization with R and ggplot2"
 author: "Dr. Dominik Schmidt"
-date: "`r substr((Sys.Date()),1,4)`"
+date: "`r format(Sys.time(), '%Y')`"
 geometry: paperheight=20cm,paperwidth=30cm,margin=1cm
 output:
   rmdformats::readthedown:
@@ -13,6 +13,21 @@ output:
     toc_depth: 4    
     css: "./custom.css"     
     code_folding: hide
+  # html_document:
+  #   #code_folding: hide
+  #   toc: true
+  #   toc_depth: 4
+  #   theme: united
+  #   highlight: zenburn
+  #   number_sections: true
+  #   toc_float: 
+  #     collapsed: false
+#      smooth_scroll: false
+  pdf_document:
+    toc: true
+    toc_depth: 4
+    number_sections: true
+    highlight: zenburn
 ---
 
 ```{r echo=FALSE}
@@ -37,6 +52,7 @@ knitr::opts_chunk$set(
 - Optional: Advanced boxplots
 - Optional: Interactive plots in HTML documents 
 - Optional: Data structure and management for plotting 
+
 
 
 ## Vote for optional topic
@@ -109,7 +125,7 @@ knitr::kable(schedule)
 
 # Exercises / R-Environment
 
-- Local R/R-Studio installation with R version 3.6.3 (2020-02-29) or later
+- Local R/R-Studio installation with R version 4.2.x or later
 - https://rstudio.cloud/
 - https://mybinder.org/v2/gh/dschmidt-hgu/ggplot2-course/main
 - https://mybinder.org/v2/gh/dschmidt-hgu/ggplot2-course/main?urlpath=rstudio
@@ -118,28 +134,28 @@ knitr::kable(schedule)
 
 ```{r message=FALSE}
 
-usePackage <- function(p)   
-{ 
-  if (!is.element(p, installed.packages()[,1])) 
-    install.packages(p, dep = TRUE, repos="https://cloud.r-project.org/", lib=.libPaths()[1]) 
-  require(p, character.only = TRUE) 
-} 
+if (!require("pacman")) install.packages("pacman")
 
-usePackage("rmarkdown")     # to compile RMD files
-usePackage("ggplot2")       # plotting
-usePackage("data.table")    # data management
-#usePackage("rdwd")         # get DWD climate data (optional)
-#usePackage("remotes")      # get DWD climate data (optional)
-#remotes::install_github("brry/rdwd", build_vignettes=TRUE) # for latest version
-usePackage("patchwork")     # align multiple plots
-usePackage("scales")        # pretty scales
-usePackage("ggforce")       # zoom facet, annotation
-usePackage("transformr")    # req. for gganimate example
-usePackage("sf")            # req. for gganmiate example
-usePackage("gganimate")     # animate ggplot2s
-usePackage("ggthemes")      # themes for ggplot2
-usePackage("rgl")           # 3D plotting
-usePackage("plotly")        # Interactive graphs
+# install/load packages using pacman package
+pacman::p_load("rmarkdown")     # to compile RMD files
+pacman::p_load("rmdformats") 	  # to compile RMD files
+pacman::p_load("ggplot2")  		  # plotting
+pacman::p_load("data.table")    # data management
+pacman::p_load("rdwd")          # get DWD climate data (optional)
+pacman::p_load("patchwork")     # align multiple plots
+pacman::p_load("scales")        # pretty scales
+pacman::p_load("ggforce")       # zoom facet, annotation
+pacman::p_load("sf")            # req. for gganmiate example
+pacman::p_load("transformr")    # req. for gganimate example
+pacman::p_load("gganimate")     # animate ggplot2s
+pacman::p_load("ggthemes")      # themes for ggplot2
+pacman::p_load("rgl")           # 3D plotting
+pacman::p_load("plotly")        # Interactive graphs
+pacman::p_load("gghalves")      # half-box-plot etc.
+pacman::p_load("lvplot")        # boxenplot/letter value plot
+pacman::p_load("ggridges")      # ridgeline plots
+pacman::p_load("ggpubr")        # helper functions
+pacman::p_load("ggdist")        # distribution plots
 
 
 ```

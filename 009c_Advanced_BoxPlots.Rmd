@@ -10,7 +10,7 @@ output:
     gallery: false
     highlight: tango
     toc_depth: 4    
-    css: "./custom.css"     
+    css: "./custom.css"    
     code_folding: show
 ---
 ```{r echo=FALSE}
@@ -362,6 +362,7 @@ ggplot(clim_lt, aes(x = TMK.Lufttemperatur, y = Month,fill = factor(stat(quantil
 
 # Additional resources
 
+- https://ggforce.data-imaginist.com/reference/geom_sina.html
 - https://vita.had.co.nz/papers/letter-value-plot.html
 - https://chartio.com/learn/charts/box-plot-complete-guide/
 - https://www.cedricscherer.com/2021/06/06/visualizing-distributions-with-raincloud-plots-and-how-to-create-them-with-ggplot2/

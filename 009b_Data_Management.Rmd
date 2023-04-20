@@ -1,7 +1,7 @@
 ---
 title: "Introduction to data visualization with R and ggplot2"
 author: "Dr. Dominik Schmidt"
-date: "`r substr((Sys.Date()),1,4)`"
+date: "`r format(Sys.time(), '%Y')`"
 output:
   rmdformats::readthedown:
     self_contained: true
@@ -10,7 +10,7 @@ output:
     gallery: false
     highlight: tango
     toc_depth: 4    
-    css: "./custom.css"     
+    css: "./custom.css"    
     code_folding: show
 ---
 ```{r echo=FALSE}
@@ -38,16 +38,11 @@ knitr::opts_chunk$set(
 
 ```{r message=FALSE}
 
-usePackage <- function(p)   
-{ 
-  if (!is.element(p, installed.packages()[,1])) 
-    install.packages(p, dep = TRUE, repos="https://cloud.r-project.org/", lib=.libPaths()[1]) 
-  require(p, character.only = TRUE) 
-} 
+if (!require("pacman")) install.packages("pacman")
   
-usePackage("ggplot2")
-usePackage("data.table")
-usePackage("scales")   #viridis_pal
+pacman::p_load("ggplot2")
+pacman::p_load("data.table")
+pacman::p_load("scales")
 
 
 ```
@@ -131,7 +126,7 @@ clim_lt_sub_YMSD   <- clim_lt_sub[,lapply(.SD, function(x) {sd(x, na.rm=TRUE)}),
 
 ```
 
-## Creat Longformat Datasets for ggplot
+## Create Longformat Datasets for ggplot2
 
 ```{r}
 
@@ -228,12 +223,12 @@ levels(clim_lt_sub_YMMEAN_melt$variable)
 
 #rename variables for plotting
 clim_lt_sub_YMMEAN_melt$variable <- factor(clim_lt_sub_YMMEAN_melt$variable, 
-                                            labels = c("T[air]~('°'*C)", 
-                                                                        "phi~('%')",
-                                                                        "windspeed~('m/s')",
-                                                                        "coverage~('1/8')",
-                                                                        "precipitation~('mm')"
-                                                                        )
+                                            labels = c( "T[air]~('°'*C)", 
+                                                        "phi~('%')",
+                                                        "windspeed~('m/s')",
+                                                        "coverage~('1/8')",
+                                                        "precipitation~('mm')"
+                                                        )
                                             )
 
 
