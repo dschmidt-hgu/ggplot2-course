@@ -1,5 +1,9 @@
 compileAll.R
 
+
+# exercises
+exercises/
+
 # History files
 .Rhistory
 .Rapp.history
