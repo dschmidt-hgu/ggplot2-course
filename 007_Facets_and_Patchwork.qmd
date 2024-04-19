@@ -1,26 +1,21 @@
 ---
 title: "Introduction to data visualization with R and ggplot2"
 author: "Dr. Dominik Schmidt"
-date: "`r format(Sys.time(), '%Y')`"
-output:
-  rmdformats::readthedown:
-    self_contained: true
-    thumbnails: true
-    lightbox: true
-    gallery: false
-    highlight: tango
-    toc_depth: 4    
-    css: "./custom.css"      
-    code_folding: show
+date: "`r Sys.Date()`"
+date-format: "YYYY"
+toc: true
+toc-depth: 3
+number-sections: false
+highlight-style: tango
+format: 
+  html:
+   embed-resources: true
+   css: "./css/clean_qmd.css"
 ---
 ```{r echo=FALSE}
 
-knitr::opts_chunk$set(
-  class.output  = "bg-success",
-  class.message = "bg-info text-info",
-  class.warning = "bg-warning text-warning",
-  class.error   = "bg-danger text-danger"
-  )
+source("./src/custom.R")
+
 ```
 
 
@@ -53,7 +48,7 @@ pacman::p_load("rdwd")
 ## `patchwork` 
 
 > The goal of patchwork is to make it ridiculously simple to combine separate ggplots into the same graphic.
-> <small>https://patchwork.data-imaginist.com/index.html</small>
+> <small><https://patchwork.data-imaginist.com/index.html></small>
 
 
 
@@ -157,6 +152,7 @@ p1+p2+p3+p4 +
 ### Theme modifications - global
 
 ```{r}
+
 p1+p2+p3+p4  + 
   plot_layout(guides = 'collect') & 
   theme(legend.direction="vertical")
@@ -195,10 +191,10 @@ p4+theme(legend.position = "none")+
 
 ## *Advanced* `patchwork` 
 
-For additional/more complex problems related to the arrangement of plots, please refer to the package vignettes  (https://patchwork.data-imaginist.com/) e.g.
+For additional/more complex problems related to the arrangement of plots, please refer to the package vignettes  (<https://patchwork.data-imaginist.com/<) e.g.
 
-- https://patchwork.data-imaginist.com/articles/guides/assembly.html
-- https://patchwork.data-imaginist.com/articles/guides/layout.html
+- <https://patchwork.data-imaginist.com/articles/guides/assembly.html>
+- <https://patchwork.data-imaginist.com/articles/guides/layout.html>
 
 ## Alternative packages
 
@@ -207,17 +203,17 @@ If alternative packages and their tutorials are addressing your grid arrangement
 
 ### `cowplot`
 
-- https://wilkelab.org/cowplot/index.html
-- https://wilkelab.org/cowplot/articles/index.html
+- <https://wilkelab.org/cowplot/index.html>
+- <https://wilkelab.org/cowplot/articles/index.html>
 
 ### `egg`
 
-- https://cran.r-project.org/web/packages/egg/vignettes/Overview.html
-- https://cran.r-project.org/web/packages/egg/vignettes/Ecosystem.html
+- <https://cran.r-project.org/web/packages/egg/vignettes/Overview.html>
+- <https://cran.r-project.org/web/packages/egg/vignettes/Ecosystem.html>
 
 
 
-
+<br><br><br><br><br><br><br>
 
 # Facets for multidimensional visualizations in `ggplot2`
 
@@ -231,12 +227,12 @@ If alternative packages and their tutorials are addressing your grid arrangement
 
 ```{r}
 
-library(data.table)
-library(ggplot2)
+pacman::p_load("data.table")
+pacman::p_load("ggplot2")
 
 iris <- as.data.table(iris)
 
-# covert to long format 
+# covert to long format (i.e. tidyverse -> pivot_longer)
 iris.m <- melt(iris, id.vars="Species")
 
 iris.m
@@ -301,6 +297,7 @@ ggplot(iris.m, aes(x=Species,y=value, color=Species))+
 
 
 ```{r}
+
 set.seed(1)
 sinoid <- function(x) {rnorm(n=1,mean=sin(x*(2*pi/365)),sd=0.2)+5}
 vsinoid <- Vectorize(sinoid)
@@ -349,7 +346,7 @@ ggplot(dFACE, aes(x=Day, y=Measurement,fill=Treatment))+
 ## `facet_wrap`
 
 - The differences between facet_wrap() and facet_grid():
-  - https://ggplot2-book.org/facet.html
+  - <https://ggplot2-book.org/facet.html>
 
 
 
@@ -447,18 +444,25 @@ For mathemaical symbols use, e.g.
 
 ### Further options
 
-- `?facet_wrap`: e.g. `strip.positon`
+- `?facet_wrap`: e.g. `strip.placement`
 - `theme()` options (`?theme`), some examples:
 
 ```{r eval=FALSE}
 ...
-strip.background,
-strip.background.x,
-strip.background.y,
-strip.placement,
-strip.text,
-strip.text.x,
-strip.text.y,
+  strip.background,
+  strip.background.x,
+  strip.background.y,
+  strip.clip,
+  strip.placement,
+  strip.text,
+  strip.text.x,
+  strip.text.x.bottom,
+  strip.text.x.top,
+  strip.text.y,
+  strip.text.y.left,
+  strip.text.y.right,
+  strip.switch.pad.grid,
+  strip.switch.pad.wrap,
 ...
 
 ```
@@ -467,12 +471,12 @@ strip.text.y,
 
 # Exercise (1)
 
-1. Use the following code to load the 'tree'-dataset and transfer it into a `data.table` and to add two artificial groups (experiments):
+1. Use the following code to load the `tree`-dataset and transfer it into a `data.table` and to add two artificial groups (experiments):
 
 ```{r}
-library("data.table")
-library("ggplot2")
-library("patchwork")
+pacman::p_load("data.table")
+pacman::p_load("ggplot2")
+pacman::p_load("patchwork")
 
 str(trees)
 
@@ -484,7 +488,7 @@ trees[,"Group":=rep(c("1","2"), length.out=nrow(trees))]
 
 ```
 
-2. Information about the data (https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/trees.html)
+2. Information about the data (<https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/trees.html>)
 3. Create a plot to each of the three variables showing their distribution and merge theme to a single plot using `patchwork`
 4. Modify the axis titles to match scientific standards
 5. Optional: Customize the appearance according to your preferences
@@ -496,7 +500,7 @@ trees[,"Group":=rep(c("1","2"), length.out=nrow(trees))]
 # Exercise (2)
 
 
-1. Load the historic climate data set from Geisenheim (s. code) and extract three years from this long-time data to a new data table (s. code example). You could use different years.
+1. Load the historic climate data set from Geisenheim (see code) and extract *three years* from this long-time data to a new data table (see code example). You could use different years.
 2. Transfer into a long-format data set for plotting.
 3. Use `ggplot2` (facets) to create a plot illustrating two variables (`MO_TT.Lufttemperatur` und `MO_RR.Niederschlagshoehe`) by year.
 4. Optional: Customize the appearance according to your preferences
@@ -504,16 +508,17 @@ trees[,"Group":=rep(c("1","2"), length.out=nrow(trees))]
 
 
 ```{r message=FALSE}
-library("data.table")
-library("ggplot2")
-library("rdwd")
+
+pacman::p_load("data.table")
+pacman::p_load("ggplot2")
+# pacman::p_load("rdwd")
 
 clim <- fread("clim_DWD_Geisenheim_historic_monthly.csv")
-clim[,"MESS_DATUM":=as.POSIXct(MESS_DATUM)]
+
 
 
 #Create a new year variable from date 
-clim[,"Year":=year(MESS_DATUM)] # using year function (provided by data.table)
+clim[,"Year":=year(MESS_DATUM)] # using year function (provided by data.table / )
 #clim[,"Year":=substr(MESS_DATUM,1:4)] #alternative extract first 4 digits from string
 # More alternatives can be found with a quick google search: https://stackoverflow.com/questions/36568070/extract-year-from-date
 
@@ -537,24 +542,19 @@ str(climSub.m)
 
 
 
-
-
-
-
-
 # Additional resources
 
 
-- https://ggplot2-book.org/facet.html
-- https://ggplot2.tidyverse.org/reference/facet_grid.html
-- https://ggplot2.tidyverse.org/reference/gg-add.html
-- https://fishandwhistle.net/post/2018/modifying-facet-scales-in-ggplot2/
-- http://www.sthda.com/english/wiki/ggplot2-violin-plot-quick-start-guide-r-software-and-data-visualization
-- https://ggforce.data-imaginist.com/ [zoom to data]
+- <https://ggplot2-book.org/facet.html>
+- <https://ggplot2.tidyverse.org/reference/facet_grid.html>
+- <https://ggplot2.tidyverse.org/reference/gg-add.html>
+- <https://fishandwhistle.net/post/2018/modifying-facet-scales-in-ggplot2/>
+- <http://www.sthda.com/english/wiki/ggplot2-violin-plot-quick-start-guide-r-software-and-data-visualization>
+- <https://ggforce.data-imaginist.com/> [zoom to data]
 
 ```{r}
 
-library(ggforce)
+pacman::p_load("ggforce")
 ggplot(iris, aes(x=Petal.Length,y=Petal.Width, colour = Species)) +
   geom_point() +
   facet_zoom(x = Species == "versicolor")

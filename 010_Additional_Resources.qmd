@@ -1,0 +1,222 @@
+---
+title: "Introduction to data visualization with R and ggplot2"
+author: "Dr. Dominik Schmidt"
+date: "`r Sys.Date()`"
+date-format: "YYYY"
+toc: true
+toc-depth: 3
+number-sections: false
+highlight-style: tango
+format: 
+  html:
+   embed-resources: true
+   css: "./css/clean_qmd.css"
+---
+```{r echo=FALSE}
+
+source("./src/custom.R")
+
+```
+
+
+# 010 Additional Resources
+
+
+
+
+## Calculating statistics in `ggplot2`
+
+- <https://ggplot2.tidyverse.org/reference/stat_summary.html>
+- <https://data-se.netlify.com/2018/06/10/visualizing-summary-statistics-the-tidyverse-way/>
+- <http://rstudio-pubs-static.s3.amazonaws.com/5045_1c5e8b09671544b79f6c582bd1d9324e.html>
+- <http://www.sthda.com/english/wiki/be-awesome-in-ggplot2-a-practical-guide-to-be-highly-effective-r-software-and-data-visualization>
+- <https://rdrr.io/github/brooksandrew/Rsenal/man/smartAgg.html>
+
+
+## Two Axis (secondary X/Y axis)
+
+- sec_axis(trans = NULL, name = waiver(), breaks = waiver(),  labels = waiver())
+  - <https://ggplot2.tidyverse.org/reference/sec_axis.html>
+
+## Correlations / Scatter plot matrix
+
+- <https://ggobi.github.io/ggally/>
+
+
+
+## Heatmaps/ Dendrograms
+
+- <https://mode.com/blog/r-ggplot-extension-packages>
+- <https://jcoliver.github.io/learn-r/006-heatmaps.html>
+- <http://www.opiniomics.org/you-probably-dont-understand-heatmaps/>
+- <https://earlglynn.github.io/RNotes/package/gplots/heatmap2.html>
+- <https://genomicsclass.github.io/book/pages/clustering_and_heatmaps.html>
+- <http://girke.bioinformatics.ucr.edu/GEN242/pages/mydoc/Rclustering.html>
+- <https://cran.r-project.org/web/packages/ggdendro/vignettes/ggdendro.html>
+- <http://www.sthda.com/english/wiki/beautiful-dendrogram-visualizations-in-r-5-must-known-methods-unsupervised-machine-learning>
+
+## More add-ons/extensions/features
+
+- <https://exts.ggplot2.tidyverse.org/gallery/>
+- <http://www.sthda.com/english/articles/24-ggpubr-publication-ready-plots/>
+- <https://eriqande.github.io/rep-res-web/lectures/making-maps-with-R.html>
+- <https://github.com/thomasp85/ggforce>
+- <https://github.com/AtherEnergy/ggTimeSeries>
+- <https://pkg.earo.me/sugrrants/>
+- <https://pkg.earo.me/sugrrants/articles/frame-calendar.html>
+- <https://cran.r-project.org/web/packages/corrplot/vignettes/corrplot-intro.html>
+- <http://davidgohel.github.io/ggiraph/index.html>
+- <http://www.sthda.com/english/wiki/be-awesome-in-ggplot2-a-practical-guide-to-be-highly-effective-r-software-and-data-visualization>
+
+## Misc
+
+- `ggpubr` - Shortcuts for pre-designed plots -- <https://rpkgs.datanovia.com/ggpubr/>
+- `ggstatsplot` - ggplot2 Based Plots with Statistical Details -- <https://github.com/IndrajeetPatil/ggstatsplot>
+
+
+## Dos and Don'ts
+
+- <http://genomicsclass.github.io/book/pages/plots_to_avoid.html>
+- Christa Kelleher, Thorsten Wagener, Ten guidelines for effective data visualization in scientific publications, Environmental Modelling & Software, Volume 26, Issue 6, 2011, Pages 822-827, ISSN 1364-8152, <https://doi.org/10.1016/j.envsoft.2010.12.006> (<http://www.sciencedirect.com/science/article/pii/S1364815210003270>)
+- Rougier NP, Droettboom M, Bourne PE (2014) Ten Simple Rules for Better Figures. PLoS Comput Biol 10(9): e1003833. <https://doi.org/10.1371/journal.pcbi.1003833>
+- <http://blogs.nature.com/methagora/2013/07/data-visualization-points-of-view.html?WT.mc_id=TWT_NatureMethods>
+- <https://stat545.com/effective-graphs.html>
+- <https://visguides.org/>
+- <https://eagereyes.org/talk/how-do-we-know-that>
+
+
+
+## More Dimension (3D, 4D, ...)
+
+- <https://towardsdatascience.com/a-comprehensive-guide-to-the-grammar-of-graphics-for-effective-visualization-of-multi-dimensional-1f92b4ed4149>
+- 'Real' 3D Plots: `rgl` - interactive (<https://cran.r-project.org/web/packages/rgl/vignettes/rgl.html>)
+- 'Real' 3D Plots: `scatterplot3d` static (<https://cran.r-project.org/web/packages/scatterplot3d/vignettes/s3d.pdf>)
+- <https://rdrr.io/rforge/rgl/man/persp3d.html>
+- <http://www.sthda.com/english/wiki/impressive-package-for-3d-and-4d-graph-r-software-and-data-visualization>
+- <https://ggplot2.tidyverse.org/reference/geom_tile.html>
+
+
+### Plot Pseudo-3d -- Colored points
+
+```{r}
+pacman::p_load("ggplot2")
+pacman::p_load("data.table")
+#### Create data 
+# Measurements over a rectangular surface
+
+x <- -5:5
+y <- x
+
+set.seed(2019)
+value <- abs(x*y)+rnorm(mean=0,sd=1, n=length(x) * length(y))
+
+d <- as.data.table(expand.grid(x=x,y=y))
+d[,"value":=value]
+
+
+```
+
+
+```{r}
+
+# Option1: Colour data points by value | viridis colors
+ggplot(d,aes(x=x,y=y))+
+  geom_point(aes(color=value))+
+  coord_fixed()+                       #Fix aspect ratio
+  scale_colour_viridis_c()
+
+
+```
+
+### Plot Pseudo-3d -- Colored raster
+
+
+```{r}
+
+
+
+ggplot(d,aes(x=x,y=y))+
+  geom_raster(aes(fill=value))+        #Coordinates are in the center of the squares
+  coord_fixed()+                       #Fix aspect ratio
+  scale_fill_viridis_c()
+
+
+ggplot(d[-13,],aes(x=x,y=y))+          #Missing data = Missing
+  geom_raster(aes(fill=value))+
+  coord_fixed()+                       
+  scale_fill_viridis_c()
+
+
+ggplot(d[-13,],aes(x=x,y=y))+
+  geom_raster(aes(fill=value),interpolate=TRUE)+  #NOT very good ?! missing = zero
+                                                  #AND to strong boarders
+  coord_fixed()+                      
+  scale_fill_viridis_c()
+
+# google: Missing values problem [data imputation]  
+
+```
+
+### Real 3D [rgl]
+
+
+```{r}
+pacman::p_load("rgl")     #interactive 3D plots
+  options(rgl.useNULL = TRUE) #only for markdown output
+
+# Pointcloud
+plot3d(d)
+aspect3d("iso")               #set  aspect ratio
+rgl_scene <- scene3d()        #only for markdown output
+rglwidget(x=rgl_scene)        #only for markdown output
+
+```
+
+
+
+### Real 3D [plotly]
+
+
+```{r}
+
+pacman::p_load("plotly")      #interactive 3D plots
+
+fig <- plot_ly(d, x = ~x, y = ~y, z = ~value
+  #, color = ~x*y*z, colors = c('#BF382A', '#0C4B8E')
+  )
+fig <- fig %>% add_markers()
+
+fig
+
+
+```
+
+
+
+### Four Dimensions with a few lines of ggplot2 
+
+- x (wt)
+- y (mpg)
+- color (gear)
+- +size (cyl)
+
+
+
+```{r}
+
+ggplot(mtcars, aes(x=wt, y=mpg, color=factor(gear), size=cyl))+
+        geom_point() +
+        theme_minimal()
+
+
+```
+
+- Not very *clear*!
+
+#  Session Info
+
+```{r}
+
+sessionInfo()
+
+```

@@ -1,26 +1,21 @@
 ---
 title: "Introduction to data visualization with R and ggplot2"
 author: "Dr. Dominik Schmidt"
-date: "`r substr((Sys.Date()),1,4)`"
-output:
-  rmdformats::readthedown:
-    self_contained: true
-    thumbnails: true
-    lightbox: true
-    gallery: false
-    highlight: tango
-    toc_depth: 4    
-    css: "./custom.css"    
-    code_folding: show
+date: "`r Sys.Date()`"
+date-format: "YYYY"
+toc: true
+toc-depth: 3
+number-sections: false
+highlight-style: tango
+format: 
+  html:
+   embed-resources: true
+   css: "./css/clean_qmd.css"
 ---
 ```{r echo=FALSE}
 
-knitr::opts_chunk$set(
-  class.output  = "bg-success",
-  class.message = "bg-info text-info",
-  class.warning = "bg-warning text-warning",
-  class.error   = "bg-danger text-danger"
-  )
+source("./src/custom.R")
+
 ```
 
 
@@ -34,20 +29,15 @@ knitr::opts_chunk$set(
 
 ```{r message=FALSE}
 
-usePackage <- function(p)   
-{ 
-  if (!is.element(p, installed.packages()[,1])) 
-    install.packages(p, dep = TRUE, repos="https://cloud.r-project.org/", lib=.libPaths()[1]) 
-  require(p, character.only = TRUE) 
-} 
+if (!require("pacman")) install.packages("pacman")
   
-usePackage("ggplot2")
-usePackage("data.table")
-usePackage("lvplot")   #letter value plot / boxenplot
-usePackage("gghalves") #half_plots
-usePackage("ggdist")   #distribution plots
-usePackage("patchwork")#combine plots 
-usePackage("ggridges") #ridgelines
+pacman::p_load("ggplot2")
+pacman::p_load("data.table")
+pacman::p_load("lvplot")   #letter value plot / boxenplot
+pacman::p_load("gghalves") #half_plots
+pacman::p_load("ggdist")   #distribution plots
+pacman::p_load("patchwork")#combine plots 
+pacman::p_load("ggridges") #ridgelines
 
 ```
 
@@ -76,7 +66,7 @@ iris <- as.data.table(iris)
 - not-use for $<=$ 5 data points
 - annotate number of observations (per plot; if these differ between variants)
   - possibility to scale by 'number'
--  
+
 
 
 # Boxplot and data
@@ -93,7 +83,7 @@ ggplot(data=iris, aes(x=Species,y=Sepal.Width))+
 
 ```{r}
 
-library("gghalves")
+pacman::p_load("gghalves")
 #https://cran.r-project.org/web/packages/gghalves/vignettes/gghalves.html
 
 ggplot(iris, aes(x = Species, y = Sepal.Width)) +
@@ -158,15 +148,15 @@ ggplot(iris, aes(y = Species, x = Petal.Width)) +
 
 # Boxenplot / Letter value plot
 
-- Heike Hofmann, Hadley Wickham & Karen Kafadar (2017) Letter-Value Plots: Boxplots for Large Data, *Journal of Computational and Graphical Statistics*, 26:3, 469-477, DOI: https://doi.org/10.1080/10618600.2017.1305277
-- Preprint: https://vita.had.co.nz/papers/letter-value-plot.html
-- https://www.r-project.org/conferences/useR-2006/Slides/HofmannEtAl.pdf
+- Heike Hofmann, Hadley Wickham & Karen Kafadar (2017) Letter-Value Plots: Boxplots for Large Data, *Journal of Computational and Graphical Statistics*, 26:3, 469-477, DOI: <https://doi.org/10.1080/10618600.2017.1305277>
+- Preprint: <https://vita.had.co.nz/papers/letter-value-plot.html>
+- <https://www.r-project.org/conferences/useR-2006/Slides/HofmannEtAl.pdf>
 - for large data sets, as number of outliers in a boxplot scale with data size  
 
 
 ```{r message=FALSE}
 
-library("lvplot")
+pacman::p_load("lvplot")
 
 boxenPlot0 <- 
   ggplot(iris, aes(x=Species,y=Petal.Length))+
@@ -188,7 +178,7 @@ boxenPlot_k2 <-
 #Letters represent ‘median’, ‘fourths’, ‘eights’ etc.    
 boxenPlot_k3_fill <- 
   ggplot(iris, aes(x=Species,y=Petal.Length))+
-      geom_lv(k=3,aes(fill = ..LV.. ))  +
+      geom_lv(k=3,aes(fill = after_stat(LV) ))  +
       ggtitle("k=3; median + 50 % + 25%")    
 
 boxenPlot0 + boxenPlot_k1 + boxenPlot_k2 + boxenPlot_k3_fill
@@ -272,8 +262,8 @@ LU <- ggplot(data_uniform, aes(x=x,y=y))+ geom_lv(fill=colorblindsafecolors[6],c
 
 # Additional packages
 
--  `gghalves`  https://erocoar.github.io/gghalves/ 
--  `ggdist`   https://mjskay.github.io/ggdist/
+-  `gghalves`  <https://erocoar.github.io/gghalves/>
+-  `ggdist`   <https://mjskay.github.io/ggdist/>
 
 ```{r}
 
@@ -281,7 +271,7 @@ clim_lt <- fread("clim_DWD_Geisenheim_historic_daily.csv")
 
 clim_lt[,"Month":=factor(month(MESS_DATUM))]
 
-library("ggdist")
+pacman::p_load("ggdist")
 #TMK.Lufttemperatur
 
 ggplot(clim_lt, aes(y=Month,x=TMK.Lufttemperatur))+ 
@@ -342,15 +332,15 @@ ggplot(clim_lt, aes(x = Month, y = TMK.Lufttemperatur)) +
 ## `ggridges`
 
 - 'overlapping' density plots
-- https://cran.r-project.org/web/packages/ggridges/vignettes/introduction.html
+- <https://cran.r-project.org/web/packages/ggridges/vignettes/introduction.html>
 
 ```{r}
 
-ggplot(clim_lt, aes(x = TMK.Lufttemperatur, y = Month, fill = stat(x))) +
+ggplot(clim_lt, aes(x = TMK.Lufttemperatur, y = Month, fill = after_stat(x))) +
   geom_density_ridges_gradient(scale = 3, rel_min_height = 0.01) +
   scale_fill_viridis_c(name="T (°C)",option = "C") 
 
-ggplot(clim_lt, aes(x = TMK.Lufttemperatur, y = Month,fill = factor(stat(quantile)))) +
+ggplot(clim_lt, aes(x = TMK.Lufttemperatur, y = Month,fill = factor(after_stat(quantile)))) +
   stat_density_ridges(geom = "density_ridges_gradient", calc_ecdf = TRUE,  quantiles = 4, quantile_lines = TRUE) +
   scale_fill_viridis_d(name = "Quartiles")
 
@@ -362,16 +352,16 @@ ggplot(clim_lt, aes(x = TMK.Lufttemperatur, y = Month,fill = factor(stat(quantil
 
 # Additional resources
 
-- https://ggforce.data-imaginist.com/reference/geom_sina.html
-- https://vita.had.co.nz/papers/letter-value-plot.html
-- https://chartio.com/learn/charts/box-plot-complete-guide/
-- https://www.cedricscherer.com/2021/06/06/visualizing-distributions-with-raincloud-plots-and-how-to-create-them-with-ggplot2/
-- https://brshallo.github.io/r4ds_solutions/07-exploratory-data-analysis.html
-- https://towardsdatascience.com/letter-value-plot-the-easy-to-understand-boxplot-for-large-datasets-12d6c1279c97
-- https://github.com/easystats/see
-- https://cran.r-project.org/web/packages/ggridges/vignettes/introduction.html
-- https://github.com/mjskay/ggdist/blob/master/figures-source/cheat_sheet-slabinterval.pdf
-- https://www.data-to-viz.com/caveat/boxplot.html
+- <https://ggforce.data-imaginist.com/reference/geom_sina.html>
+- <https://vita.had.co.nz/papers/letter-value-plot.html>
+- <https://chartio.com/learn/charts/box-plot-complete-guide/>
+- <https://www.cedricscherer.com/2021/06/06/visualizing-distributions-with-raincloud-plots-and-how-to-create-them-with-ggplot2/>
+- <https://brshallo.github.io/r4ds_solutions/07-exploratory-data-analysis.html>
+- <https://towardsdatascience.com/letter-value-plot-the-easy-to-understand-boxplot-for-large-datasets-12d6c1279c97>
+- <https://github.com/easystats/see>
+- <https://cran.r-project.org/web/packages/ggridges/vignettes/introduction.html>
+- <https://github.com/mjskay/ggdist/blob/master/figures-source/cheat_sheet-slabinterval.pdf>
+- <https://www.data-to-viz.com/caveat/boxplot.html>
 
 #  Session Info
 

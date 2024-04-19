@@ -1,26 +1,21 @@
 ---
 title: "Introduction to data visualization with R and ggplot2"
 author: "Dr. Dominik Schmidt"
-date: "`r format(Sys.time(), '%Y')`"
-output:
-  rmdformats::readthedown:
-    self_contained: true
-    thumbnails: true
-    lightbox: true
-    gallery: false
-    highlight: tango
-    toc_depth: 4    
-    css: "./custom.css"       
-    code_folding: show
+date: "`r Sys.Date()`"
+date-format: "YYYY"
+toc: true
+toc-depth: 3
+number-sections: false
+highlight-style: tango
+format: 
+  html:
+   embed-resources: true
+   css: "./css/clean_qmd.css"
 ---
 ```{r echo=FALSE}
 
-knitr::opts_chunk$set(
-  class.output  = "bg-success",
-  class.message = "bg-info text-info",
-  class.warning = "bg-warning text-warning",
-  class.error   = "bg-danger text-danger"
-  )
+source("./src/custom.R")
+
 ```
 
 
@@ -50,7 +45,7 @@ pacman::p_load("ggplot2")
 - reproducible results (Script/Rmarkdown/Quarto) 
 - very flexible ***A Layered Grammar of Graphics*** 
   - syntax based on ***Wilkinson, Leland. 2005. The Grammar of Graphics. 2nd ed. Statistics and Computing. Springer***. 
-  - transferred to R mainly by Hadley Wickham (http://hadley.nz/, https://ggplot2-book.org/, https://ggplot2.tidyverse.org/)  
+  - transferred to R mainly by Hadley Wickham (<http://hadley.nz/>, <https://ggplot2-book.org/>, <https://ggplot2.tidyverse.org/>)  
   - 'A Layered Grammar of Graphics. (Wickham, Hadley. 2009. 'A Layered Grammar of Graphics.' Journal of Computational and Graphical Statistics.) 
 - `ggplot2` is also part of the `tidyverse` - alternative coding style with pipes `%>%` applicable
 
@@ -107,8 +102,6 @@ You cannot assign a linetype to a point representation.
 # Read file
 ##########################################################################################
 clim <- fread("clim_DWD_Geisenheim_current.csv")
-clim[,"MESS_DATUM":=as.POSIXct(MESS_DATUM)] 
-
 ##########################################################################################
 
 # combine plots
@@ -142,7 +135,7 @@ ggplot(data=iris, aes(x=Sepal.Length, y=Sepal.Width))+
 # "loess" (Local Polynomial Regression Fitting) [stats::loess]
 # "gam":  generalized additive model (GAM) [mgcv::gam]
 
-# Regression line for subsets [grouped by color = species] 
+# Regression line for subsets [grouped by color = Species] 
 ggplot(data=iris, aes(x=Sepal.Length, y=Sepal.Width, color=Species))+
   geom_point()+
   geom_smooth(method="lm")  #linear model
@@ -164,11 +157,6 @@ ggplot(data=iris, aes(x=Sepal.Length, y=Sepal.Width, color=Species))+
 ggplot(data=iris, aes(x=Species,y=Petal.Width))+
   geom_boxplot()+
   geom_jitter( height = 0)   #do not allow random positions in y-direction
-
-# alternative: dotplot [histogram equivalent]
-ggplot(data=iris, aes(x=Species,y=Petal.Width))+
-  geom_boxplot()+
-  geom_dotplot(binaxis='y', stackdir='center', binwidth = 0.1,dotsize=0.25)
 
 
 ```
@@ -221,7 +209,7 @@ p00 + geom_violin()
 
 # Additional resources
 
-- https://ggplot2.tidyverse.org/reference/geom_smooth.html
+- <https://ggplot2.tidyverse.org/reference/geom_smooth.html>
 
 
 

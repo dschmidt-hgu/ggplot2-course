@@ -1,32 +1,25 @@
 ---
 title: "Introduction to data visualization with R and ggplot2"
 author: "Dr. Dominik Schmidt"
-date: "`r format(Sys.time(), '%Y')`"
-output:
-  rmdformats::readthedown:
-    self_contained: true
-    thumbnails: true
-    lightbox: true
-    gallery: false
-    highlight: tango
-    toc_depth: 4    
-    css: "./custom.css"     
-    code_folding: show
+date: "`r Sys.Date()`"
+date-format: "YYYY"
+toc: true
+toc-depth: 3
+number-sections: false
+highlight-style: tango
+format: 
+  html:
+   embed-resources: true
+   css: "./css/clean_qmd.css"
 ---
 ```{r echo=FALSE}
 
-knitr::opts_chunk$set(
-  class.output  = "bg-success",
-  class.message = "bg-info text-info",
-  class.warning = "bg-warning text-warning",
-  class.error   = "bg-danger text-danger"
-  )
+source("./src/custom.R")
+
 ```
 
 
 # 002: First plot
-
-
 
 
 # R and RStudio
@@ -48,8 +41,23 @@ pacman::p_load("ggplot2")
 
 
 
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 
-# Why visualizing data - Exploratory data analysis
+# Why visualize?  - Exploratory data analysis
+
+
+**How do you imagine a scatterplot corresponding to the following regression line and correlation coefficient:**
+
+-  $y = 3 + 0.5x$ 
+-  $r=0.82$	 
+
+
+
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+
+
 
 ```{r echo=FALSE, message=FALSE}
 
@@ -69,7 +77,7 @@ ggplot(anscombe.long, aes(x=x,y=y))+
   ggpubr::stat_cor(label.x = min(anscombe.long$x)
                   ,label.y = max(anscombe.long$x)
                   ,cor.coef.name="cor"
-                  ,aes(label = ..r.label..)
+                  ,aes(label = after_stat(r.label))
                   ,size=2.75) +
   ggpubr::stat_regline_equation(label.x = min(anscombe.long$x)
                                ,label.y = max(anscombe.long$x)-2
@@ -83,7 +91,7 @@ ggplot(anscombe.long, aes(x=x,y=y))+
 
 ## *Anscombe's quartet* 
 
-- Anscombe, F. J. (1973). "Graphs in Statistical Analysis". American Statistician. 27 (1): 17–21. doi:10.1080/00031305.1973.10478966. JSTOR 2682899.
+- Anscombe, F. J. (1973). "Graphs in Statistical Analysis". American Statistician. 27 (1): 17–21. doi: 10.1080/00031305.1973.10478966. JSTOR 2682899.
 
 ```{r, echo=FALSE}
 
@@ -110,7 +118,7 @@ knitr::kable(anscombe.summary)
 
 ## More illustrations on data patterns and correlation coefficients
 
-- https://janhove.github.io/teaching/2016/11/21/what-correlations-look-like
+- <https://janhove.github.io/teaching/2016/11/21/what-correlations-look-like>
 
 
 
@@ -118,7 +126,7 @@ knitr::kable(anscombe.summary)
 
 # First plot
 
-- Data: https://en.wikipedia.org/wiki/Iris_flower_data_set
+- Data: <https://en.wikipedia.org/wiki/Iris_flower_data_set>
 
 
 ```{r}
@@ -175,8 +183,8 @@ ggplot(data=iris[1:5,], aes(x=Species, y=Sepal.Length))+
 
 ## Part 1 - Scatter plot
 
-- Open R/RStudio and load the packages "ggplot2" and "data.table"
-- Create a plot comparing Petal.Width and Petal.Length using scatter plots for the entire iris data set 
+- Open R/RStudio and load the packages `ggplot2` and `data.table`
+- Create a plot comparing `Petal.Width` and `Petal.Length` using scatter plots for the entire iris data set 
 - Create singe plots for each species
 - Plot all data, use color to distinguish between species 
 - Plot all data, use shapes to distinguish between species
@@ -191,8 +199,8 @@ ggplot(data=iris[1:5,], aes(x=Species, y=Sepal.Length))+
 
 # Additional resources
 
-- https://en.wikipedia.org/wiki/Anscombe%27s_quartet
-- https://style.tidyverse.org/ggplot2.html
+- <https://en.wikipedia.org/wiki/Anscombe%27s_quartet>
+- <https://style.tidyverse.org/ggplot2.html>
 
 #  Session Info
 

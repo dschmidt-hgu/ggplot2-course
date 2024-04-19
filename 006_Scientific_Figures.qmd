@@ -1,26 +1,21 @@
 ---
 title: "Introduction to data visualization with R and ggplot2"
 author: "Dr. Dominik Schmidt"
-date: "`r format(Sys.time(), '%Y')`"
-output:
-  rmdformats::readthedown:
-    self_contained: true
-    thumbnails: true
-    lightbox: true
-    gallery: false
-    highlight: tango
-    toc_depth: 4    
-    css: "./custom.css"    
-    code_folding: show
+date: "`r Sys.Date()`"
+date-format: "YYYY"
+toc: true
+toc-depth: 3
+number-sections: false
+highlight-style: tango
+format: 
+  html:
+   embed-resources: true
+   css: "./css/clean_qmd.css"
 ---
 ```{r echo=FALSE}
 
-knitr::opts_chunk$set(
-  class.output  = "bg-success",
-  class.message = "bg-info text-info",
-  class.warning = "bg-warning text-warning",
-  class.error   = "bg-danger text-danger"
-  )
+source("./src/custom.R")
+
 ```
 
 
@@ -42,6 +37,9 @@ if (!require("pacman")) install.packages("pacman")
   
 pacman::p_load("data.table")
 pacman::p_load("ggplot2")
+pacman::p_load("ggthemes")
+pacman::p_load("directlabels") 
+pacman::p_load("geomtextpath")  
 
 ```
 
@@ -81,7 +79,7 @@ ggplot(data = iris, aes(x = Petal.Width, y = Sepal.Length)) +
 
 ### `ggtext`
 
-- https://github.com/wilkelab/ggtext
+- <https://github.com/wilkelab/ggtext>
 
 ```{r}
 pacman::p_load("ggtext")
@@ -116,16 +114,16 @@ ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) +
 
 
 # x-ticks
-seq(-1,5,by=1.5)
+(xtick <- seq(-1,5,by=1.5))
 
 # y-ticks
-seq(-1,20,by=1.5)
+(ytick <- seq(-1,20,by=1.5))
 
 # Breaks = ticks
 ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
     geom_point(aes(color = Species))+
-    scale_x_continuous(name="Petal width (cm)", limits=c(-1,5), breaks=seq(-1,5,by=1.5))+
-    scale_y_continuous(name="Petal length (cm)", limits=c(-1,20), breaks=seq(-1,20,by=1.5))
+    scale_x_continuous(name="Petal width (cm)", limits=range(xtick), breaks=xtick)+
+    scale_y_continuous(name="Petal length (cm)", limits=range(ytick), breaks=ytick)
 
 
 ```
@@ -155,7 +153,7 @@ ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) +
 # Legends
 
 >  In ggplot2, you don’t directly control the legend; instead you set up the data so that there’s a clear mapping between data and aesthetics, and a legend is generated for you automatically. This can be frustrating when you first start using ggplot2, but once you get the hang of it, you’ll find that it saves you time, and there is little you cannot do. If you’re struggling to get the legend you want, it’s likely that your data is in the wrong form.
-> <small> Q: https://ggplot2-book.org/scales.html </small>
+> <small> Q: <https://ggplot2-book.org/scales.html> </small>
 
 
 ```{r}
@@ -170,7 +168,6 @@ ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) +
 
 
 # Change legend item names = labels
-
 ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
     geom_point(aes(color = Species))+
     scale_x_continuous(name="Petal width (cm)")+
@@ -198,6 +195,7 @@ ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length, color = Species)) +
 
 
 ```{r}
+
 #Shape and color are automatically combined in a single legend 
 ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
     geom_point(aes(color = Species, shape=Species))
@@ -244,8 +242,9 @@ ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) +
 - <a href=https://ggplot2-book.org/annotations.html#direct-labelling>'*direct labelling*'</a>.
 - sometimes *the better legend*
 - no need to 'search' for the legend box 
-- `geom_text`, `geom_label` if you want to reuse data mappings
+- `geom_text`, `geom_label` if you want to re-use data mappings
 - `annotate` more flexible
+- or use helper-packages (see below)
 
 ```{r}
 # add custom color and rename + change linetype and name
@@ -267,26 +266,26 @@ ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) +
 
 ## Helper Packages
 
-- not always too comfortable in base ggplot2
-  - `directlabels` https://tdhock.github.io/directlabels/
-  - `ggforce` (https://ggforce.data-imaginist.com/)
-  - `ggrepel` (e.g. avoids overlapping) (https://cran.r-project.org/web/packages/ggrepel/vignettes/ggrepel.html)
-  - `gghighlight` https://github.com/yutannihilation/gghighlight
-  - `geomtextpath` https://github.com/AllanCameron/geomtextpath
+- as its not always too comfortable in base ggplot2
+  - `directlabels` <https://tdhock.github.io/directlabels/>
+  - `geomtextpath` <https://github.com/AllanCameron/geomtextpath>
+  - `ggforce` <https://ggforce.data-imaginist.com/>
+  - `ggrepel` (e.g. avoids overlapping) <https://cran.r-project.org/web/packages/ggrepel/vignettes/ggrepel.html>
+  - `gghighlight` <https://github.com/yutannihilation/gghighlight>
+
 
 
 ### `ggforce`
 
 
 ```{r}
-#install.packages("ggforce")
-library(ggforce)
+pacman::p_load("ggforce")
 
 # use annotation
 ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
     geom_point(aes(color = Species, shape=Species),show.legend=FALSE)+
     geom_smooth(method="lm", color="black")+
-    geom_mark_ellipse(aes(label = Species, group = Species, color=Species),show.legend=FALSE)+ #ggforce-Function
+    ggforce::geom_mark_ellipse(aes(label = Species, group = Species, color=Species),show.legend=FALSE)+ #ggforce-Function
     scale_x_continuous(name="Petal width (cm)")+
     scale_y_continuous(name="Petal length (cm)")+
     annotate( #Draw curved arrow
@@ -304,50 +303,47 @@ ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) +
 
 ### `directlabels`
 
-- `directlabels` https://tdhock.github.io/directlabels/
+- `directlabels` <https://tdhock.github.io/directlabels/>
 
 ```{r}
-pacman::p_load(directlabels)
-
+pacman::p_load("directlabels")
 
 ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length, fill = Species)) + 
     geom_count(shape=21,alpha=0.75)+
     geom_smooth(method="lm", color="black")+        
-    geom_dl(aes(label = Species, color = Species), method = "smart.grid")
+    directlabels::geom_dl(aes(label = Species, color = Species), method = "smart.grid")
 
 ```
 
 
 ### `geomtextpath`
 
-- https://github.com/AllanCameron/geomtextpath
+- <https://github.com/AllanCameron/geomtextpath>
 
 
 ```{r}
-pacman::p_load(geomtextpath)
-
+pacman::p_load("geomtextpath")
 
 ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
     geom_count(aes(fill = Species),shape=21,alpha=0.75)+
-    geom_labelsmooth(method="lm",aes(label="Linear Model")
+    geomtextpath::geom_labelsmooth(method="lm",aes(label="Linear Model")
       ,color="black"
       ,size=3
       ,boxlinetype=0
       ,alpha=0.75
       )      
+
 ```
 
 
-
-
-
+<br><br><br><br><br><br>
 
 # Themes 
 
 - custom design - 'cosmetics'
 
 > Graphs have other features not strictly connected to the logical structure of the data being displayed. These include things like their background color, the typeface used for labels, or the placement of the legend on the graph. To adjust these, use the theme() function.
-> <small> Q: https://socviz.co/workgeoms.html</small>
+> <small> Q: <https://socviz.co/workgeoms.html></small>
 
 
 
@@ -355,6 +351,7 @@ ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) +
 
 
 ```{r}
+
 # Save plot to a variable
 p1 <- ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
     geom_point(aes(color = Species))
@@ -382,8 +379,8 @@ p1 + theme_classic() #white bg, no grid, no 'border' only axis
 
 ```{r}
 # additional packages
-#install.packages("ggthemes")
-library(ggthemes)
+pacman::p_load("ggthemes")
+
 
 p1 + theme_few() #larger font size, no grid, border
 
@@ -400,7 +397,7 @@ ls("package:ggthemes")[grepl("theme_", ls("package:ggthemes"))]
 ```
 
 
-- `ggthemr` https://github.com/cttobin/ggthemr 
+- `hrbrthemes` <https://github.com/hrbrmstr/hrbrthemes>
 - ... 
 
 
@@ -440,7 +437,7 @@ p1 +
 
 ## Customize a theme (2)
 
-- There are many options ... https://ggplot2.tidyverse.org/reference/theme.html
+- There are many options ... <https://ggplot2.tidyverse.org/reference/theme.html>
 
 
 
@@ -456,7 +453,9 @@ ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) +
 # Legend at 15% X and 85% Y [default justification: center of legend]
 ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
     geom_point(aes(color = Species))+
-    theme(legend.position  = c(0.15,0.85) ) #percentage of figure area
+    theme(legend.position  = "inside",
+          legend.position.inside = c(0.15,0.85)  #percentage of figure area
+          )
 
 # Add border to legend Background-Box
     # Change justification to 'left' - Box left Side
@@ -464,7 +463,8 @@ ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) +
 ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
     geom_point(aes(color = Species))+
     theme(
-          legend.position  = c(0.15,0.85), 
+          legend.position  = "inside",
+          legend.position.inside = c(0.15,0.85),  #percentage of figure area
           legend.justification = "left",                          
           legend.background = element_rect(color="black")    #Add border to legend Background-Box
           ) 
@@ -473,7 +473,8 @@ ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) +
 ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
     geom_point(aes(color = Species))+
     theme(
-          legend.position  = c(0.15,0.85),   
+          legend.position  = "inside",
+          legend.position.inside = c(0.15,0.85),  #percentage of figure area
           legend.justification = "left",  
           legend.background = element_rect(color="black", fill=NA) #remove fill color (default: "white")
           ) 
@@ -482,20 +483,19 @@ ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) +
 ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
     geom_point(aes(color = Species))+
     theme(
-          legend.position  = c(0.05,0.85),                             
+          legend.position  = "inside",
+          legend.position.inside = c(0.05,0.85),  #percentage of figure area            
           legend.justification = "left",            
           legend.background = element_rect(color="black", fill=NA), 
           legend.direction = "horizontal"                            #change legend direction 
           ) 
-
 
 ```
 
 - there is more to legends...
 
 ```{r eval=FALSE}
-
-legend.background, 
+legend.background,
 legend.margin,
 legend.spacing,
 legend.spacing.x,
@@ -504,13 +504,28 @@ legend.key,
 legend.key.size,
 legend.key.height,
 legend.key.width,
+legend.key.spacing,
+legend.key.spacing.x,
+legend.key.spacing.y,
+legend.frame,
+legend.ticks,
+legend.ticks.length,
+legend.axis.line,
 legend.text,
-legend.text.align,
+legend.text.position,
 legend.title,
-legend.title.align,
+legend.title.position,
 legend.position,
+legend.position.inside,
 legend.direction,
+legend.byrow,
 legend.justification,
+legend.justification.top,
+legend.justification.bottom,
+legend.justification.left,
+legend.justification.right,
+legend.justification.inside,
+legend.location,
 legend.box,
 legend.box.just,
 legend.box.margin,
@@ -524,7 +539,7 @@ legend.box.spacing,
 
 - select a reference theme and modify 
 - most ggplot2 themes are themselves only modifications of the standard theme: `theme_gray`,
-dessen Definition unter: <a href=https://github.com/tidyverse/ggplot2/blob/master/R/theme-defaults.r>Link</a> 
+its definition can be found at: <a href=https://github.com/tidyverse/ggplot2/blob/master/R/theme-defaults.r>Link</a> 
 
 
 
@@ -549,7 +564,7 @@ theme_DS <- function(base_size = 10,                           #set default valu
       panel.grid.major = element_line(                           # add major grid lines
         color = rgb(197, 198, 198, maxColorValue = 255),         # hgu_lightgray   <- rgb(197, 198, 198, maxColorValue = 255)
         linetype = "dotted",                                     # dotted line
-        size = base_line_size/1.5),                              # slighlty decreased line thickness
+        linewidth = base_line_size/1.5),                              # slighlty decreased line thickness
       axis.line = element_line(                                  # modifiy axis lines
         color = rgb(197, 198, 198, maxColorValue = 255),         # hgu_lightgray   <- rgb(197, 198, 198, maxColorValue = 255)
         arrow=arrow(type = "closed",length = unit(0.125, "cm"))),# draw tiny arrow at the end of the axis lines      
@@ -583,9 +598,9 @@ theme_set(theme_DS())
 
 # Best practices
 
-- reduce 'chartjunk' to highlight data (https://en.wikipedia.org/wiki/Chartjunk)
-- 'Simplify to clarify' (Wong, B. Simplify to clarify. Nat Methods 8, 611 (2011). https://doi.org/10.1038/nmeth.1660)
-- 'effective' graphics (https://stat545.com/effective-graphs.html)
+- reduce 'chartjunk' to highlight data (<https://en.wikipedia.org/wiki/Chartjunk>)
+- 'Simplify to clarify' (Wong, B. Simplify to clarify. Nat Methods 8, 611 (2011). <https://doi.org/10.1038/nmeth.1660>)
+- 'effective' graphics (<https://stat545.com/effective-graphs.html>)
 
 ## Grid Lines
 
@@ -649,7 +664,7 @@ pB1  +
 ### Example (2)
 
 - Compare February and May
-- (Figure 2): https://www.perceptualedge.com/articles/dmreview/grid_lines.pdf 
+- (Figure 2): <https://www.perceptualedge.com/articles/dmreview/grid_lines.pdf>
 
 
 
@@ -693,6 +708,7 @@ pB1+
 ```
 
 
+
 ## Axis limits
 
 - Include full range or not?
@@ -722,10 +738,7 @@ pB1+
 > 2011,
 > Pages 822-827,
 > ISSN 1364-8152,
-> https://doi.org/10.1016/j.envsoft.2010.12.006
-> (http://www.sciencedirect.com/science/article/pii/S1364815210003270)
-> (https://scholar.google.de/scholar?cluster=14672598521261445236&hl=de&as_sdt=0,5&as_vis=1)
-
+> <https://doi.org/10.1016/j.envsoft.2010.12.006>
 
 - ***Keep it simple*** 
 - ***Visualize the purpose*** of the plot (details versus patterns) 
@@ -779,18 +792,17 @@ p1|p2
 
 
 
+- From **Data Looks Better Naked** by Darkhorse Analytics: <https://stat545.com/img/less-is-more-darkhorse-analytics.gif>
 
 
 
 # Exercise 
 
 ```{r}
-library("data.table")
-library("ggplot2")
+pacman::p_load("data.table")
+pacman::p_load("ggplot2")
 
 clim <- fread("clim_DWD_Geisenheim_historic_monthly.csv")
-clim[,"MESS_DATUM":=as.POSIXct(MESS_DATUM)] 
-
 clim[,"Year":=year(MESS_DATUM)]
 clim_lt_sub <- clim[Year > 1951]
 minmaxmeanTDF <- clim_lt_sub[,.(meanT=mean(MO_TT.Lufttemperatur),minT=min(MO_TT.Lufttemperatur),maxT=max(MO_TT.Lufttemperatur)),by=.(Year)]
@@ -811,21 +823,20 @@ ggplot(m_minmaxmeanTDF, aes(x=Year,y=value, fill=variable))+
  
 # Additional resources
 
-- https://www.data-to-viz.com/
-- https://scales.r-lib.org/
-  - `pretty_breaks` -  https://scales.r-lib.org/reference/pretty_breaks.html
-  - `extendet_breaks` - https://scales.r-lib.org/reference/extended_breaks.html
-- https://cran.r-project.org/web/packages/ggrepel/vignettes/ggrepel.html
-- https://ggplot2.tidyverse.org/reference/theme.html
-- https://www.data-imaginist.com/2019/the-ggforce-awakens-again/
-- `ggfittext`https://github.com/wilkox/ggfittext
+- <https://www.data-to-viz.com/>
+- <https://scales.r-lib.org/>
+  - `pretty_breaks` -  <https://scales.r-lib.org/reference/pretty_breaks.html>
+  - `extendet_breaks` - <https://scales.r-lib.org/reference/extended_breaks.html>
+- <https://cran.r-project.org/web/packages/ggrepel/vignettes/ggrepel.html>
+- <https://ggplot2.tidyverse.org/reference/theme.html>
+- <https://www.data-imaginist.com/2019/the-ggforce-awakens-again/>
 
 
 ## **Nature Methods**: Points of View columns
 
-- https://protocolsmethods.springernature.com/posts/43650-data-visualization-a-view-of-every-points-of-view-column
-    - e.g. *Plotting Symbols*: https://www.nature.com/articles/nmeth.2490
-    - https://www.nature.com/articles/nmeth.2337 (Figure3: Grid density)
+- <https://protocolsmethods.springernature.com/posts/43650-data-visualization-a-view-of-every-points-of-view-column>
+    - e.g. *Plotting Symbols*: <https://www.nature.com/articles/nmeth.2490>
+    - <https://www.nature.com/articles/nmeth.2337> (Figure3: Grid density)
 
 
 #  Session Info

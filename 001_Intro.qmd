@@ -1,43 +1,20 @@
 ---
 title: "Introduction to data visualization with R and ggplot2"
 author: "Dr. Dominik Schmidt"
-date: "`r format(Sys.time(), '%Y')`"
-geometry: paperheight=20cm,paperwidth=30cm,margin=1cm
-output:
-  rmdformats::readthedown:
-    self_contained: true
-    thumbnails: true
-    lightbox: true
-    gallery: false
-    highlight: tango
-    toc_depth: 4    
-    css: "./custom.css"     
-    code_folding: hide
-  # html_document:
-  #   #code_folding: hide
-  #   toc: true
-  #   toc_depth: 4
-  #   theme: united
-  #   highlight: zenburn
-  #   number_sections: true
-  #   toc_float: 
-  #     collapsed: false
-#      smooth_scroll: false
-  pdf_document:
-    toc: true
-    toc_depth: 4
-    number_sections: true
-    highlight: zenburn
+date: "`r Sys.Date()`"
+date-format: "YYYY"
+toc: true
+toc-depth: 3
+number-sections: false
+highlight-style: tango
+format: 
+  html:
+   embed-resources: true
+   css: "./css/clean_qmd.css"
 ---
-
 ```{r echo=FALSE}
 
-knitr::opts_chunk$set(
-  class.output  = "bg-success",
-  class.message = "bg-info text-info",
-  class.warning = "bg-warning text-warning",
-  class.error   = "bg-danger text-danger"
-  )
+source("./src/custom.R")
 
 ```
  
@@ -57,40 +34,42 @@ knitr::opts_chunk$set(
 
 ## Vote for optional topic
 
+<br><br><br><br>
+
 
 # Schedule 
 
 - Total: 6h 
-- 08:30 - 12:00 (3.5h)
+- 10:15 - 12:30 (2.25h)
 - Break (1h)
-- 13:00 - 15:30 (2.5h)
+- 13:00 - 16:45 (3.75h)
 
 
 
 
 
 
-```{r}
+```{r, echo=FALSE}
 
 library("data.table")
 schedule <- data.table( 
 					Timeslot= c(
-						"08:30 -- 08:45", #"1 Intro", 
-						"08:45 -- 09:00", #"2 First Plot",
-						"09:00 -- 09:30", #"Exercise (1)",
-						"09:30 -- 09:45", #"3 Plot types",
-						"09:45 -- 10:15", #"Exercise (2) + short break",
-						"10:15 -- 10:30", #"4 Layers "
-						"10:30 -- 11:00", #"5 Colors, Shapes, Linetypes",
-						"11:00 -- 12:00", #"Exercise (3)"
-						"12:00 -- 13:00", #break
-						"13:00 -- 13:30", #"6 Scientific figures",	
-						"13:30 -- 13:45", #"Exercise (4)"
-						"13:45 -- 14:00", #"7 Facets and patchwork",	
-						"14:00 -- 14:30", #"Exercise (5) + short break"	
-						"14:30 -- 14:45", #"8 Exporting vector graphics",	
-						"14:45 -- 15:00", #"9 Optional topic",	
-						"15:00 -- 15:30"  #"Q&A",		
+						"10:15 -- 10:40", #"1 Intro", 
+						"10:40 -- 11:00", #"2 First Plot",
+						"11:00 -- 11:30", #"Exercise (1)",
+						"11:30 -- 11:45", #"3 Plot types",
+						"11:45 -- 12:15", #"Exercise (2) + short break",
+						"12:15 -- 12:30", #"4 Layers "
+						"12:30 -- 13:00", #Lunch break
+						"13:00 -- 13:30", #"5 Colors, Shapes, Linetypes",
+						"13:30 -- 14:00", #"Exercise (3)"
+						"14:00 -- 14:30", #"6 Scientific figures",	
+						"14:30 -- 14:45", #"Exercise (4)"
+						"14:45 -- 15:00", #"7 Facets and patchwork",	
+						"15:00 -- 15:30", #"Exercise (5) + short break"	
+						"15:30 -- 15:45", #"8 Exporting vector graphics",	
+						"15:45 -- 16:00", #"9 Optional topic",	
+						"16:00 -- 16:30"  #"Q&A",		
 						),
 					                        
 
@@ -101,9 +80,9 @@ schedule <- data.table(
 						"3 Plot types",
 						"Exercise (2) + short break",
 						"4 Layers ",
-						"5 Colors, Shapes, Linetypes",
+						"Lunch break",
+						"5 Colors, Shapes, Linetypes ",
 						"Exercise (3)",
-						"Break",
 						"6 Scientific figures",	
 						"Exercise (4)",
 						"7 Facets and patchwork",	
@@ -125,10 +104,10 @@ knitr::kable(schedule)
 
 # Exercises / R-Environment
 
-- Local R/R-Studio installation with R version 4.2.x or later
-- https://rstudio.cloud/
-- https://mybinder.org/v2/gh/dschmidt-hgu/ggplot2-course/main
-- https://mybinder.org/v2/gh/dschmidt-hgu/ggplot2-course/main?urlpath=rstudio
+- Local R/R-Studio installation with R version 4.3.x or later
+- <https://rstudio.cloud/>
+- <https://mybinder.org/v2/gh/dschmidt-hgu/ggplot2-course/main>
+- <https://mybinder.org/v2/gh/dschmidt-hgu/ggplot2-course/main?urlpath=rstudio>
 
 ## Packages
 
@@ -137,15 +116,13 @@ knitr::kable(schedule)
 if (!require("pacman")) install.packages("pacman")
 
 # install/load packages using pacman package
-pacman::p_load("rmarkdown")     # to compile RMD files
-pacman::p_load("rmdformats") 	  # to compile RMD files
 pacman::p_load("ggplot2")  		  # plotting
 pacman::p_load("data.table")    # data management
 pacman::p_load("rdwd")          # get DWD climate data (optional)
 pacman::p_load("patchwork")     # align multiple plots
-pacman::p_load("scales")        # pretty scales
+pacman::p_load("scales")        # (pretty) scales + helpers
 pacman::p_load("ggforce")       # zoom facet, annotation
-pacman::p_load("sf")            # req. for gganmiate example
+#pacman::p_load("sf")            # req. for gganmiate example
 pacman::p_load("transformr")    # req. for gganimate example
 pacman::p_load("gganimate")     # animate ggplot2s
 pacman::p_load("ggthemes")      # themes for ggplot2
@@ -156,7 +133,13 @@ pacman::p_load("lvplot")        # boxenplot/letter value plot
 pacman::p_load("ggridges")      # ridgeline plots
 pacman::p_load("ggpubr")        # helper functions
 pacman::p_load("ggdist")        # distribution plots
-
+pacman::p_load("skimr")         # complex data summary (optional)
+pacman::p_load("hexbin")        # for geom_hex
+pacman::p_load("scico")         # scientific color maps
+pacman::p_load("cols4all")      # color maps + evaluation 
+pacman::p_load("ggtext")        # more flexible text formatting in ggplot2
+pacman::p_load("directlabels")  # smart automatic direct labelling
+pacman::p_load("geomtextpath")  # label along lines
 
 ```
 
@@ -164,8 +147,8 @@ pacman::p_load("ggdist")        # distribution plots
 
 # Additional resources
 
-- https://ggplot2-book.org/index.html
-- https://ggplot2.tidyverse.org/
+- <https://ggplot2-book.org/index.html>
+- <https://ggplot2.tidyverse.org/>
 
 
 #  Session Info

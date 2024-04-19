@@ -1,26 +1,21 @@
 ---
 title: "Introduction to data visualization with R and ggplot2"
 author: "Dr. Dominik Schmidt"
-date: "`r format(Sys.time(), '%Y')`"
-output:
-  rmdformats::readthedown:
-    self_contained: true
-    thumbnails: true
-    lightbox: true
-    gallery: false
-    highlight: tango
-    toc_depth: 4    
-    css: "./custom.css"       
-    code_folding: show
+date: "`r Sys.Date()`"
+date-format: "YYYY"
+toc: true
+toc-depth: 3
+number-sections: false
+highlight-style: tango
+format: 
+  html:
+   embed-resources: true
+   css: "./css/clean_qmd.css"
 ---
 ```{r echo=FALSE}
 
-knitr::opts_chunk$set(
-  class.output  = "bg-success",
-  class.message = "bg-info text-info",
-  class.warning = "bg-warning text-warning",
-  class.error   = "bg-danger text-danger"
-  )
+source("./src/custom.R")
+
 ```
 
 
@@ -43,6 +38,7 @@ if (!require("pacman")) install.packages("pacman")
   
 pacman::p_load("data.table")
 pacman::p_load("ggplot2")
+pacman::p_load("scico")
 
 ```
 
@@ -55,7 +51,6 @@ pacman::p_load("ggplot2")
 
 ```{r}
 
-
 iris <- as.data.table(iris)
 
 
@@ -64,7 +59,7 @@ ggplot(data=iris, aes(x=Petal.Length,y=Petal.Width,color=Species))+
   geom_point()+
   geom_smooth(method="lm")
 
-# local color association
+# local color assignment
 ggplot(data=iris, aes(x=Petal.Length,y=Petal.Width))+
   geom_point(aes(color=Species))+
   geom_smooth(method="lm")
@@ -125,7 +120,7 @@ ggplot(data=iris, aes(x=Petal.Length,y=Petal.Width,shape=Species,color=Species))
 
 ## *List of available shapes* 
 
-- https://ggplot2.tidyverse.org/reference/scale_shape.html 
+- <https://ggplot2.tidyverse.org/reference/scale_shape.html>
 - filled red shapes (21-25) also allow a `fill` color besides the `color` assignment [=border color] 
 
 ```{r}
@@ -225,7 +220,7 @@ ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
 
 ## Find the red dot
 
-- based on https://socviz.co/lookatdata.html (Figure 1.18)
+- based on <https://socviz.co/lookatdata.html> (Figure 1.18)
 
 ```{r echo=FALSE, message=FALSE, fig.cap="*Searching for the red dot becomes progressively harder.*"}
 
@@ -402,7 +397,7 @@ ggplot(dRandom, aes(x=x, y=y))+
 * `scale_color_manual`
 * `scale_fill_manual`
 
-- color names: http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf
+- color names: <http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf>
 
 ```{r}
 # With color names
@@ -425,8 +420,8 @@ ggplot(data=iris, aes(x=Sepal.Length,y=Sepal.Width))+
 
 ### RGB or HEX
 
-- RGB https://en.wikipedia.org/wiki/RGB_color_model
-- HEX https://www.color-hex.com
+- RGB <https://en.wikipedia.org/wiki/RGB_color_model>
+- HEX <https://www.color-hex.com>
 
 
 ```{r}
@@ -469,14 +464,14 @@ ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
 
 
 - `scale_color_identity` could be used when there is a color-code column in the dataset 
-- https://ggplot2.tidyverse.org/reference/scale_identity.html
+- <https://ggplot2.tidyverse.org/reference/scale_identity.html>
 
 
 
 
 ## Predefined color palettes
 
-- https://ggplot2.tidyverse.org/reference/scale_grey.html
+- <https://ggplot2.tidyverse.org/reference/scale_grey.html>
 
 
 ### ggplot2-Optionen
@@ -512,7 +507,7 @@ ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
 
 
 - `scale_colour_brewer()` palettes
-- https://colorbrewer2.org
+- <https://colorbrewer2.org>
 
 ```{r  echo=FALSE}
 par(cex=0.5)
@@ -539,7 +534,7 @@ ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
 ```
 
 
-- https://ggplot2.tidyverse.org/reference/scale_viridis.html
+- <https://ggplot2.tidyverse.org/reference/scale_viridis.html>
 
 ```{r}
 
@@ -564,20 +559,28 @@ ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
 
 ## `#endrainbow`
 
-- https://www.fabiocrameri.ch/endrainbow/
+- <https://www.fabiocrameri.ch/endrainbow/>
 - Crameri, F., Shephard, G.E. & Heron, P.J. The misuse of colour in science communication. Nat Commun 11, 5444 (2020). 
-https://doi.org/10.1038/s41467-020-19160-7
+<https://doi.org/10.1038/s41467-020-19160-7>
 
 
-### more packages with color palettes
+### Üackages with color palettes
 
-* `colorBlindness` https://cran.r-project.org/web/packages/colorBlindness/vignettes/colorBlindness.html
-* `scico` -- https://github.com/thomasp85/scico inspired by https://www.fabiocrameri.ch/colourmaps/
-* `wesanderson` -- https://github.com/karthik/wesanderson
-* `unikn` -- https://cran.r-project.org/web/packages/unikn/vignettes/colors.html
+* `scico` -- <https://github.com/thomasp85/scico> uses color maps from <https://www.fabiocrameri.ch/colourmaps/>
+
+```{r}
+ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
+  geom_point(aes(color=Species),size=2)+
+  scico::scale_color_scico_d(palette = "batlow",begin = 0.2,end=0.8)+
+  theme_bw()
+```
+
+
+* `cols4all` -- `cols4all::c4a_gui()`  -- <https://github.com/mtennekes/cols4all>
+* `colorBlindness` <https://cran.r-project.org/web/packages/colorBlindness/vignettes/colorBlindness.html>
 * ...
 
-Extensive list: https://github.com/EmilHvitfeldt/r-color-palettes
+Extensive list: <https://github.com/EmilHvitfeldt/r-color-palettes>
 
 
 
@@ -587,13 +590,17 @@ Extensive list: https://github.com/EmilHvitfeldt/r-color-palettes
 * do use professionally composed color palettes (suited for color blindness)
 * do not 'overuse' color
 
-- Gehlenborg, N., Wong, B. Mapping quantitative data to color. Nat Methods 9, 769 (2012). https://doi.org/10.1038/nmeth.2134
-- Wong, B. Avoiding color. Nat Methods 8, 525 (2011). https://doi.org/10.1038/nmeth.1642
-- Wong, B. Points of view: Points of review (part 2). Nat Methods 8, 189 (2011). https://doi.org/10.1038/nmeth0311-189
-- https://colorusage.arc.nasa.gov/GuidelinesHierarchy.php
+- Gehlenborg, N., Wong, B. Mapping quantitative data to color. Nat Methods 9, 769 (2012). <https://doi.org/10.1038/nmeth.2134>
+- Wong, B. Avoiding color. Nat Methods 8, 525 (2011). <https://doi.org/10.1038/nmeth.1642>
+- Wong, B. Points of view: Points of review (part 2). Nat Methods 8, 189 (2011). <https://doi.org/10.1038/nmeth0311-189>
+- <https://colorusage.arc.nasa.gov/GuidelinesHierarchy.php>
+- <https://medialab.github.io/iwanthue/>
 
 
-
+### Limiting the Number of Categories
+>**Categorical** color palettes in data visualization should not have more than **5 colors** (this is a fairly well-discussed "rule" of the field). In addition to this, redundant encodings should follow the same rules.<br>
+>When crafting your own color schemes, think about the distinct nameability of not only your colors, but also whatever else you use to redundantly encode that color. Design for an upper limit between 3 and 5, but ideally stay under 6 total categories. This will help reduce cognitive load for your audience and you may even discover that distinct nameability gets quite hard after 5 categories anyway.<br>
+> <https://observablehq.com/@frankelavsky/no-use-of-color-alone-in-data-visualization>
 
 # Manual `shape`-selection
 
@@ -625,10 +632,7 @@ ggplot(df_shapes, aes(0, 0, shape = shape)) +
 - use (highlighting) colors
 
 > "The hollow circle is a flexible and robust plotting symbol"
-
-- Krzywinski, M., Wong, B. Plotting symbols. Nat Methods 10, 451 (2013). https://doi.org/10.1038/nmeth.2490
-
-
+> Krzywinski, M., Wong, B. Plotting symbols. Nat Methods 10, 451 (2013). <https://doi.org/10.1038/nmeth.2490>
 
 
 # Manual `linetype`-selection
@@ -681,24 +685,23 @@ ggplot() + scale_x_continuous(name = "", limits = c(0, 1),
 
 # Additional resources
 
-- https://socviz.co/lookatdata.html
-- https://en.wikipedia.org/wiki/Alpha_compositing
-- https://en.wikipedia.org/wiki/Web_colors#Hex_triplet
-- https://ggplot2.tidyverse.org/articles/ggplot2-specs.html
-- https://ggplot2.tidyverse.org/reference/aes_linetype_size_shape.html
-- https://www.rdocumentation.org/packages/ggthemes/versions/3.5.0/topics/scale_colour_few
-- https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html
-- https://lisacharlotterost.de/2016/04/22/Colors-for-DataVis/
-- https://socviz.co/workgeoms.html
-- https://ggplot2-book.org/scale-colour.html
-- https://github.com/LKremer/ggpointdensity
-- Krzywinski, M., Wong, B. Plotting symbols. Nat Methods 10, 451 (2013). https://doi.org/10.1038/nmeth.2490
-- Wong, B. Avoiding color. Nat Methods 8, 525 (2011). https://doi.org/10.1038/nmeth.1642
-- Wong, B. Points of view: Points of review (part 2). Nat Methods 8, 189 (2011). https://doi.org/10.1038/nmeth0311-189
-- https://cran.r-project.org/web/packages/colorBlindness/vignettes/colorBlindness.html
-- http://mkweb.bcgsc.ca/biovis2012/krzywinski-visualizing-biological-data.pdf
-- https://blog.datawrapper.de/10-ways-to-use-fewer-colors-in-your-data-visualizations/
-- https://observablehq.com/@frankelavsky/no-use-of-color-alone-in-data-visualization
+- <https://socviz.co/lookatdata.html>
+- <https://en.wikipedia.org/wiki/Alpha_compositing>
+- <https://en.wikipedia.org/wiki/Web_colors#Hex_triplet>
+- <https://ggplot2.tidyverse.org/articles/ggplot2-specs.html>
+- <https://ggplot2.tidyverse.org/reference/aes_linetype_size_shape.html>
+- <https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html>
+- https://lisacharlotterost.de/2016/04/22/Colors-for-DataVis/>
+- https://socviz.co/workgeoms.html>
+- https://ggplot2-book.org/scale-colour.html>
+- https://github.com/LKremer/ggpointdensity>
+- Krzywinski, M., Wong, B. Plotting symbols. Nat Methods 10, 451 (2013). <https://doi.org/10.1038/nmeth.2490>
+- Wong, B. Avoiding color. Nat Methods 8, 525 (2011). <https://doi.org/10.1038/nmeth.1642>
+- Wong, B. Points of view: Points of review (part 2). Nat Methods 8, 189 (2011). <https://doi.org/10.1038/nmeth0311-189>
+- <https://cran.r-project.org/web/packages/colorBlindness/vignettes/colorBlindness.html>
+- <http://mkweb.bcgsc.ca/biovis2012/krzywinski-visualizing-biological-data.pdf>
+- <https://blog.datawrapper.de/10-ways-to-use-fewer-colors-in-your-data-visualizations/>
+- <https://observablehq.com/@frankelavsky/no-use-of-color-alone-in-data-visualization>
 
 #  Session Info
 

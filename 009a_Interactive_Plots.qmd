@@ -1,26 +1,21 @@
 ---
 title: "Introduction to data visualization with R and ggplot2"
 author: "Dr. Dominik Schmidt"
-date: "`r format(Sys.time(), '%Y')`"
-output:
-  rmdformats::readthedown:
-    self_contained: true
-    thumbnails: true
-    lightbox: true
-    gallery: false
-    highlight: tango
-    toc_depth: 4    
-    css: "./custom.css"      
-    code_folding: show
+date: "`r Sys.Date()`"
+date-format: "YYYY"
+toc: true
+toc-depth: 3
+number-sections: false
+highlight-style: tango
+format: 
+  html:
+   embed-resources: true
+   css: "./css/clean_qmd.css"
 ---
 ```{r echo=FALSE}
 
-knitr::opts_chunk$set(
-  class.output  = "bg-success",
-  class.message = "bg-info text-info",
-  class.warning = "bg-warning text-warning",
-  class.error   = "bg-danger text-danger"
-  )
+source("./src/custom.R")
+
 ```
 
 
@@ -42,7 +37,7 @@ pacman::p_load("ggplot2")
 pacman::p_load("plotly")
 pacman::p_load("gganimate")
 pacman::p_load("transformr")
-pacman::p_load("sf")
+# pacman::p_load("sf")
 
 
 ```
@@ -51,12 +46,11 @@ pacman::p_load("sf")
 # A brief insight into interactive plots
 
 - most popular interactive plotting library <a href=https://plotly.com/>`plotly`</a> (cross platform availability)
-- alternative R-packages, e.g. `ggvis`  (https://ggvis.rstudio.com/).
 
 
 ## `plotly`
 
-- for R: https://plotly.com/r/
+- for R: <https://plotly.com/r/>
 - no need to learn `plotly` syntax for simple graphs - convert ggplot to plotly: `ggplotly()`
 
 
@@ -100,7 +94,7 @@ and `facet_`s (z.B. text outside of plot area). `plotly` has no equivalent funct
 # to long format
 miris <- melt(iris, id.vars="Species")
 
-# facetted plot
+# faceted plot
 pF <- ggplot(miris,aes(x=variable,y=value, fill=variable))+
             geom_boxplot()+
             facet_wrap(.~Species)
@@ -157,15 +151,15 @@ animate(pAnim, nframes = nYears, fps=1)
 ```
 
 
-More examples can be found e.g. at https://gganimate.com/.
+More examples can be found e.g. at <https://gganimate.com/>.
 
 
 # Additional resources
 
-- https://www.r-bloggers.com/comparing-plotly-ggplotly-plot-generation-times/
-- https://www.musgraveanalytics.com/blog/2018/8/24/how-to-make-ggplot2-charts-interactive-with-plotly
-- https://gganimate.com/articles/gganimate.html
-- https://ggvis.rstudio.com/
+- <https://www.r-bloggers.com/comparing-plotly-ggplotly-plot-generation-times/>
+- <https://www.musgraveanalytics.com/blog/2018/8/24/how-to-make-ggplot2-charts-interactive-with-plotly>
+- <https://gganimate.com/articles/gganimate.html>
+- <https://ggvis.rstudio.com/>
 
 #  Session Info
 

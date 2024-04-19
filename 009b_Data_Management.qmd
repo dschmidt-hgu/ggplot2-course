@@ -1,33 +1,28 @@
 ---
 title: "Introduction to data visualization with R and ggplot2"
 author: "Dr. Dominik Schmidt"
-date: "`r format(Sys.time(), '%Y')`"
-output:
-  rmdformats::readthedown:
-    self_contained: true
-    thumbnails: true
-    lightbox: true
-    gallery: false
-    highlight: tango
-    toc_depth: 4    
-    css: "./custom.css"    
-    code_folding: show
+date: "`r Sys.Date()`"
+date-format: "YYYY"
+toc: true
+toc-depth: 3
+number-sections: false
+highlight-style: tango
+format: 
+  html:
+   embed-resources: true
+   css: "./css/clean_qmd.css"
 ---
 ```{r echo=FALSE}
 
-knitr::opts_chunk$set(
-  class.output  = "bg-success",
-  class.message = "bg-info text-info",
-  class.warning = "bg-warning text-warning",
-  class.error   = "bg-danger text-danger"
-  )
+source("./src/custom.R")
+
 ```
 
 
 # 009b Data management
 
 - R-internals for plotting with `ggplot2`
-- not covered here: FAIR data principles ("**F**indable, **A**ccessible, **I**nteroperable, and **R**e-usable") (https://www.forschungsdaten.org/index.php/FAIR_data_principles)
+- not covered here: FAIR data principles ("**F**indable, **A**ccessible, **I**nteroperable, and **R**e-usable") (<https://www.forschungsdaten.org/index.php/FAIR_data_principles>)
 
 
 
@@ -259,7 +254,7 @@ ggplot(clim_lt_sub_YMMEAN_melt, aes(x=Year,y=value))+
               ,strip.placement = "outside"                              #use strip text as y-axis 
                ,legend.position="bottom"                               #move legend
              # ,legend.position=c(0.75,0.2)                               #move legend | if multi-column setup
-              ,legend.key = element_rect(fill = 'white', color="white", size = 0.0)    #fill background and remove 
+              ,legend.key = element_rect(fill = 'white', color="white", linewidth = 0.0)    #fill background and remove 
               ,legend.key.size = unit(0.5,"cm")    #fill background and remove border of "key"
              # ,legend.background = element_rect(color = 'black')        #draw box around legend
               ,legend.title = element_blank()                           #remove empty title entirely
@@ -396,8 +391,8 @@ knitr::include_graphics("./Figure1_2.pdf")
 
 # Additional resources
 
-- https://cran.r-project.org/web/packages/data.table/vignettes/datatable-reshape.html
-- http://brooksandrew.github.io/simpleblog/articles/advanced-data-table/
+- <https://cran.r-project.org/web/packages/data.table/vignettes/datatable-reshape.html>
+- <http://brooksandrew.github.io/simpleblog/articles/advanced-data-table/>
 
 
 #  Session Info

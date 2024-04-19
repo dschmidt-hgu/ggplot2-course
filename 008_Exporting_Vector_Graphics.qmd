@@ -1,26 +1,21 @@
 ---
 title: "Introduction to data visualization with R and ggplot2"
 author: "Dr. Dominik Schmidt"
-date: "`r format(Sys.time(), '%Y')`"
-output:
-  rmdformats::readthedown:
-    self_contained: true
-    thumbnails: true
-    lightbox: true
-    gallery: false
-    highlight: tango
-    toc_depth: 4    
-    css: "./custom.css"       
-    code_folding: show
+date: "`r Sys.Date()`"
+date-format: "YYYY"
+toc: true
+toc-depth: 3
+number-sections: false
+highlight-style: tango
+format: 
+  html:
+   embed-resources: true
+   css: "./css/clean_qmd.css"
 ---
 ```{r echo=FALSE}
 
-knitr::opts_chunk$set(
-  class.output  = "bg-success",
-  class.message = "bg-info text-info",
-  class.warning = "bg-warning text-warning",
-  class.error   = "bg-danger text-danger"
-  )
+source("./src/custom.R")
+
 ```
 
 
@@ -92,15 +87,18 @@ ggsave("FigurePB1.pdf", width=15,height=10, unit="cm")
 # save a plot (variable) without printing, as 15x10cm PNG with a 300 DPI resolution
 ggsave("FigurePB1.png", plot=pB1, width=15,height=10, unit="cm", dpi=300)
 
+ggsave("FigurePB1.svg", width=15,height=10, unit="cm")
 
 
 ```
 
-- most platform independent vector graphics format: pdf
-- common alternatives: ps, eps
+- reccomended: **pdf**  -- *but* can be problematic in Microsoft Office
+- common alternatives: ps, eps, **svg**
+
+- Word and vector images <https://www.weston-tech.com/blog/vector-images-in-office-apps/>
 
 > Device to use. Can either be a device function (e.g. png()), or one of "eps", "ps", "tex" (pictex), "pdf", "jpeg", "tiff", "png", "bmp", "svg" or "wmf" (windows only).
-> <small>https://ggplot2.tidyverse.org/reference/ggsave.html</small>
+> <small><https://ggplot2.tidyverse.org/reference/ggsave.html></small>
 
 
 
@@ -110,9 +108,6 @@ ggsave("FigurePB1.png", plot=pB1, width=15,height=10, unit="cm", dpi=300)
 
 - Create a plot of your choice and export it as a vector and as a raster graphics
 - Compare the plot quality when zooming in 
-
-
-
 
 
 # Additional resources

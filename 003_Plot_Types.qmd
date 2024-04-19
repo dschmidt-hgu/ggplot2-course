@@ -1,26 +1,21 @@
 ---
 title: "Introduction to data visualization with R and ggplot2"
 author: "Dr. Dominik Schmidt"
-date: "`r format(Sys.time(), '%Y')`"
-output:
-  rmdformats::readthedown:
-    self_contained: true
-    thumbnails: true
-    lightbox: true
-    gallery: false
-    highlight: tango
-    toc_depth: 4    
-    css: "./custom.css"     
-    code_folding: show
+date: "`r Sys.Date()`"
+date-format: "YYYY"
+toc: true
+toc-depth: 3
+number-sections: false
+highlight-style: tango
+format: 
+  html:
+   embed-resources: true
+   css: "./css/clean_qmd.css"
 ---
 ```{r echo=FALSE}
 
-knitr::opts_chunk$set(
-  class.output  = "bg-success",
-  class.message = "bg-info text-info",
-  class.warning = "bg-warning text-warning",
-  class.error   = "bg-danger text-danger"
-  )
+source("./src/custom.R")
+
 ```
 
 
@@ -28,7 +23,7 @@ knitr::opts_chunk$set(
 
 ## Cheatsheet 
 
-- https://posit.co/wp-content/uploads/2022/10/data-visualization-1.pdf
+- <https://rstudio.github.io/cheatsheets/html/data-visualization.html>
 
 
 
@@ -45,7 +40,8 @@ if (!require("pacman")) install.packages("pacman")
 pacman::p_load("data.table")
 pacman::p_load("ggplot2")
 pacman::p_load("rdwd")
-
+pacman::p_load("ggforce")
+pacman::p_load("skimr")
 ```
 
 
@@ -53,12 +49,9 @@ pacman::p_load("rdwd")
 
 ## Histograms and distributions 
 
-- Continuous or ordinal input 
+- Continuous (`numeric`,`integer`) or ordinal (`ordered factor`) input 
 
 ```{r}
-
-library("ggplot2")
-library("data.table")
 
 # Counts per 'bin' 
 ggplot(data=iris, aes(x=Sepal.Length))+
@@ -81,14 +74,9 @@ ggplot(data=iris, aes(x=Sepal.Length))+
 ggplot(data=iris, aes(x=Sepal.Length,color=Species))+
   geom_density()
 
-# Rotated density
+# Rotated + mirrored density
 ggplot(data=iris, aes(x=Species,y=Sepal.Length))+
   geom_violin()
-
-
-# Alternative: frequency polygons
-ggplot(data=iris, aes(x=Sepal.Length, color=Species))+
-  geom_freqpoly(binwidth=0.2)
 
 
 ```
@@ -137,6 +125,11 @@ ggplot(data=iris, aes(x=Species,y=Petal.Width))+
 ggplot(data=iris, aes(x=Species,y=Petal.Width))+
   geom_jitter(height=0, width=0.25)
 
+
+# a 'violin' by 'systematic jittering
+ggplot(data=iris, aes(x=Species,y=Petal.Width))+
+  ggforce::geom_sina(jitter_y=FALSE)
+    
 ```
 
 
@@ -164,6 +157,7 @@ ggplot(data=iris, aes(x=as.character(Species)))+
 - Dataset: USArrests - arrests per 100.000 residents
 
 ```{r}
+
 USArrests <- as.data.table(USArrests,keep.rownames = TRUE)
 colnames(USArrests)[1] = "State"
 
@@ -202,6 +196,13 @@ ggplot(USArrests,aes(y = reorder(x=State,X=Assault,FUN=max), x = Assault)) +
     scale_x_continuous(limits=c(0,NA)                       # include zero
                       ,expand = expansion(mult = c(0, .1))) # expand right  
 
+# lollipop
+ggplot(USArrests,aes(y = reorder(x=State,X=Assault,FUN=max), x = Assault)) +
+    geom_pointrange(aes(xmin=0,xmax=Assault))+
+    scale_x_continuous(limits=c(0,NA)                       # include zero
+                      ,expand = expansion(mult = c(0, .1))) # expand right  
+
+
 ```
 
 # Time-series data
@@ -212,36 +213,33 @@ ggplot(USArrests,aes(y = reorder(x=State,X=Assault,FUN=max), x = Assault)) +
 
 ```{r}
 
-# # load packages
+# load packages
 # pacman::p_load("rdwd")
-# # to update to latest version
-# # updateRdwd() 
+# to update to latest version
+# updateRdwd()
 
 ##########################################################################################
 # DO NOT EXECUTE CODE IN BINDER !
 ##########################################################################################
-# #Select data from the DWD CDC FTP Server
-# #set current=TRUE - to check current FTP Server Index to gather up-to-date file information
+# # #Select data from the DWD CDC FTP Server
+# # #set current=TRUE - to check current FTP Server Index to gather up-to-date file information
 # link <- selectDWD("Geisenheim", res="daily", var="kl", per="recent", current=FALSE)
 # #Download data from the DWD CDC FTP Server
 # file <- dataDWD(link, read=FALSE, dir="DWDdata", quiet=TRUE, force=NA)
 # #Process data from the DWD CDC FTP Server to a data.frame
 # clim <- readDWD(file, varnames=TRUE, fread=TRUE)
-
-# # Write out for students 
-# fwrite(clim,"clim_DWD_Geisenheim_current.csv")
+# 
+# # # Write out for students 
+#  fwrite(clim[1:365,],"clim_DWD_Geisenheim_current.csv")
 ##########################################################################################
 # Read file (for BINDER USERS)
 ##########################################################################################
 clim <- fread("clim_DWD_Geisenheim_current.csv")
-clim[,"MESS_DATUM":=as.POSIXct(MESS_DATUM)] 
 ##########################################################################################
 
 str(clim)
-
 summary(clim)
-
-
+skimr::skim(clim)
 
 #MESS_DATUM  = Measurement Date
 #TMK.Lufttemperatur = Daily Mean Air Temperature 2 m above ground 
@@ -250,12 +248,10 @@ summary(clim)
 clim[c(1,nrow(clim)),"MESS_DATUM"]
 
 # Scatterplot air temperature over time
-
 ggplot(data=clim, aes(x=MESS_DATUM, y=TMK.Lufttemperatur))+
   geom_point()
 
 # Line plot
-
 ggplot(data=clim, aes(x=MESS_DATUM, y=TMK.Lufttemperatur))+
   geom_line()
 
@@ -314,26 +310,31 @@ ggplot(dRandom, aes(x=round(x,1), y=round(y,1)))+
 
 
 
-- see also https://github.com/LKremer/ggpointdensity
+- see also <https://github.com/LKremer/ggpointdensity>
 
 
 
 
 # Exercise
 
-- Create different visualizations of the distribution of daily mean air temperature (`TMK.Lufttemperatur`) using density, histogram and frequency polygon plots
+- Create different visualizations of the **distribution** of daily mean air temperature (`TMK.Lufttemperatur`) using density, histogram and frequency polygon plots (`?geom_freqpoly`; optional)
 - Play around with their options (density: `adjust=`, histogram and frequency polygon: `binwidth=`)
 - more options can be found in the help of the respective `?geom_...`
+
+## More...
+
+- "Simulator 1: The effect of sample size on normality tests and the precision of summary statistics"
+  - "***How many data points do you need to determine the data distribution? A visual approach***"
+  - <https://rtools.mayo.edu/size_matters>
 
 
 
 
 # Additional resources
 
-- https://ggplot2.tidyverse.org/reference/scale_binned.html
-- http://www.sthda.com/english/wiki/ggplot2-essentials
-- https://bookdown.org/brry/rdwd/
-
+- <https://ggplot2.tidyverse.org/reference/scale_binned.html>
+- <http://www.sthda.com/english/wiki/ggplot2-essentials>
+- <https://bookdown.org/brry/rdwd/>
 
 #  Session Info
 
