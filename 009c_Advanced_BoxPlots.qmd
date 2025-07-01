@@ -348,6 +348,19 @@ ggplot(clim_lt, aes(x = TMK.Lufttemperatur, y = Month,fill = factor(after_stat(q
 ```
 
 
+## `ggrain`
+
+
+```{r}
+pacman::p_load("ggrain")
+ggplot(iris, aes(x=Species, y=Sepal.Width)) +
+  geom_rain() +
+  theme_classic() 
+```
+
+
+- <https://cran.r-project.org/web/packages/ggrain/vignettes/ggrain.html>
+
 
 
 # Additional resources
