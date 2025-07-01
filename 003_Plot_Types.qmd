@@ -95,11 +95,6 @@ ggplot(data=iris, aes(x=Species,y=Sepal.Length))+
 ggplot(data=iris, aes(x=Petal.Length,y=Petal.Width))+
   geom_point()
 
-# counts
-ggplot(data=iris, aes(x=Petal.Length,y=Petal.Width))+
-  geom_count()
-
-
 ```
 
 
@@ -229,7 +224,7 @@ ggplot(USArrests,aes(y = reorder(x=State,X=Assault,FUN=max), x = Assault)) +
 # #Process data from the DWD CDC FTP Server to a data.frame
 # clim <- readDWD(file, varnames=TRUE, fread=TRUE)
 # 
-# # # Write out for students 
+# # # Write out for students
 #  fwrite(clim[1:365,],"clim_DWD_Geisenheim_current.csv")
 ##########################################################################################
 # Read file (for BINDER USERS)
@@ -270,6 +265,14 @@ ggplot(data=clim[-c(100:150),], aes(x=MESS_DATUM, y=TMK.Lufttemperatur))+
 ggplot(data=clim[-c(100:150),], aes(x=MESS_DATUM, y=TMK.Lufttemperatur))+
   geom_point()+
   geom_line()  
+
+
+# Better: set NA
+clim_NA <- copy(clim)
+clim_NA$TMK.Lufttemperatur[c(100:150)] <- NA
+ggplot(data=clim_NA, aes(x=MESS_DATUM, y=TMK.Lufttemperatur))+
+  geom_line()  
+
 
 
 ```

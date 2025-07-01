@@ -39,10 +39,10 @@ source("./src/custom.R")
 
 # Schedule 
 
-- Total: 6h 
-- 10:15 - 12:30 (2.25h)
+- Total: 7h 
+- 09:00 - 12:30 (3.5h)
 - Break (1h)
-- 13:00 - 16:45 (3.75h)
+- 13:30 - 17:00 (3.5h)
 
 
 
@@ -54,22 +54,22 @@ source("./src/custom.R")
 library("data.table")
 schedule <- data.table( 
 					Timeslot= c(
-						"10:15 -- 10:40", #"1 Intro", 
-						"10:40 -- 11:00", #"2 First Plot",
-						"11:00 -- 11:30", #"Exercise (1)",
-						"11:30 -- 11:45", #"3 Plot types",
-						"11:45 -- 12:15", #"Exercise (2) + short break",
-						"12:15 -- 12:30", #"4 Layers "
-						"12:30 -- 13:00", #Lunch break
-						"13:00 -- 13:30", #"5 Colors, Shapes, Linetypes",
-						"13:30 -- 14:00", #"Exercise (3)"
-						"14:00 -- 14:30", #"6 Scientific figures",	
-						"14:30 -- 14:45", #"Exercise (4)"
-						"14:45 -- 15:00", #"7 Facets and patchwork",	
-						"15:00 -- 15:30", #"Exercise (5) + short break"	
-						"15:30 -- 15:45", #"8 Exporting vector graphics",	
-						"15:45 -- 16:00", #"9 Optional topic",	
-						"16:00 -- 16:30"  #"Q&A",		
+						"09:00 -- 09:20", #"1 Intro", 
+						"09:20 -- 09:50", #"2 First Plot",
+						"09:50 -- 10:20", #"Exercise (1)",
+						"10:20 -- 10:40", #"3 Plot types",
+						"10:40 -- 11:10", #"Exercise (2) + short break",
+						"11:10 -- 11:30", #"4 Layers "
+						"11:30 -- 12:00", #"5 Colors, Shapes, Linetypes",
+						"12:00 -- 12:30", #"Exercise (3)"
+						"12:30 -- 13:30", #Lunch break
+						"13:30 -- 14:00", #"6 Scientific figures",	
+						"14:00 -- 14:20", #"Exercise (4)"
+						"14:20 -- 14:50", #"7 Facets and patchwork",	
+						"14:50 -- 15:20", #"Exercise (5) + short break"	
+						"15:20 -- 15:30", #"8 Exporting vector graphics",	
+						"15:30 -- 16:00", #"9 Optional topic",	
+						"16:00 -- 17:00"  #"Q&A",		
 						),
 					                        
 
@@ -80,9 +80,9 @@ schedule <- data.table(
 						"3 Plot types",
 						"Exercise (2) + short break",
 						"4 Layers ",
-						"Lunch break",
 						"5 Colors, Shapes, Linetypes ",
 						"Exercise (3)",
+						"Lunch break",						
 						"6 Scientific figures",	
 						"Exercise (4)",
 						"7 Facets and patchwork",	
@@ -104,10 +104,10 @@ knitr::kable(schedule)
 
 # Exercises / R-Environment
 
-- Local R/R-Studio installation with R version 4.3.x or later
-- <https://rstudio.cloud/>
-- <https://mybinder.org/v2/gh/dschmidt-hgu/ggplot2-course/main>
-- <https://mybinder.org/v2/gh/dschmidt-hgu/ggplot2-course/main?urlpath=rstudio>
+- Local R/R-Studio installation with R version 4.3.x or later   
+- <https://rstudio.cloud/>  
+- <https://mybinder.org/v2/gh/dschmidt-hgu/ggplot2-course/main>   
+- <https://mybinder.org/v2/gh/dschmidt-hgu/ggplot2-course/main?urlpath=rstudio>   
 
 ## Packages
 

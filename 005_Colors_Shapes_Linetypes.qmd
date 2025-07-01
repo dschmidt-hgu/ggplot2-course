@@ -564,7 +564,7 @@ ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
 <https://doi.org/10.1038/s41467-020-19160-7>
 
 
-### Üackages with color palettes
+### Packages with color palettes
 
 * `scico` -- <https://github.com/thomasp85/scico> uses color maps from <https://www.fabiocrameri.ch/colourmaps/>
 

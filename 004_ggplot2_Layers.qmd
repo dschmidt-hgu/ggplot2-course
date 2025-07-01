@@ -75,7 +75,7 @@ Examples:
 - `geom_boxplot` - ... boxplot 
 - ...
 
-- see cheat sheet for more options https://github.com/rstudio/cheatsheets/raw/master/data-visualization-2.1.pdf
+- see cheat sheet for more options <https://github.com/rstudio/cheatsheets/raw/master/data-visualization-2.1.pdf>
 
 
 ### 'Aesthetic Mappings' `aes`

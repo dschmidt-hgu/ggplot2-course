@@ -112,7 +112,6 @@ knitr::kable(anscombe.summary)
 
 
 
-
 ```
 
 
@@ -121,12 +120,10 @@ knitr::kable(anscombe.summary)
 - <https://janhove.github.io/teaching/2016/11/21/what-correlations-look-like>
 
 
+# Prerequisities
 
-
-
-# First plot
-
-- Data: <https://en.wikipedia.org/wiki/Iris_flower_data_set>
+- load `packages` and get a `data.frame`
+- data: <https://en.wikipedia.org/wiki/Iris_flower_data_set>
 
 
 ```{r}
@@ -135,6 +132,18 @@ if (!require("pacman")) install.packages("pacman")
 pacman::p_load("data.table")
 pacman::p_load("ggplot2")
 
+```
+
+
+# ggplot2 - Essential components
+
+- data 
+- mapping 
+- geometric representation
+
+## Data
+
+```{r}
 # to data table [for data management](optional)
 iris <- as.data.table(iris)
 
@@ -143,10 +152,34 @@ str(iris)
 summary(iris)
 
 
+ggplot(data=iris)
+
+```
+
+## Mapping
+
+```{r}
+
+ggplot(data=iris, aes(x=Sepal.Length, y=Sepal.Width))
+
+```
+
+
+
+## + geometric representation = **First plot**
+
+
+
+```{r}
 # Scatterplot
 ggplot(data=iris, aes(x=Sepal.Length, y=Sepal.Width))+
   geom_point()
+```
 
+
+## Modify data
+
+```{r}
 # show unique values of Species
 unique(iris$Species)
 
@@ -156,15 +189,28 @@ iris[Species=="setosa"]
 # Scatter plot Subset
 ggplot(data=iris[Species=="setosa"], aes(x=Sepal.Length, y=Sepal.Width))+
   geom_point()
+```
 
+## Extend Mapping
+
+```{r}
 # Introduce color
 ggplot(data=iris, aes(x=Sepal.Length, y=Sepal.Width, color=Species))+
   geom_point()
+```
 
+## Change geom_
+
+```{r}
 # Boxplot
 ggplot(data=iris, aes(x=Species, y=Sepal.Length))+
   geom_boxplot()  
+```
 
+
+### A gentle reminder on box plots
+
+```{r}
 # Reduce data set to first 5 Rows
 iris[1:5,]
 
@@ -173,9 +219,9 @@ ggplot(data=iris[1:5,], aes(x=Species, y=Sepal.Length))+
   geom_boxplot()+
   geom_point()
 
-# Boxplot for 5 Data points does not make much sense!
-
 ```
+
+- A boxplot for 5 data points does not make much sense! 
 
 
 
@@ -184,10 +230,10 @@ ggplot(data=iris[1:5,], aes(x=Species, y=Sepal.Length))+
 ## Part 1 - Scatter plot
 
 - Open R/RStudio and load the packages `ggplot2` and `data.table`
-- Create a plot comparing `Petal.Width` and `Petal.Length` using scatter plots for the entire iris data set 
-- Create singe plots for each species
-- Plot all data, use color to distinguish between species 
-- Plot all data, use shapes to distinguish between species
+- Create a plot comparing `Petal.Width` and `Petal.Length` using a scatter plot for the entire iris data set 
+- Create separate plots for each species
+- Plot all data, use `color`s to distinguish between species 
+- Plot all data, use `shape`s to distinguish between species
 
 ## Part 2 - Box plot
 
