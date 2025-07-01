@@ -595,6 +595,37 @@ theme_set(theme_DS())
 ```
 
 
+# Reproducibility / Automization
+
+## named vectors
+
+```{r}
+unique(iris$Species)
+id_labels <- c("setosa"="1","versicolor"="3","virginica"="2")
+id_labels
+
+n_colors <- uniqueN(iris$Species)
+id_colors <- scico::scico(n=n_colors
+                          ,palette = "batlow"
+                          #,categorical = TRUE
+                          ,begin=0.2
+                          ,end=0.8)
+id_colors
+names(id_colors) <- c("virginica","setosa","versicolor")
+id_colors
+
+ggplot(data = iris, aes(x = Petal.Width, y = Petal.Length)) + 
+    geom_point(aes(color = Species))+
+    scale_colour_manual(name="Species ID" 
+                          ,labels=id_labels
+                          ,values=id_colors)+
+    theme_classic()
+
+
+```
+
+
+
 
 # Best practices
 
@@ -816,7 +847,7 @@ ggplot(m_minmaxmeanTDF, aes(x=Year,y=value, fill=variable))+
 
 ```
 
-- Start from the above plot and try to improve it - show that the trend of min, max and mean air temperature increased since 1952  
+- Start from the above plot and try to improve it - show that the trend of min, max and mean air temperature increased since 1952.   
 - Try to annotate instead of using a legend (e.g. lines) (***Hint***: You could use the last year's data in a mapping by providing it as a new `data` input; `geom_text(data=m_minmaxmeanTDF[Year==max(Year)],...)`)
 - Assume there is also a figure caption that contains some information, that might help you keeping the plot 'clean'/focused 
 

@@ -12,6 +12,7 @@ format:
    embed-resources: true
    css: "./css/clean_qmd.css"
 ---
+
 ```{r echo=FALSE}
 
 source("./src/custom.R")

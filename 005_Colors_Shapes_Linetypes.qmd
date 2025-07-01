@@ -691,10 +691,10 @@ ggplot() + scale_x_continuous(name = "", limits = c(0, 1),
 - <https://ggplot2.tidyverse.org/articles/ggplot2-specs.html>
 - <https://ggplot2.tidyverse.org/reference/aes_linetype_size_shape.html>
 - <https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html>
-- https://lisacharlotterost.de/2016/04/22/Colors-for-DataVis/>
-- https://socviz.co/workgeoms.html>
-- https://ggplot2-book.org/scale-colour.html>
-- https://github.com/LKremer/ggpointdensity>
+- <https://lisacharlotterost.de/2016/04/22/Colors-for-DataVis/>
+- <https://socviz.co/workgeoms.html>
+- <https://ggplot2-book.org/scale-colour.html>
+- <https://github.com/LKremer/ggpointdensity>
 - Krzywinski, M., Wong, B. Plotting symbols. Nat Methods 10, 451 (2013). <https://doi.org/10.1038/nmeth.2490>
 - Wong, B. Avoiding color. Nat Methods 8, 525 (2011). <https://doi.org/10.1038/nmeth.1642>
 - Wong, B. Points of view: Points of review (part 2). Nat Methods 8, 189 (2011). <https://doi.org/10.1038/nmeth0311-189>
