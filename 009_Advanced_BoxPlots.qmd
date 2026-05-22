@@ -11,6 +11,9 @@ format:
   html:
    embed-resources: true
    css: "./css/clean_qmd.css"
+   df-print: paged
+editor_options: 
+  chunk_output_type: console
 ---
 ```{r echo=FALSE}
 
@@ -22,35 +25,50 @@ source("./src/custom.R")
 # 009c Advanced Box Plots
 
 
-## Package installation
 
-- Copy and paste the following code in the R-console to install necessary packages.
+# 🎯 Learning objectives
+
+::: {.callout-note icon=false}
+## Layered graphics
+
+**... understanding concepts:**
+
+* you have seen some alternative plotting types to be considered for showing data distributions that include more/encode differen information than a standard boxplot
+* you understand why reordering of categories can make sense when comparing groups 
+
+
+**... tool usage:**
+
+* you can follow a `ggplot2` code from code extensions related to boxplot alternatives  
+
+
+:::
+
+<br><br>
+
+::: color-box 
+::: 
+
+# Prerequisites
 
 
 ```{r message=FALSE}
 
 if (!require("pacman")) install.packages("pacman")
   
-pacman::p_load("ggplot2")
-pacman::p_load("data.table")
-pacman::p_load("lvplot")   #letter value plot / boxenplot
-pacman::p_load("gghalves") #half_plots
-pacman::p_load("ggdist")   #distribution plots
-pacman::p_load("patchwork")#combine plots 
-pacman::p_load("ggridges") #ridgelines
-
+pacman::p_load("tidyverse")
+pacman::p_load("ggforce")   # sina
+pacman::p_load("lvplot")    #letter value plot / boxenplot
+pacman::p_load("gghalves")  #half_plots
+pacman::p_load("ggdist")    #distribution plots
+pacman::p_load("patchwork") #combine plots 
+pacman::p_load("ggridges")  #ridgelines
+pacman::p_load("ggrain")    #raincloudplots
 ```
 
 
 
-## Load data and subset
 
-```{r message=FALSE}
-
-iris <- as.data.table(iris)
-
-
-```
 
 
 # Why boxplot ?
@@ -65,8 +83,6 @@ iris <- as.data.table(iris)
 
 - not-use for $<=$ 5 data points
 - annotate number of observations (per plot; if these differ between variants)
-  - possibility to scale by 'number'
-
 
 
 # Boxplot and data
@@ -78,8 +94,20 @@ ggplot(data=iris, aes(x=Species,y=Sepal.Width))+
   geom_jitter( height = 0,alpha=0.5)   #do not allow random positions in y-direction
 
 
+ggplot(data=iris, aes(x=Species,y=Sepal.Width))+
+  geom_boxplot()+
+  geom_jitter( height = 0,alpha=0.5)   #do not allow random positions in y-direction
+
+
 ```
 
+
+<br><br>
+
+::: color-box 
+::: 
+
+## `gghalves` 
 
 ```{r}
 
@@ -103,7 +131,42 @@ ggplot(iris, aes(x = Species, y = Sepal.Width)) +
 ```
 
 
-# Re-order Boxplot
+
+## `ggrain` 
+
+```{r}
+
+pacman::p_load("ggrain")
+#https://cran.r-project.org/web/packages/ggrain/vignettes/ggrain.html
+
+ggplot(iris, aes(Species, Sepal.Width, fill = Species)) +
+  geom_rain(alpha = .5) +
+  theme_classic() +
+  scale_fill_brewer(palette = 'Dark2') +
+  guides(fill = 'none', color = 'none')
+
+
+ggplot(iris, aes(Species, Sepal.Width, fill = Species)) +
+  geom_rain(alpha = .5, 
+            boxplot.args.pos = list(
+              width = 0.05, position = position_nudge(x = 0.13)),
+            violin.args.pos = list(
+              side = "r",
+              width = 0.7, position = position_nudge(x = 0.2))) +
+  theme_classic() +
+  scale_fill_brewer(palette = 'Dark2') +
+  guides(fill = 'none', color = 'none') +
+  coord_flip()
+
+```
+
+
+<br><br>
+
+::: color-box 
+::: 
+
+# Reorder Boxplot
 
 ```{r}
 # Patchwork / quick and dirty
@@ -121,6 +184,10 @@ punsort | preord
 
 ```
 
+<br><br>
+
+::: color-box 
+::: 
 
 # Vertical vs. horizontal
 
@@ -144,6 +211,10 @@ ggplot(iris, aes(y = Species, x = Petal.Width)) +
 
 
 
+<br><br>
+
+::: color-box 
+::: 
 
 
 # Boxenplot / Letter value plot
@@ -187,6 +258,12 @@ boxenPlot0 + boxenPlot_k1 + boxenPlot_k2 + boxenPlot_k3_fill
 
 ```
 
+<br><br>
+
+::: color-box 
+::: 
+
+
 ## Boxenplot with data
 
 
@@ -199,6 +276,10 @@ ggplot(iris, aes(x=Species,y=Petal.Length))+
 
 ```
 
+<br><br>
+
+::: color-box 
+::: 
 
 
 ## Comparing distributions
@@ -222,9 +303,9 @@ colorblindsafecolors <- c("#000000","#D55E00","#0072B2","#009E73","#CC79A7","#56
 
 # Simulate Data
 set.seed(1)
-data_normal <- data.table(x="obs",y=rnorm(n=10000,mean=0,sd=1))
-data_exponential <- data.table(x="obs",y=rexp(n=10000,rate=1))
-data_uniform <- data.table(x="obs",y=runif(n=10000,min=0,max=1))
+data_normal <- tibble(x="obs",y=rnorm(n=10000,mean=0,sd=1))
+data_exponential <- tibble(x="obs",y=rexp(n=10000,rate=1))
+data_uniform <- tibble(x="obs",y=runif(n=10000,min=0,max=1))
 
 # Create plots
 #Boxplots
@@ -252,12 +333,10 @@ LU <- ggplot(data_uniform, aes(x=x,y=y))+ geom_lv(fill=colorblindsafecolors[6],c
 ```
 
 
+<br><br>
 
-
-
-
-
-
+::: color-box 
+::: 
 
 
 # Additional packages
@@ -267,9 +346,9 @@ LU <- ggplot(data_uniform, aes(x=x,y=y))+ geom_lv(fill=colorblindsafecolors[6],c
 
 ```{r}
 
-clim_lt <- fread("clim_DWD_Geisenheim_historic_daily.csv")
+clim_lt <- read_csv("clim_DWD_Geisenheim_historic_daily.csv",show_col_types = FALSE)
 
-clim_lt[,"Month":=factor(month(MESS_DATUM))]
+clim_lt <- clim_lt %>% mutate("Month"=factor(month(MESS_DATUM)))
 
 pacman::p_load("ggdist")
 #TMK.Lufttemperatur
@@ -348,18 +427,13 @@ ggplot(clim_lt, aes(x = TMK.Lufttemperatur, y = Month,fill = factor(after_stat(q
 ```
 
 
-## `ggrain`
 
 
-```{r}
-pacman::p_load("ggrain")
-ggplot(iris, aes(x=Species, y=Sepal.Width)) +
-  geom_rain() +
-  theme_classic() 
-```
+<br><br>
 
+::: color-box 
+::: 
 
-- <https://cran.r-project.org/web/packages/ggrain/vignettes/ggrain.html>
 
 
 

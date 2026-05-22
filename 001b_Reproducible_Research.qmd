@@ -1,0 +1,177 @@
+---
+title: "Introduction to data visualization with R and ggplot2"
+author: "Dr. Dominik Schmidt"
+date: "`r Sys.Date()`"
+date-format: "YYYY"
+toc: true
+toc-depth: 3
+number-sections: false
+highlight-style: tango
+format: 
+  html:
+   embed-resources: true
+   css: "./css/clean_qmd.css"
+   df-print: paged
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r echo=FALSE}
+
+source("./src/custom.R")
+
+```
+
+
+# 001: Reproducibility in R - Minimalistic introduction
+
+# 🎯 Learning objectives
+
+::: {.callout-note icon=false}
+## R for reproducibility
+
+**... understanding concepts:**
+
+*  you can explain the intention of **reproducible research** for research in general and for your own project 
+
+**... tool usage:**
+
+*   you can create a **R-project** with *portable paths* in mind.  
+
+:::
+
+
+
+<br>
+
+::: color-box
+:::
+
+
+<br>
+
+# Reproducible Research 
+
+> **Reproducible research benefits those who do it** <br> Reproducible research is a by-product of careful attention to detail throughout the research process and **allows researchers to ensure that they can repeat the same analysis multiple times with the same results**, at any point in that process. Because of this, researchers who conduct reproducible research are the primary beneficiaries of this practice.
+
+<br><br>
+
+> **Reproducible research benefits the research community** <br> Reproducible research also benefits others in the scientific community. Sharing data, code, and detailed research methods and results leads to faster progress in methodological development and innovation because research is more accessible to more scientists (Parr and Cummings 2005, Roche et al. 2015, Mislan et al. 2016).
+
+<br><br>
+
+Alston, J. M., and J. A. Rick. 2020. A Beginner's Guide to Conducting Reproducible Research. Bull Ecol Soc Am 102(2):e01801. <https://doi.org/10.1002/bes2.1801>
+
+<br><br>
+
+
+::: color-box
+:::
+
+
+<br><br>
+
+## **Reproducibility crisis**
+
+
+
+Baker, M. 1,500 scientists lift the lid on reproducibility. Nature 533, 452–454 (2016). <https://doi.org/10.1038/533452a> 
+
+[PDF](https://www.nature.com/articles/533452a.pdf)
+
+
+
+
+<br><br>
+
+
+
+
+::: color-box
+:::
+
+
+<br><br><br><br><br>
+
+::: {style="font-size: 200%;"}
+**“REPRODUCIBILITY IS LIKE BRUSHING YOUR TEETH. ONCE YOU LEARN IT, IT BECOMES A HABIT.”**
+::: 
+
+<font size="-1"> Baker, M. 1,500 scientists lift the lid on reproducibility. Nature 533, 452–454 (2016). <https://doi.org/10.1038/533452a></font>
+
+<br><br><br><br><br>
+
+
+::: color-box
+:::
+
+::: {.callout-tip icon=false}
+## 👉 Creating a R project
+
+1.  In RStudio, click on **New Project...** in the top left corner (or under File).
+2.  Select **New Directory** -\> **New Project**.
+3.  Name the project, e.g. `ggplot2_course`, and save it in a sensible location on your hard drive.
+4.  Click on **Create Project**. (You will know it worked when the name of your project appears in the top right corner of RStudio and your working directory changed accordingly).  
+5. Close RStudio and go to the project folder. 
+6. Double-click on the `.Rproj`-file.
+
+Now you can decide whether you want to work in a simple R script or in a Quarto notebook, depending on your task at hand. We will stick to a simple R script today.
+:::
+
+<br>
+<br>
+
+::: {.callout-tip icon=false}
+## Creating an R script -- in short 
+
+1. In RStudio, click on File -\> New File -\> R Script.
+2. A new, empty text editor window will open in the top left pane.
+3. Click the Save icon.
+4. Name your file script.R (or a descriptive name like 01_data_analysis.R) and click Save. 
+
+You will now see the file appear in your Files tab in the bottom right corner, safely stored inside your project folder. 
+
+:::
+
+
+
+
+
+::: color-box 
+::: 
+
+<br>
+
+
+# To keep it reproducible and transferrable
+
+-   **Never use `setwd()`** inside a project
+-   supply all path as <a href=https://cran.r-project.org/web/packages/fromhere/vignettes/portable-paths.html#:~:text=A%20relative%20path%20specifies%20the,set%20to)%20your%20project%20folder.>*relative*</a> to your script-file/Quarto document (*portable path*)       
+  - e.g. not `C:/myuser/documents/project_folder/data/data_file.csv`, just
+  `data/data_file.csv`. 
+-   File/variable naming: Do not use special characters, whitespaces, etc. (ok: `yield_data_2023.csv`, bad: `yield data final (1) müller.csv`.   
+
+
+::: color-box 
+::: 
+
+<br>
+<br>
+
+# Additional resources
+
+- [Stodden, V., Leisch, F., & Peng, R.D. (Eds.). (2014). Implementing Reproducible Research (1st ed.). Chapman and Hall/CRC.](https://doi.org/10.1201/9781315373461)  
+- [Claus O. Wilke: Fundamentals of Data Visualization](https://clauswilke.com/dataviz/)  
+- [RStudio IDE :: Cheatsheet](https://rstudio.github.io/cheatsheets/html/rstudio-ide.html)
+
+
+
+
+
+#  Session Info
+
+```{r}
+
+sessionInfo()
+
+```

@@ -11,6 +11,9 @@ format:
   html:
    embed-resources: true
    css: "./css/clean_qmd.css"
+   df-print: paged
+editor_options: 
+  chunk_output_type: console
 ---
 ```{r echo=FALSE}
 
@@ -33,15 +36,9 @@ source("./src/custom.R")
 - <https://rdrr.io/github/brooksandrew/Rsenal/man/smartAgg.html>
 
 
-## Two Axis (secondary X/Y axis)
-
-- sec_axis(trans = NULL, name = waiver(), breaks = waiver(),  labels = waiver())
-  - <https://ggplot2.tidyverse.org/reference/sec_axis.html>
-
 ## Correlations / Scatter plot matrix
 
 - <https://ggobi.github.io/ggally/>
-
 
 
 ## Heatmaps/ Dendrograms
@@ -83,7 +80,6 @@ source("./src/custom.R")
 - <https://stat545.com/effective-graphs.html>
 - <https://visguides.org/>
 - <https://eagereyes.org/talk/how-do-we-know-that>
-
 
 
 ## More Dimension (3D, 4D, ...)
@@ -132,7 +128,6 @@ ggplot(d,aes(x=x,y=y))+
 
 
 ```{r}
-
 
 
 ggplot(d,aes(x=x,y=y))+

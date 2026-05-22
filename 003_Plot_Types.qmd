@@ -11,6 +11,9 @@ format:
   html:
    embed-resources: true
    css: "./css/clean_qmd.css"
+   df-print: paged
+editor_options: 
+  chunk_output_type: console
 ---
 ```{r echo=FALSE}
 
@@ -19,164 +22,432 @@ source("./src/custom.R")
 ```
 
 
-# 003: Very basic plot types
+# 003: Exploratory Data analysis with various plot types
+
+
+# 🎯 Learning objectives
+
+::: {.callout-note icon=false}
+## Why and how - Data visualization
+
+**... understanding concepts:**
+
+* you understand why exploratory data analysis (EDA) is a fast, **iterative process**.
+* you understand the different purposes of **basic plot types** (what to use when).  
+
+**... tool usage:**
+
+*   you can quickly produce standard plot types for different data combinations using `ggplot2` with minimal code.  
+
+:::
+
+
+::: color-box 
+::: 
+
+
 
 ## Cheatsheet 
 
-- <https://rstudio.github.io/cheatsheets/html/data-visualization.html>
+- [Data visualization with ggplot2 : : CHEATSHEET](https://rstudio.github.io/cheatsheets/html/data-visualization.html)
+
+<br>
+<br><br>
+
+::: color-box 
+::: 
 
 
+<br><br>
 
-
-## Package installation
-
-- Copy and paste the following code in the R-console to install necessary packages.
+# Prerequisites
 
 
 ```{r message=FALSE}
 
 if (!require("pacman")) install.packages("pacman")
-  
-pacman::p_load("data.table")
-pacman::p_load("ggplot2")
-pacman::p_load("rdwd")
-pacman::p_load("ggforce")
-pacman::p_load("skimr")
+pacman::p_load("tidyverse")
+pacman::p_load("ggforce")   # geom_sina
 ```
 
+::: color-box 
+::: 
 
-# Examples
+<br>
+<br><br>
 
-## Histograms and distributions 
+# Plot Types for EDA
 
-- Continuous (`numeric`,`integer`) or ordinal (`ordered factor`) input 
+## 1. Distributions (One Continuous Variable)
+
+**Why:** To understand the shape, spread, and central tendency of your data, and to spot anomalies/outliers.  
+
+**Where:** A first step when analyzing a numeric variable (e.g., age, size, temperature).
 
 ```{r}
+# Histogram: Bins data into distinct groups to show frequencies
+ggplot(data = iris, aes(x = Sepal.Length)) +
+  geom_histogram(binwidth = 0.2
+                , boundary=0       # or center = ...    | KNOW where your bins start!
+                , color = "white"  # (optional) coloring the border with a fixed color
+           )
 
-# Counts per 'bin' 
-ggplot(data=iris, aes(x=Sepal.Length))+
-  geom_histogram()
+# Density: A smoothed, continuous version of the histogram
+ggplot(data = iris, aes(x = Sepal.Length, fill = Species)) +
+  geom_density(alpha = 0.5) # alpha adds transparency
+```
 
-ggplot(data=iris, aes(x=Sepal.Length))+
-  geom_histogram(binwidth=0.1)
+::: color-box 
+::: 
 
-ggplot(data=iris, aes(x=Sepal.Length))+
-  geom_histogram(binwidth=0.2
-                , aes(fill=Species))
+<br>
+<br><br>
 
-ggplot(data=iris, aes(x=Sepal.Length))+
-  geom_histogram(binwidth=0.2
-                , aes(fill=Species)
-                , position="dodge")
+## 2. Comparisons (Categorical x Continuous)
 
+**Why:** To compare the distribution of a numeric variable across different groups.  
 
-# 'Smoothed Histogram' [Kernel density estimation]
-ggplot(data=iris, aes(x=Sepal.Length,color=Species))+
-  geom_density()
+**Where:** Comparing outcome measurements by treatment, year, or species.
 
-# Rotated + mirrored density
-ggplot(data=iris, aes(x=Species,y=Sepal.Length))+
+```{r}
+# Boxplot: Great for summarizing median, quartiles, and outliers quickly
+ggplot(data = iris, aes(x = Species, y = Petal.Width)) +
+  geom_boxplot()
+
+# Jitter: Shows the actual raw data points to reveal sample sizes and clusters
+ggplot(data = iris, aes(x = Species, y = Petal.Width)) +
+  geom_jitter(width = 0.2, alpha = 0.6, height=0)   
+
+# Violin: Shows the shape of the density distribution (combines density + boxplot ideas)
+ggplot(data = iris, aes(x = Species, y = Petal.Width)) +
   geom_violin()
 
+# Sina: *Jitter inside violin* Shows the actual raw data points AND the shape of the density distribution
+ggplot(data = iris, aes(x = Species, y = Petal.Width)) +
+  ggforce::geom_sina(jitter_y=FALSE)
 
+```
+
+<br><br>
+
+---
+
+❓ **Visual-Information**
+
+What can you extract from the sina regarding the measurement resolution?
+
+---
+
+<br>
+<br><br>
+
+::: {.callout-warning icon=false}
+## Warning note on geom_jitter + geom_sina
+
+Make sure to **disable jittering** in the direction **that would change the measurement value** (usually *y*-direction). 
+
+```{r}
+geom_jitter(height=0)              # jitter height = 0
+ggforce::geom_sina(jitter_y=FALSE) # disable jittering in y-direction
 ```
 
 
 
-## Scatterplot + Count
+::: 
+ 
 
-- measurement precision of iris data set = 0.1 cm
-- problem: overlapping observations in scatter plot
-- `geom_count` does not *bin* data! Only exact overlaps are summed up.
+::: color-box 
+::: 
+
+
+::: {.callout-warning icon=false}
+## Warning note on geom_violin + geom_density + geom_sina
+
+Interpret with caution if there are fewer than approx. 50 observations in a group.
+
+See **Exercise**
+
+::: 
+
+
+<br><br>
+
+::: color-box 
+::: 
+
+
+
+
+## 3. Frequencies & Amounts (Categorical Variables)
+
+**Why:** To see how many observations belong to a category, or to plot a pre-calculated summary statistic.  
+**Where:** Survey responses, inventory/yield counts, ...
 
 ```{r}
+# geom_bar implicitly COUNTS the number of rows per category
+ggplot(data = iris, aes(x = Species)) +
+  geom_bar()
 
-# original
-ggplot(data=iris, aes(x=Petal.Length,y=Petal.Width))+
+# more intersting with differnt counts per species
+set.seed(1)
+iris %>% 
+  slice_sample(n=75) %>%           #random sample 
+  ggplot(aes(x = Species)) +
+    geom_bar()
+
+
+# geom_col plots exact VALUES provided in the dataset (e.g., summary statistics)
+# Here, we calculate average highway mileage per car class
+set.seed(1)
+iris_summary <- iris %>%
+  slice_sample(n = 75) %>%
+  group_by(Species) %>%
+  summarise(n_obs = n())
+
+iris_summary
+
+# reorder() is recommended to make bar plots easily readable
+# IF no fixed order is required
+ggplot(data = iris_summary, 
+         aes(x = n_obs                        # easy rotation of the plot 
+          , y = reorder(Species, n_obs))      # by changing x+y mapping
+       ) +
+  geom_col() 
+```
+
+
+
+
+<br><br>
+
+::: color-box 
+::: 
+
+
+
+## 4. Relationships (Two Continuous Variables)
+
+**Why:** To observe correlations, trends, or clusters between two numeric values.  
+
+**Where:** Plotting height vs. weight, price vs. age, or temperature vs. yield, etc...  
+
+```{r}
+# Scatterplot
+ggplot(data = iris, aes(x = Petal.Length, y = Petal.Width)) +
+  geom_point()
+
+# Scatterplot separated by a third categorical variable
+ggplot(data = iris, aes(x = Petal.Length, y = Petal.Width, color = Species)) +
   geom_point()
 
 ```
 
 
-## Boxplot *alternatives*
 
-- more in 'Advanced boxplots' (optional topic)
+
+## 5. Time-Series (Continuous Time x Continuous Value)
+
+**Why:** To observe how a variable changes chronologically.  
+
+**Where:** Weather data, stock prices, or sensor data (data logger) ...
 
 ```{r}
-# original boxplot
-ggplot(data=iris, aes(x=Species,y=Petal.Width))+
-  geom_boxplot()
+# built-in 'economics' dataset
+# geom_line connects points sequentially by the x-axis
+head(economics)
 
-# Rotated density
-ggplot(data=iris, aes(x=Species,y=Petal.Width))+
-  geom_violin()
-
-# 'semi-continuous' measurement 
-sort(unique(iris$Petal.Width))
-ggplot(data=iris, aes(x=Species,y=Petal.Width))+
-  geom_count()
-
-# or simply the data with some 'random' x-component
-ggplot(data=iris, aes(x=Species,y=Petal.Width))+
-  geom_jitter(height=0, width=0.25)
-
-
-# a 'violin' by 'systematic jittering
-ggplot(data=iris, aes(x=Species,y=Petal.Width))+
-  ggforce::geom_sina(jitter_y=FALSE)
-    
+ggplot(data = economics, aes(x = date, y = unemploy)) +
+  geom_line()
 ```
 
 
-
-# Bar plot
-
-- implicitly counts occurrences of discrete variables/factors
+::: {.callout-warning icon=false}
+## Missing Data in timeseries
 
 ```{r}
+# MESS_DATUM  = Measurement Date
+# TMK.Lufttemperatur = Daily Mean Air Temperature 2 m above ground 
+# RSK.Niederschlagshoehe = Daily sum of precipitation (mm)
 
-ggplot(data=iris, aes(x=Species))+
-  geom_bar()
+clim <- read_csv("clim_DWD_Geisenheim_current.csv",show_col_types = FALSE) %>%
+            select(MESS_DATUM
+                   ,TMK.Lufttemperatur
+                   ,RSK.Niederschlagshoehe)
 
-# automatically detects characters as 'grouping'
-ggplot(data=iris, aes(x=as.character(Species)))+
-  geom_bar()
+head(clim)
 
+# Line plot
+ggplot(data=clim, aes(x=MESS_DATUM, y=TMK.Lufttemperatur))+
+  geom_line()
+
+# 'introduce' missing data 
+# Scatterplot - to show the GAP
+ggplot(data=clim[-c(100:150),], aes(x=MESS_DATUM, y=TMK.Lufttemperatur))+
+  geom_point()   
+
+# Dot not plot timeseries data with 'removed' time stamps alone!
+ggplot(data=clim[-c(100:150),], aes(x=MESS_DATUM, y=TMK.Lufttemperatur))+
+  geom_line()
+
+# Correclty hand missing data by setting/keeping values for missing times to NA
+clim_NA <- clim 
+clim_NA$TMK.Lufttemperatur[c(100:150)] <- NA
+ggplot(data=clim_NA, aes(x=MESS_DATUM, y=TMK.Lufttemperatur))+
+  geom_line()  
+
+```
+
+:::
+
+<br>
+<br><br>
+
+
+::: color-box 
+::: 
+
+
+## 6. High-Density Data (Overplotting)
+**Why:** When dealing with tens of thousands of rows, scatterplots become solid black blobs. You need to group points spatially.  
+**Where:** Big data sets (e.g., flow cytometry, massive surveys, geographic tracking).
+
+```{r}
+# The 'diamonds' dataset has ~54,000 rows. A standard scatterplot is less informative here.
+ggplot(data = diamonds, aes(x = carat, y = price)) +
+  geom_point(alpha = 0.05) # One solution: extreme transparency
+
+# Alternative solution: 2D Binning (creates a heat map of counts)
+ggplot(data = diamonds, aes(x = carat, y = price)) +
+  geom_bin2d(bins=30)
 
 ```
 
 
-# Bar plot and dot plot
+More alternatives as ggplot2 extensions ...
 
-- for counts, but also for other summary statistics
-- Dataset: USArrests - arrests per 100.000 residents
+- e.g.  [ggpointdensity - geom_pointdensity(): A cross between a scatter plot and a 2D density plot.](https://github.com/LKremer/ggpointdensity)  
+
+
+---
+
+
+
+<br><br>
+
+
+::: color-box 
+::: 
+
+
+# Exercise
+
+::: {.callout-tip icon=false}
+## 👉  Does sample size matter - Kernel density estimated *shapes*?
+
+Density estimates (which create the shape of `geom_violin` or `geom_density`) require a decent amount of data to be accurate. If your sample size is too small, these plots can "hallucinate" shapes that aren't really there, or completely miss the true distribution. 
+
+*(Concept inspired by the Mayo Clinic's [size_matters](https://rtools.mayo.edu/size_matters/) tool).*
+
+**Your Task:**
+
+*Variant A*
+
+1. Go to <https://rtools.mayo.edu/size_matters/> and select *Simulator 1: The effect of sample size on normality tests and the accuracy of summary statistics*.
+2. Change the values of 'n' in the boxes to view samples of different sizes.  
+3. Repeat the same values via 'Draw a New Sample' to make sure your answers to the following/provided questions remain consistent ...
+
+- *How many observations do you need to be confident that you can distinguish between the different data distributions?*   
+-  *At what sample size does it become impossible for you to tell the difference between the data distributions?*    
+- *What sample sizes do you usually work with? With samples of this size, can you tell the difference between the distributions?*    
+
+
+---  
+ 
+ 
+*Variant B*
+
+1. Run the code below e.g. with the starting sample size of `n <- 3`.    
+2. Look at the plot: Can you clearly see which distribution is Normal, Bimodal, or Skewed based on the violin shape alone?    
+3. Change `n` to **10**, **20**, **50**, **100**, and **1000** and re-run the code. Watch how the violin shapes stabilize.     
+4. Answer the questions above ... 
+
+
+### Simulation Code
 
 ```{r}
+#| fig-width: 7
+#| fig-height: 5
 
-USArrests <- as.data.table(USArrests,keep.rownames = TRUE)
-colnames(USArrests)[1] = "State"
+
+# 1. CHANGE THIS NUMBER: Try 10, 20, 50, 100, 500, 1000 ... 
+n <- 3 
+
+
+# 2. Creat ground truth data from three known underlying distributions
+n_truth = 1e4
+ground_truth <- tibble(
+  Normal  = rnorm(n_truth, mean = 0, sd = 1),
+  Bimodal = ifelse(runif(n_truth) > 0.5, rnorm(n_truth, -3, 1), rnorm(n_truth, 3, 1)),
+  Skewed  = rlnorm(n_truth, meanlog = 0, sdlog = 0.8)
+) |> 
+  # Reshape data for ggplot2
+  pivot_longer(cols = everything(), names_to = "Distribution", values_to = "Value")
+
+
+# 3. Simulate data with lower 'n'
+sim_data <- tibble(
+  Normal  = rnorm(n, mean = 0, sd = 1),
+  Bimodal = ifelse(runif(n) > 0.5, rnorm(n, -3, 1), rnorm(n, 3, 1)),
+  Skewed  = rlnorm(n, meanlog = 0, sdlog = 0.8)
+) |> 
+  # Reshape data for ggplot2
+  pivot_longer(cols = everything(), names_to = "Distribution", values_to = "Value")
+
+
+# 3. Plot the estimated shapes (violin) vs. actual data (points)
+ggplot(sim_data, aes(x = Distribution, y = Value, fill = Distribution)) +
+  geom_violin(data=ground_truth, fill=NA, color = "black", trim = FALSE) +    # The ground truth shape
+  geom_violin(alpha = 0.4, color = NA, trim = FALSE) +               # The estimated shape
+  ggforce::geom_sina(alpha = 0.7) +         # The raw data points
+  theme_minimal() +
+  labs(
+    title = paste("Sample Size (n) =", n, "per group"),
+    subtitle = "Do the violins accurately show normal, bimodal, and skewed shapes?",
+    x = NULL, 
+    y = "Value"
+  ) +
+  theme(legend.position = "none")
+
+
+```
+
+:::
+
+
+<br><br>
+
+
+::: color-box 
+::: 
+
+
+## Bonus: Dot and Lollipop instead of bar plot
+
+- Dataset: USArrests - arrests per 100.000 residents per State and type of crime
+
+```{r}
+data(USArrests)
+USArrests <- as_tibble(USArrests,rownames = "State")
+USArrests
 
 # bar plot
 ggplot(USArrests,aes(x = State, y = Assault)) +
     geom_col() 
 
-# dot plot
-ggplot(USArrests,aes(x = State, y = Assault)) +
-    geom_point()+
-    scale_y_continuous(limits=c(0,NA)                       # include zero
-                      ,expand = expansion(mult = c(0, .1))) # expand top    
-
 # rotate bar
 ggplot(USArrests,aes(y = State, x = Assault)) +
     geom_col()
  
-# rotate dot 
-ggplot(USArrests,aes(y = State, x = Assault)) +
-    geom_point()+
-    scale_x_continuous(limits=c(0,NA)                       # include zero
-                      ,expand = expansion(mult = c(0, .1))) # expand right
-
-
 # Reorder States 
 # bar    
 ggplot(USArrests,aes(y = reorder(x=State,X=Assault,FUN=max), x = Assault)) +
@@ -185,7 +456,7 @@ ggplot(USArrests,aes(y = reorder(x=State,X=Assault,FUN=max), x = Assault)) +
                       ,expand = expansion(mult = c(0, .1))) # expand right 
 
 
-# dot
+# dot plot
 ggplot(USArrests,aes(y = reorder(x=State,X=Assault,FUN=max), x = Assault)) +
     geom_point()+
     scale_x_continuous(limits=c(0,NA)                       # include zero
@@ -200,144 +471,53 @@ ggplot(USArrests,aes(y = reorder(x=State,X=Assault,FUN=max), x = Assault)) +
 
 ```
 
-# Time-series data
-
-- ... or equivalents
 
 
+<br><br>
 
-```{r}
 
+::: color-box 
+::: 
+
+
+# Bonus: Download `rdwd` weather data
+
+```{r, eval=FALSE}
 # load packages
-# pacman::p_load("rdwd")
-# to update to latest version
-# updateRdwd()
+pacman::p_load("rdwd")
+#to update to latest version
+updateRdwd()
 
 ##########################################################################################
 # DO NOT EXECUTE CODE IN BINDER !
 ##########################################################################################
-# # #Select data from the DWD CDC FTP Server
-# # #set current=TRUE - to check current FTP Server Index to gather up-to-date file information
-# link <- selectDWD("Geisenheim", res="daily", var="kl", per="recent", current=FALSE)
-# #Download data from the DWD CDC FTP Server
-# file <- dataDWD(link, read=FALSE, dir="DWDdata", quiet=TRUE, force=NA)
-# #Process data from the DWD CDC FTP Server to a data.frame
-# clim <- readDWD(file, varnames=TRUE, fread=TRUE)
-# 
-# # # Write out for students
-#  fwrite(clim[1:365,],"clim_DWD_Geisenheim_current.csv")
-##########################################################################################
-# Read file (for BINDER USERS)
-##########################################################################################
-clim <- fread("clim_DWD_Geisenheim_current.csv")
-##########################################################################################
+# #Select data from the DWD CDC FTP Server
+# #set current=TRUE - to check current FTP Server Index to gather up-to-date file information
+link <- selectDWD("Geisenheim", res="daily", var="kl", per="recent", current=FALSE)
+#Download data from the DWD CDC FTP Server
+file <- dataDWD(link, read=FALSE, dir="DWDdata", quiet=TRUE, force=NA)
+#Process data from the DWD CDC FTP Server to a data.frame
+clim <- readDWD(file, varnames=TRUE, fread=TRUE)
 
-str(clim)
-summary(clim)
-skimr::skim(clim)
-
-#MESS_DATUM  = Measurement Date
-#TMK.Lufttemperatur = Daily Mean Air Temperature 2 m above ground 
-
-# Time frame [first and last value of 'MESS_DATUM']
-clim[c(1,nrow(clim)),"MESS_DATUM"]
-
-# Scatterplot air temperature over time
-ggplot(data=clim, aes(x=MESS_DATUM, y=TMK.Lufttemperatur))+
-  geom_point()
-
-# Line plot
-ggplot(data=clim, aes(x=MESS_DATUM, y=TMK.Lufttemperatur))+
-  geom_line()
-
-
-# 'introduce' missing data 
-nrow(clim)
-
-ggplot(data=clim[-c(100:150),], aes(x=MESS_DATUM, y=TMK.Lufttemperatur))+
-  geom_point()
-
-# not do
-ggplot(data=clim[-c(100:150),], aes(x=MESS_DATUM, y=TMK.Lufttemperatur))+
-  geom_line()
-
-# combine plots
-ggplot(data=clim[-c(100:150),], aes(x=MESS_DATUM, y=TMK.Lufttemperatur))+
-  geom_point()+
-  geom_line()  
-
-
-# Better: set NA
-clim_NA <- copy(clim)
-clim_NA$TMK.Lufttemperatur[c(100:150)] <- NA
-ggplot(data=clim_NA, aes(x=MESS_DATUM, y=TMK.Lufttemperatur))+
-  geom_line()  
-
-
-
+# # Write out for reuse
+write_csv(clim[1:365,],"clim_DWD_Geisenheim_current.csv")
 ```
 
 
-# High density scatterplots
-
-- binning to account for overlaps
-- no 'discrete' overlaps (no truncation of floating point numbers)
-
-```{r}
-set.seed(1) #fix random sampling with 'seed'
-dRandom <- data.table( 
-                        x=rnorm(n=1000,mean=0,sd=0.5),
-                        y=rnorm(n=1000,mean=0,sd=0.5)
-                      )
-ggplot(dRandom, aes(x=x, y=y))+
-  geom_point()
-
-# binning
-# hex (automatic)
-ggplot(dRandom, aes(x=x, y=y))+
-  geom_hex()
-
-# box (automatic)
-ggplot(dRandom, aes(x=x, y=y))+
-  geom_bin2d()
-
-# density (automatic)
-ggplot(dRandom, aes(x=x, y=y))+
-  geom_density_2d_filled()
-
-# count (manual; round data)
-ggplot(dRandom, aes(x=round(x,1), y=round(y,1)))+
-  geom_count()
-
-```
+<br><br>
 
 
-
-- see also <https://github.com/LKremer/ggpointdensity>
-
-
-
-
-# Exercise
-
-- Create different visualizations of the **distribution** of daily mean air temperature (`TMK.Lufttemperatur`) using density, histogram and frequency polygon plots (`?geom_freqpoly`; optional)
-- Play around with their options (density: `adjust=`, histogram and frequency polygon: `binwidth=`)
-- more options can be found in the help of the respective `?geom_...`
-
-## More...
-
-- "Simulator 1: The effect of sample size on normality tests and the precision of summary statistics"
-  - "***How many data points do you need to determine the data distribution? A visual approach***"
-  - <https://rtools.mayo.edu/size_matters>
-
-
+::: color-box 
+::: 
 
 
 # Additional resources
 
-- <https://ggplot2.tidyverse.org/reference/scale_binned.html>
-- <http://www.sthda.com/english/wiki/ggplot2-essentials>
-- <https://bookdown.org/brry/rdwd/>
+
+- [ggpointdensity](https://github.com/LKremer/ggpointdensity)
+- [rdwd](https://cran.r-project.org/web/packages/rdwd/vignettes/rdwd.html)
+
+
 
 #  Session Info
 

@@ -1,0 +1,261 @@
+---
+title: "Introduction to data visualization with R and ggplot2"
+author: "Dr. Dominik Schmidt"
+date: "`r Sys.Date()`"
+date-format: "YYYY"
+toc: true
+toc-depth: 3
+number-sections: false
+highlight-style: tango
+format: 
+  html:
+   embed-resources: true
+   css: "./css/clean_qmd.css"
+   df-print: paged
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r echo=FALSE}
+
+source("./src/custom.R")
+
+```
+
+
+# 001: Data visualization
+
+# 🎯 Learning objectives
+
+::: {.callout-note icon=false}
+## Why and how - Data visualization
+
+**... understanding concepts:**
+
+*     
+
+**... tool usage:**
+
+*   use your **data visualization literacy** to spot *bad graphics* 
+
+:::
+
+
+
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+# Why visualize? - A: Exploratory data analysis
+
+::: {.callout-tip icon=false}
+## 👉 
+
+**How would you visualize a scatterplot based on the following regression line and correlation coefficient?**
+
+-  $y = 3 + 0.5x$ 
+-  $r=0.82$	 
+
+::: 
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+
+
+
+```{r echo=FALSE, message=FALSE}
+pacman::p_load("tidyverse")
+anscombe <- datasets::anscombe
+anscombe.long <- data.frame(x=unlist(anscombe[,substr(colnames(anscombe),1,1)=="x"])
+                           ,y=unlist(anscombe[,substr(colnames(anscombe),1,1)=="y"])
+                           ,dataset=factor(rep(1:4,each=nrow(anscombe)))
+                           )
+
+
+ggplot(anscombe.long, aes(x=x,y=y))+
+  geom_point()+
+  geom_smooth(method="lm",se=FALSE,fullrange=TRUE)+
+  facet_wrap(dataset~.,labeller="label_both")+
+  theme_minimal()+
+  ggtitle("Anscombe's quartet")+
+  ggpubr::stat_cor(label.x = min(anscombe.long$x)
+                  ,label.y = max(anscombe.long$x)
+                  ,cor.coef.name="cor"
+                  ,aes(label = after_stat(r.label))
+                  ,size=2.75) +
+  ggpubr::stat_regline_equation(label.x = min(anscombe.long$x)
+                               ,label.y = max(anscombe.long$x)-2
+                               ,size=2.75)+
+  coord_fixed()
+
+
+
+
+```
+
+## *Anscombe's quartet* 
+
+- Anscombe, F. J. (1973). "Graphs in Statistical Analysis". American Statistician. 27 (1): 17–21. doi: 10.1080/00031305.1973.10478966. JSTOR 2682899.
+
+```{r, echo=FALSE}
+anscombe.summary <- anscombe.long %>% 
+                    group_by(dataset) %>%
+                    summarize(
+                      "mean_x"=mean(x)
+                    ,"var_x"=var(x)
+                    ,"mean_y"=round(mean(y),2)
+                    ,"var_y"=round(var(y),3)
+                    ,"corr(x,y)"=round(cor(x,y),3)
+                    ,"lm"=paste0("y = ",sprintf(round(coef(lm(y~x)),2)[1],fmt="%1.2f")," + ",sprintf(round(coef(lm(y~x)),3)[2],fmt="%1.3f"),"x")
+                    )
+
+knitr::kable(anscombe.summary)
+
+
+knitr::kable(anscombe)
+
+```
+
+
+## More illustrations on data patterns and correlation coefficients
+
+- <https://janhove.github.io/teaching/2016/11/21/what-correlations-look-like>
+
+
+::: color-box 
+::: 
+
+<br>
+<br><br>
+
+**Never trust summary statistics alone; always visualize your data.**
+
+Alberto Cairo @ [twitter.com](https://twitter.com/albertocairo/status/770267777169035264)
+
+
+<br><br><br>
+
+**Graphics reveal data**
+
+Tufte, Edward (1983). The Visual Display of Quantitative Information. Cheshire, Connecticut: Graphics Press. ISBN 0-9613921-4-2.
+
+
+
+::: color-box 
+::: 
+
+
+# Why visualize? - B: Explanatory data visualization
+
+
+A. **Exploratory Visualization (For YOU):**
+   * **Goal:** Find patterns, spot outliers, check data quality.
+   * **Look:** Can be messy, quick, and lacks perfect labels.
+
+   
+B. **Explanatory Visualization (For OTHERS):**
+   * **Goal:** Communicate a specific finding to a specific audience (scientist, grower, public).
+   * **Look:** Clean, clearly labeled, free of "chartjunk," with annotations guiding the eye.
+
+
+
+::: color-box 
+::: 
+
+
+
+# "Excellence in statistical graphics ...
+
+consists of complex ideas communicated with **clarity**, **precision**, and **efficiency**."
+
+
+- **Clarity**
+  - Lack of ambiguity and confusion   
+- **Precision**   
+  - Truthful results   
+  - Distortion‐free presentation 
+- **Efficiency**   
+  - Minimal "chartjunk"   
+  - Maximize "data-to-ink"-ratio   
+  
+
+<br>
+Tufte, Edward (1983). The Visual Display of Quantitative Information. Cheshire, Connecticut: Graphics Press. ISBN 0-9613921-4-2.
+
+
+::: color-box 
+::: 
+
+
+
+## Clarity?
+
+
+[How to Lie with Statistics: Stand Your Ground and Gun Deaths](https://thesocietypages.org/socimages/2014/12/28/how-to-lie-with-statistics-stand-your-ground-and-gun-deaths/)
+
+- ambiguity and confusion   
+
+
+::: color-box 
+::: 
+
+
+## Precision?
+
+
+[Social Distortion in Charts: The Venezuela Presidential Election 2013](https://datavizblog.com/2013/04/21/social-distortion-in-charts-the-venezuela-presidential-election-2013/)
+
+
+::: color-box 
+::: 
+
+
+
+## Efficiency?
+
+
+[Data Looks Better Naked - Remove to Improve: The Data-Ink Ratio Edition](https://darkhorsevisualization.com/blog/data-looks-better-naked)
+
+
+
+::: color-box 
+::: 
+
+
+
+
+## *"Ugly, bad, and wrong figures"*
+
+
+[Claus O. Wilke: Fundamentals of Data Visualization](https://clauswilke.com/dataviz/introduction.html)
+
+
+::: color-box 
+::: 
+
+<br><br><br>
+
+
+# ***Design is about efficient communication, not about making things pretty***
+
+[2016 Markus Püschel, Computer Science, ETH Zürich](https://people.inf.ethz.ch/markusp/teaching/guides/guide-presentations-new.pdf)
+
+<br><br>
+
+::: color-box 
+::: 
+
+# Additional resources
+
+- [Anscome's quartet](https://en.wikipedia.org/wiki/Anscombe%27s_quartet)  
+- [Claus O. Wilke: Fundamentals of Data Visualization](https://clauswilke.com/dataviz/)  
+
+
+
+
+#  Session Info
+
+```{r}
+
+sessionInfo()
+
+```

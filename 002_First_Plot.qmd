@@ -11,6 +11,9 @@ format:
   html:
    embed-resources: true
    css: "./css/clean_qmd.css"
+   df-print: paged
+editor_options: 
+  chunk_output_type: console
 ---
 ```{r echo=FALSE}
 
@@ -19,187 +22,191 @@ source("./src/custom.R")
 ```
 
 
-# 002: First plot
+# 002: A First - exploratory - plot
 
 
-# R and RStudio
+# 🎯 Learning objectives
 
-## Package installation
+::: {.callout-note icon=false}
+## ggplot2 for plotting
 
-- Copy and paste the following code in the R-console to install necessary packages.
+**... understanding concepts:**
 
+*  you know the **three essential components** for a `ggplot`    
+*  you can follow the ggplot2 *Gramma of Graphics* to read plotting code sequentially  
 
-```{r message=FALSE}
+**... tool usage:**
 
-if (!require("pacman")) install.packages("pacman")
-	
-pacman::p_load("data.table")
-pacman::p_load("ggplot2")
+*   you can create a simple **exploratory** plot from a given data set  
 
-
-```
-
-
-
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-
-# Why visualize?  - Exploratory data analysis
-
-
-**How do you imagine a scatterplot corresponding to the following regression line and correlation coefficient:**
-
--  $y = 3 + 0.5x$ 
--  $r=0.82$	 
+:::
 
 
 
+<br>
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-
-
-
-
-```{r echo=FALSE, message=FALSE}
-
-anscombe <- datasets::anscombe
-anscombe.long <- data.table(x=unlist(anscombe[,substr(colnames(anscombe),1,1)=="x"])
-                           ,y=unlist(anscombe[,substr(colnames(anscombe),1,1)=="y"])
-                           ,dataset=factor(rep(1:4,each=nrow(anscombe)))
-                           )
+::: color-box
+:::
 
 
-ggplot(anscombe.long, aes(x=x,y=y))+
-  geom_point()+
-  geom_smooth(method="lm",se=FALSE,fullrange=TRUE)+
-  facet_wrap(dataset~.,labeller="label_both")+
-  theme_minimal()+
-  ggtitle("Anscombe's quartet")+
-  ggpubr::stat_cor(label.x = min(anscombe.long$x)
-                  ,label.y = max(anscombe.long$x)
-                  ,cor.coef.name="cor"
-                  ,aes(label = after_stat(r.label))
-                  ,size=2.75) +
-  ggpubr::stat_regline_equation(label.x = min(anscombe.long$x)
-                               ,label.y = max(anscombe.long$x)-2
-                               ,size=2.75)+
-  coord_fixed()
+# Why `ggplot2`?
+
+- **reproducible results** (Script/Rmarkdown/Quarto) 
+- when working in R it's the most comprehensive plotting environment 
+- free and open source
+- large community, well documented (problem solving) 
+- very flexible *A Layered Grammar of Graphics*
+  - syntax based on *Wilkinson, Leland. 2005. The Grammar of Graphics. 2nd ed. Statistics and Computing. Springer*. 
+  - transferred to R mainly by Hadley Wickham (<http://hadley.nz/>, <https://ggplot2-book.org/>, <https://ggplot2.tidyverse.org/>)  
+  - 'A Layered Grammar of Graphics. (Wickham, Hadley. 2009. 'A Layered Grammar of Graphics.' Journal of Computational and Graphical Statistics.) 
+- `ggplot2` is also part of the `tidyverse` - alternative coding style with pipes `%>%` applicable
 
 
 
 
-```
-
-## *Anscombe's quartet* 
-
-- Anscombe, F. J. (1973). "Graphs in Statistical Analysis". American Statistician. 27 (1): 17–21. doi: 10.1080/00031305.1973.10478966. JSTOR 2682899.
-
-```{r, echo=FALSE}
-
-knitr::kable(anscombe)
-
-anscombe.summary <- anscombe.long[,list("mean_x"=mean(x)
-                    ,"var_x"=var(x)
-                    ,"mean_y"=round(mean(y),2)
-                    ,"var_y"=round(var(y),3)
-                    ,"corr(x,y)"=round(cor(x,y),3)
-                    ,"lm"=paste0("y = ",sprintf(round(coef(lm(y~x)),2)[1],fmt="%1.2f")," + ",sprintf(round(coef(lm(y~x)),3)[2],fmt="%1.3f"),"x")
-                    #,"lm_R2"=round(summary(lm(y~x))$r.squared,2)
-                    )
-              , by="dataset"]
-
-knitr::kable(anscombe.summary)
 
 
+<br>
 
+::: color-box
+:::
 
-```
-
-
-## More illustrations on data patterns and correlation coefficients
-
-- <https://janhove.github.io/teaching/2016/11/21/what-correlations-look-like>
 
 
 # Prerequisities
 
-- load `packages` and get a `data.frame`
-- data: <https://en.wikipedia.org/wiki/Iris_flower_data_set>
+- load `packages` and get a data  (`data.frame`, `tibble`)    
+- data: [Iris flower data](https://en.wikipedia.org/wiki/Iris_flower_data_set)    
 
 
-```{r}
+```{r, message=FALSE}
 # load packages
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load("data.table")
-pacman::p_load("ggplot2")
+pacman::p_load("tidyverse")
 
 ```
 
 
+
+<br>
+
+::: color-box
+:::
+
 # ggplot2 - Essential components
 
-- data 
-- mapping 
-- geometric representation
+In the age of AI coding assistants, you will rarely need to write a ggplot2 script entirely from memory, but **you will have to act as an Editor**.
 
-## Data
+**However, to be a good editor, you must understand the language.** ggplot2 is built on the Layered Grammar of Graphics. Every plot is built using three essential components:
+
+1.  **Data (`data`):** The R tabulated data (usually a `data.frame` or a `tibble`).    
+2.  **Mapping (`mapping = aes()`):**  A so called *Aesthetic Mapping*, linking columns in your data to visual aesthetics (x, y, color, shape)...      
+3.  **Geomery (`geom_...`):** The physical shapes drawn on the screen (points, lines, bars). (points, lines, boxplot, ...)?     
+
+
+
+<br>
+
+::: color-box
+:::
+
+
+
+## Know your data ... 
 
 ```{r}
-# to data table [for data management](optional)
-iris <- as.data.table(iris)
+# to tibble [for data management](optional)
+iris <- as_tibble(iris)
 
-str(iris)
+iris
+```
 
-summary(iris)
 
+::: color-box 
+::: 
 
+<br>
+<br>
+
+## `ggplot(data=...)`   
+
+```{r}
+# 1. Only the data - empty plot
 ggplot(data=iris)
 
 ```
 
-## Mapping
+## `mapping=aes(...)` (2)
 
 ```{r}
+#2. data + mapping (aesthetics): grid without geometrical objects
 
-ggplot(data=iris, aes(x=Sepal.Length, y=Sepal.Width))
+ggplot(data = iris, 
+       mapping = aes(x = Sepal.Length, y = Sepal.Width))
 
 ```
 
+::: color-box 
+::: 
 
+<br>
+<br>
 
-## + geometric representation = **First plot**
-
+## `+ geom_...` (3) = **First plot**  
 
 
 ```{r}
-# Scatterplot
-ggplot(data=iris, aes(x=Sepal.Length, y=Sepal.Width))+
+# 3. data + mapping + geometry (added geom layer with + sign)
+# Frist scatterplot
+ggplot(data = iris, 
+       mapping = aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point()
+```
+
+::: color-box 
+::: 
+
+<br>
+<br>
+
+## More global mapping
+
+```{r}
+ggplot(
+  data = iris,
+  aes(
+    x = Sepal.Length,
+    y = Sepal.Width,
+    color = Species   # added color mapping
+  )
+) +
   geom_point()
 ```
 
 
-## Modify data
+::: color-box 
+::: 
+
+<br>
+<br>
+
+## Supply/modify data - tidyverse style `%>%`
 
 ```{r}
-# show unique values of Species
-unique(iris$Species)
-
-# Show subset
-iris[Species=="setosa"]
-
-# Scatter plot Subset
-ggplot(data=iris[Species=="setosa"], aes(x=Sepal.Length, y=Sepal.Width))+
-  geom_point()
+# data is *flowing* through the pipe into the plot
+iris %>% 
+  filter(Species == "setosa") %>%
+  ggplot(aes(x = Sepal.Length, y = Sepal.Width)) +
+    geom_point()
 ```
 
-## Extend Mapping
+::: color-box 
+::: 
 
-```{r}
-# Introduce color
-ggplot(data=iris, aes(x=Sepal.Length, y=Sepal.Width, color=Species))+
-  geom_point()
-```
+<br>
+<br>
 
-## Change geom_
+## Another geom_
 
 ```{r}
 # Boxplot
@@ -208,45 +215,88 @@ ggplot(data=iris, aes(x=Species, y=Sepal.Length))+
 ```
 
 
+::: color-box 
+::: 
+
+<br>
+<br>
+
 ### A gentle reminder on box plots
+
+
+::: {style="font-size: 130%;"}
+A boxplot for 5 (or even less) data points does not make much sense! 
+:::
 
 ```{r}
 # Reduce data set to first 5 Rows
 iris[1:5,]
 
-# Combine boxplot and 'scatterplot'
+# Combine boxplot and 'scatterplot' (strip plot)
 ggplot(data=iris[1:5,], aes(x=Species, y=Sepal.Length))+
   geom_boxplot()+
-  geom_point()
+  geom_point(color="red")
 
 ```
 
-- A boxplot for 5 data points does not make much sense! 
 
 
+::: color-box 
+::: 
+
+<br>
+<br>
 
 # Exercise 
 
-## Part 1 - Scatter plot
+::: {.callout-tip icon=false}
+## 👉 Your first plots 
 
-- Open R/RStudio and load the packages `ggplot2` and `data.table`
+**Part 1 - Scatter plot**
+
+- Goto your R script and load the `tidyverse` package and the `iris` data
+
+```{r}
+#| eval: false
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load("tidyverse")
+iris <- as_tibble(iris)
+```
+
 - Create a plot comparing `Petal.Width` and `Petal.Length` using a scatter plot for the entire iris data set 
-- Create separate plots for each species
+- Create separate plots for each species (use the *powerful* `copy&paste` workflow)
 - Plot all data, use `color`s to distinguish between species 
 - Plot all data, use `shape`s to distinguish between species
 
-## Part 2 - Box plot
+<br>
+
+**Part 2 - Box plot**
 
 - Compare all four numerical variables describing the different species using box plots.
 
 
+:::
 
+---  
+
+::: {.callout-warning icon=false}
+## Warning note on copy and past workflow  
+ 
+> **Copy-and-paste is a powerful tool, but** you should avoid doing it more than twice. Repeating yourself in code is **dangerous** because it can easily lead to errors and inconsistencies.   
+> 
+>    
+> Q: R for Data Science (2e) by Hadley Wickham, Mine Çetinkaya-Rundel, and Garrett Grolemund.   
+> > <https://r4ds.hadley.nz/program.html>    
+::: 
+ 
 
 
 # Additional resources
 
-- <https://en.wikipedia.org/wiki/Anscombe%27s_quartet>
-- <https://style.tidyverse.org/ggplot2.html>
+- [ggplot tidyverse code style guide](https://style.tidyverse.org/ggplot2.html)   
+- [R for Data Science (2e)](https://r4ds.hadley.nz/)   
+
+
 
 #  Session Info
 

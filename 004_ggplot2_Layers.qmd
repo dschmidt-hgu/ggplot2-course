@@ -11,6 +11,9 @@ format:
   html:
    embed-resources: true
    css: "./css/clean_qmd.css"
+   df-print: paged
+editor_options: 
+  chunk_output_type: console
 ---
 ```{r echo=FALSE}
 
@@ -21,101 +24,90 @@ source("./src/custom.R")
 
 # 004: ggplot2 layers
 
-## Package installation
 
-- Copy and paste the following code in the R-console to install necessary packages.
+# 🎯 Learning objectives
+
+::: {.callout-note icon=false}
+## Layered graphics
+
+**... understanding concepts:**
+
+
+* you understand why and where **exploratory graphs benefit from layering**, i.e. combining multiple *geoms* in a `ggplot`   
+* you understand the logic in a the `ggplot` code with multiple geometric layers  
+* you know of the possibility to store a `ggplot` in a variable (for modification, export, etc.)
+
+**... tool usage:**
+
+*   you can add multiple geoms to a single plot in a requested order      
+
+:::
+
+
+<br><br>
+
+::: color-box 
+::: 
+
+
+
+
+
+# Prerequisites
 
 
 ```{r message=FALSE}
 
 if (!require("pacman")) install.packages("pacman")
-  
-pacman::p_load("data.table")
-pacman::p_load("ggplot2")
-
-
+pacman::p_load("tidyverse")
+pacman::p_load("ggforce")   # geom_sina
 ```
 
+<br><br>
 
-# Why ggplot2?
-
-- when working in R it's the most comprehensive plotting environment 
-- free and open source
-- large community (problem solving) 
-- reproducible results (Script/Rmarkdown/Quarto) 
-- very flexible ***A Layered Grammar of Graphics*** 
-  - syntax based on ***Wilkinson, Leland. 2005. The Grammar of Graphics. 2nd ed. Statistics and Computing. Springer***. 
-  - transferred to R mainly by Hadley Wickham (<http://hadley.nz/>, <https://ggplot2-book.org/>, <https://ggplot2.tidyverse.org/>)  
-  - 'A Layered Grammar of Graphics. (Wickham, Hadley. 2009. 'A Layered Grammar of Graphics.' Journal of Computational and Graphical Statistics.) 
-- `ggplot2` is also part of the `tidyverse` - alternative coding style with pipes `%>%` applicable
+::: color-box 
+::: 
 
 
-
-## ggplot2 syntax / Layered Grammar of Graphics
-
-A basic overview:
-
-- build plot with different layers
-- first layer usually contains the data
-- every layer has 'aesthetic mappings' to assign variables from the data to plotting objects (x, y, color, shape, ...)
-- new layers are 'added' with a `+`
-- basic graphical layers are called (`geom_...`) 
-- other layers (`stat_...`) can be used for more specific statistical transformations 
-- and there are layers for modifying the appearance (coordinate system, axis, fonts, legends, etc.) 
-
-
-
-### graphical Layers -- `geom`s
-
-Examples:
-
-- `geom_point` - creates points
-- `geom_line` - ... lines
-- `geom_histogram` - ... a histogram
-- `geom_boxplot` - ... boxplot 
-- ...
-
-- see cheat sheet for more options <https://github.com/rstudio/cheatsheets/raw/master/data-visualization-2.1.pdf>
-
-
-### 'Aesthetic Mappings' `aes`
-
-- assign 'what is what' with ('mappings')
-- besides basic mappings, e.g. which variable should be plotted on x and y axis (`x=...`, `y=...`), you can also 'map'
-- colors (`color`,`fill`)
-- shapes (`shape`,`linetype`)
-- sizes (`size`)
-
-Not all `geom`s are compatible with all the 'aesthetic mappings'.
-You cannot assign a linetype to a point representation.
-
-
-
-# Combine geoms
+# Combine compatible geoms  
 
 - add new layers with a `+`
 
+
+<br><br>
+
+::: color-box 
+::: 
+
+
+## Boxplot + Violing + Raw data 
+
+
+::: {style="font-size: 120%;"}
+
+- *the egg-laying, wool-milk-sow* ('die Eierlegende Wollmilchsau') *of univariate data distribution exploration*
+:::
+
 ```{r}
 
-
-##########################################################################################
-# Read file
-##########################################################################################
-clim <- fread("clim_DWD_Geisenheim_current.csv")
-##########################################################################################
-
-# combine plots
-ggplot(data=clim[-c(100:150),], aes(x=MESS_DATUM, y=TMK.Lufttemperatur))+ # Init Data
-  geom_point()+ # Layer 1
-  geom_line()   # Layer 2 [on top of Layer 1]
-
+ggplot(iris,aes(x=Species,y=Petal.Length))+
+    geom_violin()+                         # (optional) supports sina-shape
+    ggforce::geom_sina(jitter_y=FALSE)+    # deactivate value-jitter
+    geom_boxplot(width=0.1          # adjust to place inside the violin
+                ,alpha=0.5          # adjust to see the raw data 
+                ,outliers = FALSE   # no 'duplicate' data points
+                )
 
 ```
 
+<br><br>
+
+::: color-box 
+::: 
 
 # Regression line
 
-- *Trendlinie*
+- The famous *Excel*-***Trendlinie***
 
 ```{r}
 
@@ -144,22 +136,77 @@ ggplot(data=iris, aes(x=Sepal.Length, y=Sepal.Width, color=Species))+
 ```
 
 
+<br><br>
+
+::: color-box 
+::: 
 
 
-# Boxplot + jitter
+# Lineplot + data points
 
-- combine plots + options
-- options: `?geom_jitter`; `?geom_dotplot` ... etc.
+## Missing data spotting
+
+```{r, echo=FALSE}
+
+clim <- read_csv("clim_DWD_Geisenheim_current.csv",show_col_types = FALSE) %>%
+            select(MESS_DATUM
+                   ,TMK.Lufttemperatur
+                   ,RSK.Niederschlagshoehe)
+
+```
+
 
 ```{r}
+# Scatterplot + (bad) Line
+ggplot(data=clim[-c(100:150),], aes(x=MESS_DATUM, y=TMK.Lufttemperatur))+
+  geom_point()   +
+  geom_line()
+```
 
-# jitter is more appropriate for more and real continuous data [here: 0.1 cm 'categories']
-ggplot(data=iris, aes(x=Species,y=Petal.Width))+
-  geom_boxplot()+
-  geom_jitter( height = 0)   #do not allow random positions in y-direction
+<br><br>
+
+::: color-box 
+::: 
+
+## Irregular time step indication
+
+- Growth curves
+
+```{r}
+# The Orange data frame has 35 rows and 
+# 3 columns of records of the 
+# growth of orange trees.
+orange <- as_tibble(datasets::Orange)    #growth over time
+
+
+ggplot(orange, aes(x=age,y=circumference,color=Tree))+
+  geom_line(alpha=0.5)+
+  geom_point(size=2)
 
 
 ```
+
+<br><br>
+<br><br>
+
+::: {.callout-warning icon=false}
+## Why these strange ordering of the legend?
+
+```{r}
+str(orange$Tree)
+
+```
+
+(orderd) factors / factor levels are respected in `ggplot`
+if no levels are given (simple character data) alphabetical/chronological ordering is applied.
+:::
+
+<br><br>
+
+::: color-box 
+::: 
+
+
 
 
 
@@ -205,6 +252,78 @@ p00 + geom_violin()
 
 ```
 
+
+<br><br>
+
+::: color-box 
+::: 
+
+# Exercise
+
+::: {.callout-tip icon=false}
+## 👉  *Never trust summary statistics alone*?
+
+<br><br>
+
+- What summary statistics is misleading here when comparing the left (A) and right (B) plot variants?
+
+
+```{r}
+#| echo: false
+#| message: false
+pacman::p_load("patchwork")
+
+# regression line across all data
+p1 <- ggplot(data=iris, aes(x=Sepal.Length, y=Sepal.Width))+
+  geom_point()+
+  geom_smooth(method="lm")+   #linear model
+  coord_fixed()
+
+# Regression line for subsets [grouped by color = Species] 
+p2 <- ggplot(data=iris, aes(x=Sepal.Length, y=Sepal.Width, color=Species))+
+  geom_point()+
+  geom_smooth(method="lm")+  #linear model
+  coord_fixed()
+
+(p1 | p2) + plot_annotation(tag_levels = "A")
+
+```
+
+
+:::
+
+<br>
+*Bonus*: Code to reproduce these plots
+
+
+```{r}
+#| echo: true
+#| eval: false
+pacman::p_load("ggplot2")
+pacman::p_load("patchwork")
+
+# regression line across all data
+p1 <- ggplot(data=iris, aes(x=Sepal.Length, y=Sepal.Width))+
+  geom_point()+
+  geom_smooth(method="lm")+  
+  coord_fixed()
+
+# Regression line for subsets [grouped by color = Species] 
+p2 <- ggplot(data=iris, aes(x=Sepal.Length, y=Sepal.Width, color=Species))+
+  geom_point()+
+  geom_smooth(method="lm")+ 
+  coord_fixed()
+
+(p1 | p2) + plot_annotation(tag_levels = "A")
+
+
+```
+
+
+<br><br>
+
+::: color-box 
+::: 
 
 
 # Additional resources

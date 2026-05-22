@@ -11,6 +11,9 @@ format:
   html:
    embed-resources: true
    css: "./css/clean_qmd.css"
+   df-print: paged
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r echo=FALSE}
@@ -22,36 +25,59 @@ source("./src/custom.R")
 
 # 007: Facets and Patchwork
 
-- grouping plots with `patchwork`
-- facets for multidimensional visualization
 
 
-## Package installation
+# 🎯 Learning objectives
 
-- Copy and paste the following code in the R-console to install necessary packages.
+::: {.callout-note icon=false}
+## Layered graphics
 
+**... understanding concepts:**
+
+* you understand how facets can support clarity (**small multiples**) or can be used in multidimensional visualization 
+
+
+**... tool usage:**
+
+* you can **grouping** a few `ggplot`s with the `patchwork` syntax and add labels to the subplots.  
+* you can create **small multiples** with `facet_` functions   
+
+
+:::
+
+
+<br><br>
+
+::: color-box 
+::: 
+
+
+# Prerequisites
 
 ```{r message=FALSE}
 
 if (!require("pacman")) install.packages("pacman")
   
-pacman::p_load("data.table")
-pacman::p_load("ggplot2")
+pacman::p_load("tidyverse")
 pacman::p_load("patchwork")
-pacman::p_load("rdwd")
 
 ```
 
 
-# Arranging different plots 
 
 
-## `patchwork` 
+<br><br>
+
+::: color-box 
+::: 
+
+
+# Arranging different plots with `patchwork` 
 
 > The goal of patchwork is to make it ridiculously simple to combine separate ggplots into the same graphic.
 > <small><https://patchwork.data-imaginist.com/index.html></small>
 
-
+## Generate 4 arbitrary plots
 
 ```{r}
 # generate 4 arbitrary plots
@@ -103,6 +129,14 @@ p1+p2+p3+p4
 
 ``` 
 
+
+<br><br>
+
+::: color-box 
+::: 
+
+<br><br>
+
 - Tabulating plots 
 
 ```{r}
@@ -114,6 +148,15 @@ p1/p2/p3/p4
 
 ``` 
 
+
+
+<br><br>
+
+::: color-box 
+::: 
+
+<br><br>
+
 - brackets 
 
 ```{r}
@@ -124,19 +167,52 @@ p1/p2/p3/p4
 ``` 
 
 
+
+<br><br>
+
+::: color-box 
+::: 
+
+<br><br>
+
 ## `plot_layout`
 
-- using `plot_layout`
+- using `plot_layout` to 
 
 ```{r}
 
-p1+p2+p3+p4 + plot_layout(nrow = 1, byrow = TRUE)
+p1+p2+p3+p4 + plot_layout(nrow = 1, byrow = TRUE,)
+
+``` 
+
+
+<br><br>
+
+::: color-box 
+::: 
+
+<br><br>
+
+## `plot_annotation`
+
+- using `plot_annotation` to assing labels to the subplots
+
+```{r}
+
+p1+p2+p3+p4 + plot_annotation(tag_levels = "A")
 
 ``` 
 
 
 
-### Merge legends 
+<br><br>
+
+::: color-box 
+::: 
+
+
+
+## Merge legends 
 
 - ... where possible
 - identical legends are *collected*
@@ -150,7 +226,14 @@ p1+p2+p3+p4 +
 ```
 
 
-### Theme modifications - global
+<br><br>
+
+::: color-box 
+::: 
+
+
+
+## Theme modifications - global
 
 ```{r}
 
@@ -160,6 +243,14 @@ p1+p2+p3+p4  +
 
 
 ```
+
+
+<br><br>
+
+::: color-box 
+::: 
+
+
 
 ### Theme modifications - local
 
@@ -177,6 +268,14 @@ p4+theme(legend.position = "none")+
 
 ```
 
+
+<br><br>
+
+::: color-box 
+::: 
+
+
+
 ### Modify grid
 
 ```{r}
@@ -189,6 +288,12 @@ p4+theme(legend.position = "none")+
 ```
 
 
+<br><br>
+
+::: color-box 
+::: 
+
+
 
 ## *Advanced* `patchwork` 
 
@@ -196,6 +301,14 @@ For additional/more complex problems related to the arrangement of plots, please
 
 - <https://patchwork.data-imaginist.com/articles/guides/assembly.html>
 - <https://patchwork.data-imaginist.com/articles/guides/layout.html>
+
+
+<br><br>
+
+::: color-box 
+::: 
+
+
 
 ## Alternative packages
 
@@ -216,236 +329,274 @@ If alternative packages and their tutorials are addressing your grid arrangement
 
 <br><br><br><br><br><br><br>
 
+
+<br><br>
+
+::: color-box 
+::: 
+
+
+
 # Facets for multidimensional visualizations in `ggplot2`
 
 - no additional package necessary
+
+
+
+## `facet_` - 1 dimension
+
+- e.g. for comparing the 'same' data from different years, differnt regions, differnt ...
+
+
+```{r}
+clim <- read_csv("clim_DWD_Geisenheim_historic_monthly.csv",show_col_types = FALSE)
+clim <- clim %>% 
+          mutate("month"=month(MESS_DATUM)
+                 ,"year"=year(MESS_DATUM)
+                 )
+
+# all in one plot - too crowded
+clim %>% 
+  filter(year > 2000 & year <= 2012) %>%
+  ggplot(aes(x=month,y=MO_TT.Lufttemperatur))+
+    geom_line(aes(color=factor(year)))
+
+# 'wrap' onto a grid
+clim %>% 
+  filter(year > 2000 & year <= 2012) %>%
+  ggplot(aes(x=month,y=MO_TT.Lufttemperatur))+
+    geom_line(aes(color=factor(year)))+
+    facet_wrap(year~.)
+
+
+# place onto rows/cols of a 'grid'
+clim %>% 
+  filter(year > 2000 & year <= 2012) %>%
+  ggplot(aes(x=month,y=MO_TT.Lufttemperatur))+
+    geom_line(aes(color=factor(year)))+
+    facet_grid(year~.)    #rows ~ cols [. = placeholder]
+
+clim %>% 
+  filter(year > 2000 & year <= 2012) %>%
+  ggplot(aes(x=month,y=MO_TT.Lufttemperatur))+
+    geom_line(aes(color=factor(year)))+
+    facet_grid(.~year)   #rows ~ cols [. = placeholder]
+
+
+```
+
+
+
+<br><br>
+
+::: color-box 
+::: 
+
+- Different data set `country`-wise data 
+
+
+```{r}
+# data from: https://r-graph-gallery.com/web-line-chart-small-multiple-all-group-greyed-out.html
+pacman::p_load("tidyverse")
+df1 <- read.csv("https://raw.githubusercontent.com/holtzy/R-graph-gallery/master/DATA/dataConsumerConfidence.csv") %>% 
+  mutate(date=lubridate::my(Time)) %>% 
+  select(-Time) %>% 
+  pivot_longer(!date, names_to = "country", values_to = "value") %>% 
+  na.omit()
+
+df1
+
+df1 %>% 
+  ggplot(aes(x=date,y=value))+
+    geom_line()+
+    facet_wrap(.~country)   #rows ~ cols [. = placeholder]
+
+```
+
+
+
+<br><br>
+
+::: color-box 
+::: 
+
+
+## Alternative application of facets: different data - same plot 
+
 - requires data in *long format* as an input
-
-
-## `facet_grid` - 1 dimension
-
 
 
 ```{r}
 
-pacman::p_load("data.table")
-pacman::p_load("ggplot2")
-
-iris <- as.data.table(iris)
-
 # covert to long format (i.e. tidyverse -> pivot_longer)
-iris.m <- melt(iris, id.vars="Species")
+iris.m <- iris  %>% 
+            pivot_longer(cols =  -c(Species))
 
 iris.m
 
 ```
 
 
+
 - To get an overview of the iris data set
 
 ```{r}
-# Approach 1: color boxplot by variable
-ggplot(iris.m, aes(x=Species,y=value,color=variable))+
- geom_boxplot()
+# free wrap
+ggplot(iris.m, aes(x=Species,y=value, color=Species))+
+ geom_boxplot()+
+ facet_wrap(name~.)
 
-# Hard to compare across species
-
-```
-
-```{r}
-# Approach 2: color boxplot by Species
-ggplot(iris.m, aes(x=variable,y=value,color=Species))+
- geom_boxplot()
-
-# not too bad here, but fails when variables are on more different scales
-
-```
-
-```{r}
 # put on a grid | use a column for each variable 
 ggplot(iris.m, aes(x=Species,y=value, color=Species))+
  geom_boxplot()+
- facet_grid(.~variable)
-
-#more or less similar to approach 2 
-```
-
-
-```{r}
-# put on a grid | use a row for each variable
-ggplot(iris.m, aes(x=Species,y=value, color=Species))+
- geom_boxplot()+
- facet_grid(variable~.)
+ facet_grid(.~name)
 
 
 # put on a grid | use a row for each variable
  # AND allow different y-axis [if justified]
 ggplot(iris.m, aes(x=Species,y=value, color=Species))+
  geom_boxplot()+
- facet_grid(variable~., scales="free_y")
+ facet_grid(name~., scales="free_y")
+
+
+# wrap 
+ # AND allow different y-axis [if justified]
+ggplot(iris.m, aes(x=Species,y=value, color=Species))+
+ geom_boxplot()+
+ facet_wrap(name~., scales="free_y")
 
 ```
 
 
 
-- Alternative: `facet_wrap` for custom 'grid' (see below)
+<br><br>
+
+::: color-box 
+::: 
 
 
 
-
-## `facet_grid` - 2 dimensions
+## `facet_` and 2 dimensions
 
 
 
 ```{r}
+# ---------------------------------------------------------
+# 1. DATA PREPARATION (LONG FORMAT)
+# ---------------------------------------------------------
+# Creating a dataset for 9 different weather stations
+set.seed(123)
 
-set.seed(1)
-sinoid <- function(x) {rnorm(n=1,mean=sin(x*(2*pi/365)),sd=0.2)+5}
-vsinoid <- Vectorize(sinoid)
+climate_wrap_data <- expand.grid(
+  Month = 1:12,
+  Year = as.factor(2021:2022),
+  Station = paste("Station", LETTERS[1:9]) # 9 distinct locations
+)
 
-dFACE <- data.table(
-            Day = rep(c(1:365),times=6),
-            Ring_Pair=factor(rep(c(1:3,1:3),each=365)),
-            Treatment= rep(c("A","E"),each=365*3)     
-          )
+# Generate temperatures with different base levels and seasonal swings per station
+station_id <- as.numeric(climate_wrap_data$Station)
+climate_wrap_data$Temperature <- 35 + 
+  (station_id * 3.5) +                                         # Base temp varies
+  sin((climate_wrap_data$Month - 4) * pi / 6) * (10 + station_id) + # Seasonality varies
+  rnorm(nrow(climate_wrap_data), mean = 0, sd = 2.5)           # Random noise
 
 
-dFACE[,"Measurement":=vsinoid(Day)]
+climate_wrap_data
 
 
-dFACE
+
+# 1d wrap - split data by station
+ggplot(climate_wrap_data
+       , aes(x = Month, y = Temperature, color = Year)) +
+  geom_line() +
+  facet_wrap(Station~.,)
+
+
+# 2d wrap - split by Station + Year (set 3 cols)
+ggplot(climate_wrap_data
+       , aes(x = Month, y = Temperature, color = Year)) +
+  geom_line() +
+  # The Small Multiples Wrap:
+  # Takes the 9 stations + Years and wraps them into a 3x3 grid
+  facet_wrap(Station~Year, ncol = 3)
+
+
+# 2d grid - split by Station (rows) + Year (cols)
+ggplot(climate_wrap_data
+       , aes(x = Month, y = Temperature, color = Year)) +
+  geom_line() +
+  facet_grid(Station~Year)
 
 ```
 
+<br><br>
 
-```{r}
-
-# Split by Ring_Pair [rows] + Treatment [cols]
-  # plus: Color by Treatment
-ggplot(dFACE, aes(x=Day, y=Measurement,color=Treatment))+
-    geom_point()+
-    facet_grid(Ring_Pair~Treatment)+
-    scale_color_manual(values=c("blue","red"))+
-    theme_classic() 
+::: color-box 
+::: 
 
 
-```
-
-
-```{r}
-
-ggplot(dFACE, aes(x=Day, y=Measurement,fill=Treatment))+
-    geom_point(alpha=0.5,shape=21)+
-    facet_grid(Ring_Pair~.)+
-    scale_fill_manual(values=c("blue","red"))+
-    theme_classic() 
-
-
-```
-
-
-## `facet_wrap`
+## More details on `facet_wrap` vs `facet_grid`  
 
 - The differences between facet_wrap() and facet_grid():
   - <https://ggplot2-book.org/facet.html>
 
 
+<br><br>
 
-### `facet_wrap` - 1 dimension
+::: color-box 
+::: 
 
 
+## Some Options ...
 
-```{r}
-
-ggplot(dFACE, aes(x=Day, y=Measurement,fill=Ring_Pair))+
-    geom_point(alpha=0.5,shape=21)+
-    facet_wrap(.~Treatment)+
-    scale_fill_viridis_d()+
-    theme_classic() 
-
-```
+- check with `?face_grid` or `?facet_wrap`
 
 ```{r}
-# same plot 
-ggplot(dFACE, aes(x=Day, y=Measurement,fill=Ring_Pair))+
-    geom_point(alpha=0.5,shape=21)+
-    facet_wrap(.~Treatment)+
-    scale_fill_viridis_d()+
-    theme_classic() 
-
-```
-
-
-### `facet_wrap` - 2 dimensions
-
-```{r}
-
-ggplot(dFACE, aes(x=Day, y=Measurement,color=Treatment))+
-    geom_point()+
-    facet_wrap(Ring_Pair~Treatment)+
-    scale_color_manual(values=c("blue","red"))+
-    theme_classic() 
-
+facet_grid(
+  rows = NULL,
+  cols = NULL,
+  scales = "fixed",
+  space = "fixed",
+  shrink = TRUE,
+  labeller = "label_value",
+  as.table = TRUE,
+  switch = NULL,
+  drop = TRUE,
+  margins = FALSE,
+  axes = "margins",
+  axis.labels = "all",
+)
 ```
 
 
+<br><br>
 
-```{r}
+::: color-box 
+::: 
 
-ggplot(iris.m, aes(x=Species,y=value, color=Species))+
- geom_boxplot()+
- facet_wrap(variable~., scales="free")
-
-```
-
-
-## `facet_*` options
-
-### `scales` - free axis scales
-
-```{r}
-
-ggplot(iris.m, aes(x=Species,y=value, color=Species))+
- geom_boxplot()+
- facet_grid(variable~., scales="free_y")
-
-```
-
-
-```{r}
-
-ggplot(iris.m, aes(x=Species,y=value, color=Species))+
- geom_boxplot()+
- facet_wrap(variable~., scales="free")
-
-```
-
-
-### `labels` - facet-text options
+### `labeller` - facet-text options
 
 - `?labellers`
 
 ```{r}
 
-ggplot(dFACE, aes(x=Day, y=Measurement,color=Treatment))+
-    geom_point()+
-    facet_grid(Ring_Pair~Treatment, label="label_both")+
-    scale_color_manual(values=c("blue","red"))+
-    theme_classic() 
+
+clim %>% 
+  filter(year > 2000 & year <= 2012) %>%
+  ggplot(aes(x=month,y=MO_TT.Lufttemperatur))+
+    geom_line(aes(color=factor(year)))+
+    facet_grid(.~year,labeller="label_both")   #adds colname to strip.text label
 
 ```
 
-For mathemaical symbols use, e.g.
 
-> `label_parsed()` interprets the labels as plotmath expressions. 
-> `label_bquote()` offers a more flexible way of constructing plotmath expressions. 
+<br><br>
 
+::: color-box 
+::: 
 
+### Thematic options
 
-
-### Further options
-
-- `?facet_wrap`: e.g. `strip.placement`
 - `theme()` options (`?theme`), some examples:
 
 ```{r eval=FALSE}
@@ -469,78 +620,114 @@ For mathemaical symbols use, e.g.
 ```
 
 
+<br><br>
 
-# Exercise (1)
+::: color-box 
+::: 
+
+
+::: {.callout-warning icon=false}
+## Be careful with `scales="free_y"`
+
+By setting `scales = "free_y"`, the Y-axis numbers will change for every panel to perfectly fit that station's data. 
+This should only be considered if you are plotting different variables within each subplot (e.g. cf. iris long data). 
+Otherwise, it eliminates between-plot comparability and can be visually deceptive. If the audience assumes all panels share the same baseline, they may misinterpret small swings in a nearly constant dataset as a massive spike - a trend that, in the broader context of the data, would actually be almost 'flat'.
+
+:::
+
+
+<br><br>
+
+::: color-box 
+::: 
+
+
+# Exercise
+
+::: {.callout-tip icon=false}
+## 👉  patchwork and facetting
+
+**Exercise (1)**
 
 1. Use the following code to load the `tree`-dataset and transfer it into a `data.table` and to add two artificial groups (experiments):
 
 ```{r}
-pacman::p_load("data.table")
-pacman::p_load("ggplot2")
+pacman::p_load("tidyverse")
 pacman::p_load("patchwork")
 
 str(trees)
 
-trees <- as.data.table(trees)
+trees <- as_tibble(trees) %>% 
+            mutate("Group":=rep(c("1","2","3","4"), length.out=nrow(trees)))  #Assign 'artifical' Groups
 
-#Assig 'artifical' Groups
-trees[,"Group":=rep(c("1","2"), length.out=nrow(trees))]
+
+
 
 
 ```
 
-2. Information about the data (<https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/trees.html>)
-3. Create a plot to each of the three variables showing their distribution and merge theme to a single plot using `patchwork`
-4. Modify the axis titles to match scientific standards
-5. Optional: Customize the appearance according to your preferences
+2. Information about the data (<https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/trees.html>)   
+3. Create a plot to each of the three variables (use different plot types) showing their distribution and merge theme to a single plot using `patchwork`  
+4. Modify the axis titles to match scientific standards   
+5. Optional: Customize the appearance according to your preferences    
 
 
 
+**Exercise (2)**
+
+0. Same data... 
+1. Use `ggplot2` (facets) to create scatterplots of the `Volume~Height` split into subplots per `Group`.
+  a. facet_grid colwise  
+  b. facet_grid rowise  
+  c. facet_wrap 3 cols
+2. Modify the axis titles to match scientific standards   
+3. Optional: Customize the appearance according to your preferences    
+
+:::
+
+<br><br>
+
+::: color-box 
+::: 
+
+# Bonus: `gghighlight` 
+
+- Option 1 with package `gghighlight`     
+- Option 2: manually
 
 
-# Exercise (2)
+```{r}
+pacman::p_load("gghighlight")
+
+# highlight the 'country' line but show all others too
+ggplot(df1,aes(x=date, y=value, color=country)) +
+  geom_line() +
+  gghighlight(use_direct_label = FALSE,    # can also be used for direct labelling
+              unhighlighted_params = list(colour = alpha("grey85", 1)) # configure how to show non highlighted data 
+              ) +
+  facet_wrap(.~country)
 
 
-1. Load the historic climate data set from Geisenheim (see code) and extract *three years* from this long-time data to a new data table (see code example). You could use different years.
-2. Transfer into a long-format data set for plotting.
-3. Use `ggplot2` (facets) to create a plot illustrating two variables (`MO_TT.Lufttemperatur` und `MO_RR.Niederschlagshoehe`) by year.
-4. Optional: Customize the appearance according to your preferences
+# manual realization in ggplot
+df1_mod <- df1 %>% 
+              mutate("country_facet"=country)
 
-
-
-```{r message=FALSE}
-
-pacman::p_load("data.table")
-pacman::p_load("ggplot2")
-# pacman::p_load("rdwd")
-
-clim <- fread("clim_DWD_Geisenheim_historic_monthly.csv")
-
-
-
-#Create a new year variable from date 
-clim[,"Year":=year(MESS_DATUM)] # using year function (provided by data.table / )
-#clim[,"Year":=substr(MESS_DATUM,1:4)] #alternative extract first 4 digits from string
-# More alternatives can be found with a quick google search: https://stackoverflow.com/questions/36568070/extract-year-from-date
-
-
-# Extract 3 Years [2000-2002]
-# Using Year
-climSub <- clim[Year %in% c(2000:2002)]
-#climSub <- clim[Year %in% c(1998,2001,2004)]
-
-# ... should be 3x12=36
-nrow(climSub)
-
-
-# melt to long format using relevant columns only:
-climSub.m <- melt(climSub[,c("MESS_DATUM","Year","MO_TT.Lufttemperatur","MO_RR.Niederschlagshoehe")], id.vars=c("MESS_DATUM","Year"))
-
-str(climSub.m)
+ggplot(df1_mod,aes(x=date, y=value, color=country)) +
+  geom_line(data=df1,aes(group=country),color="grey") +    
+  #background lines: with missing 'facet' variable in df1 all gray lines appear everywhere
+  geom_line(aes(color=country))+  # colored lines from df1_mod with facet
+  facet_wrap(.~country_facet)
 
 ```
 
 
+
+
+
+<br><br>
+
+::: color-box 
+::: 
 
 
 # Additional resources
@@ -560,14 +747,10 @@ ggplot(iris, aes(x=Petal.Length,y=Petal.Width, colour = Species)) +
   geom_point() +
   facet_zoom(x = Species == "versicolor")
 
-
-
 ggplot(iris, aes(x=Petal.Length,y=Petal.Width, colour = Species)) +
   geom_point() +
   facet_zoom(xlim = c(4, 6),
              zoom.size=1) 
-
-
 
 ggplot(iris, aes(x=Petal.Length,y=Petal.Width, colour = Species)) +
   geom_point() +

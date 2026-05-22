@@ -11,6 +11,9 @@ format:
   html:
    embed-resources: true
    css: "./css/clean_qmd.css"
+   df-print: paged
+editor_options: 
+  chunk_output_type: console
 ---
 ```{r echo=FALSE}
 
@@ -21,38 +24,110 @@ source("./src/custom.R")
 
 # 005: Colors, shapes and linetypes
 
-- `aes()` - aesthetics not only assign the data (variables) to the axis 
-- can also be used to associate colors, shapes etc. with variables
+
+
+# 🎯 Learning objectives
+
+::: {.callout-note icon=false}
+## Layered graphics
+
+**... understanding concepts:**
+
+
+* you know you can use `aes()` not only to assign the data (variables) to the axis, but also to **associate colors, shapes etc. with variables** from your  
+* you understand the logic behind the **automatic legend creation** for such mappings    
+* you know *best practices* in the color, shape and linetype selection for **clear and accessible** figure creation (beyond exploratory figures)   
+
+**... tool usage:**
+
+* you can **add and adjust** the color, shape and linetype of your geometric objects in a `ggplot`
+*  you can **choose perceptually appropriate** color palettes for continuous, diverging, and categorical data.
+*  you can **customize scales** (e.g., `scale_color_manual()`, `scale_shape_manual()`) to match publication standards.
+
+
+:::
+
+
+<br><br>
+
+::: color-box 
+::: 
 
 
 
 
-## Package installation
 
-- Copy and paste the following code in the R-console to install necessary packages.
+# Prerequisites
 
 
 ```{r message=FALSE}
 
 if (!require("pacman")) install.packages("pacman")
-  
-pacman::p_load("data.table")
-pacman::p_load("ggplot2")
-pacman::p_load("scico")
+pacman::p_load("tidyverse")
+pacman::p_load("scico")   # scientific color palettes
+```
+
+
+<br><br>
+
+::: color-box 
+::: 
+
+
+# Aesthetic Mappings in `aes()` 
+
+The core idea in ggplot2 is the **grammar of graphics**: every visual property of a geometric object can be either *fixed* (set outside `aes()`) or *mapped* to a variable (set inside `aes()`).
+
+| Property   | Fixed (outside `aes()`)       | Mapped (inside `aes()`)                    |
+|------------|-------------------------------|--------------------------------------------|
+| Color      | `color = "steelblue"`         | `aes(color = Species)`                     |
+| Fill       | `fill = "tomato"`             | `aes(fill = Species)`                      |
+| Shape      | `shape = 17`                  | `aes(shape = Species)`                     |
+| Linetype   | `linetype = "dashed"`         | `aes(linetype = drv)`                      |
+| Size       | `size = 3`                    | `aes(size = body_wt)`                      |
+| Alpha      | `alpha = 0.4`                 | `aes(alpha = carat)`                       |
+
+: Summary of aesthetic properties 
+
+
+<br><br><br>
+
+## Fixed vs. Mapped Aesthetics
+
+```{r fixed-vs-mapped}
+# Fixed
+ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point(color = "steelblue")
+             
+# Mapped
+ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, color = Species)) +
+  geom_point() 
 
 ```
 
 
-# Colors for points and lines - `color` 
+::: {.callout-important}
+## Key Rule
+When an aesthetic is inside `aes()`, **ggplot2 automatically creates a legend** and maps the levels of the variable to distinct visual values (colors, shapes, etc.). When it is outside `aes()`, the value is applied uniformly to *all* observations.
 
-## `color` grouping for discrete variables
+**Thus, We usually want to use the mapping abilities**
 
-- `color` can act as a grouping variable
+:::
+
+<br><br>
+
+::: color-box 
+::: 
+
+
+
+
+# Global versus local 'mapping' 
+
+- color (or shape) also act as grouping variables
+
 
 ```{r}
-
-iris <- as.data.table(iris)
-
 
 # global color association
 ggplot(data=iris, aes(x=Petal.Length,y=Petal.Width,color=Species))+
@@ -68,100 +143,175 @@ ggplot(data=iris, aes(x=Petal.Length,y=Petal.Width))+
 ```
 
 
-## `color` and numerical variables
 
-- color bar
+<br><br>
 
-```{r}
+::: color-box 
+::: 
 
-ggplot(data=iris, aes(x=Petal.Length,y=Petal.Width))+
-  geom_point(aes(color=Petal.Length))
+
+
+
+#  `color`- Colors for points and lines
+
+## Categorical Data: Qualitative Palettes 
+
+Qualitative palettes assign **maximally distinct** hues to unordered categories. 
+The default ggplot2 palette is evenly spaced on the color wheel - fine for exploration, but can be improved.
+
+```{r color-categorical}
+pacman::p_load("patchwork") # side by side plot
+
+p_base <- ggplot(iris, aes(x = Sepal.Length, y = Petal.Length, color = Species)) +
+  geom_point() +
+  labs(title = "ggplot2 standard")
+
+p_base
+
+p1 <- p_base + 
+  scale_color_brewer(palette = "Set2") + 
+  labs(title = "ColorBrewer Set2")
+
+p1
+
+p2 <- p_base + 
+  scale_color_manual(values = c("#E69F00", "#56B4E9", "#009E73")) + 
+  labs(title = "Wong (colorblind-safe)")
+
+p2
+
+p3 <- p_base + 
+  scale_color_viridis_d(option = "plasma") + 
+  labs(title = "Viridis plasma (discrete)")
+
+p3
+
+p4 <- p_base + 
+  scale_color_grey()
+
+p4
 
 
 ```
+
+
+<br><br>
+
+- [Wong, B. Points of view: Color blindness. Nat Methods 8, 441 (2011). https://doi.org/10.1038/nmeth.1618](https://www.nature.com/articles/nmeth.1618)
+
+
+
+
+<br><br>
+
+::: color-box 
+::: 
+
+
+
+
+## Continuous Data: Sequential & Diverging Palettes
+
+For **ordered** or **continuous** variables, use palettes that encode magnitude through lightness or saturation.
+
+```{r color-continuous}
+p_base <- ggplot(iris, aes(x = Sepal.Length, y = Petal.Length, color = Petal.Width)) +
+            geom_point()
+p_base
+
+p_base +
+  scale_color_viridis_c(option = "viridis") 
+
+p_base +
+  scico::scale_color_scico(palette="batlow",end=0.9) 
+
+
+
+```
+
+
+
+
+<br><br>
+
+::: color-box 
+::: 
+
+
 
 
 # `shape`
 
-## `shape` grouping for discrete variables
+## The Shape Scale
 
+ggplot2 maps categorical variables to **25 built-in shapes** (0–25). Shapes 0–14 are outlines (controlled by `color`); shapes 15–20 are filled (controlled by `color`); shapes 21–25 are filled with a separate border (`fill` + `color`).
 
-- combine plots + options
-- options: `?geom_jitter`; `?geom_dotplot` ... etc.
+```{r shape-reference}
+#| fig-cap: "All 25 built-in ggplot2 point shapes."
+#| fig-height: 3
+#| echo: false
 
-```{r}
-
-ggplot(data=iris, aes(x=Petal.Length,y=Petal.Width, shape=Species))+
-  geom_point()
-
-
-# local
-ggplot(data=iris, aes(x=Petal.Length,y=Petal.Width))+
-  geom_point(aes(shape=Species))+
-  geom_smooth(method="lm")
-
-# global association
-ggplot(data=iris, aes(x=Petal.Length,y=Petal.Width,shape=Species))+
-  geom_point()+
-  geom_smooth(method="lm")
-
-```
-
-
-## Grouping: `color` + `shape`
-
-```{r}
-ggplot(data=iris, aes(x=Petal.Length,y=Petal.Width,shape=Species,color=Species))+
-  geom_point()+
-  geom_smooth(method="lm")
-
-```
-
-
-## *List of available shapes* 
-
-- <https://ggplot2.tidyverse.org/reference/scale_shape.html>
-- filled red shapes (21-25) also allow a `fill` color besides the `color` assignment [=border color] 
-
-```{r}
-
-df_shapes <- data.table(shape = 0:25)
+df_shapes <- tibble(shape = 0:25)
 ggplot(df_shapes, aes(0, 0, shape = shape)) +
   geom_point(aes(shape = shape), size = 5, fill = 'red') +
   scale_shape_identity() +
   facet_wrap(~shape) +
   theme_void()
-
 ```
 
-# `linetype`
 
+- <https://ggplot2.tidyverse.org/reference/scale_shape.html>
+- filled red shapes (21-25) also allow a `fill` color besides the `color` assignment [=border color] 
+
+
+
+<br><br>
+
+::: color-box 
+::: 
+
+
+
+
+## `shape` mapping
 
 ```{r}
-# re-assign to data.table 
-economics_long <- as.data.table(economics_long)  
+p_base <- ggplot(iris, aes(x = Sepal.Length, y = Petal.Length
+                           , shape = Species
+                           , color=Species)) +
+  geom_point() 
 
-str(economics_long)
+# Unified Legend of shape and color !
+p_base
 
-# data in 'long format'
-economics_long
+p1 <- p_base + 
+  scale_shape_manual(values=c(15,16,18))
 
-# grouping by linetype
-ggplot(economics_long, aes(x=date, y=value01,linetype=variable)) + 
-  geom_line()
+p1
 
-# grouping by color
-ggplot(economics_long, aes(x=date, y=value01,color=variable)) + 
-  geom_line()
+p2 <- p_base + 
+   scale_shape_manual(values=c(21,22,23))
 
-# both
-ggplot(economics_long, aes(x=date, y=value01,color=variable, linetype=variable)) + 
-  geom_line()
+p2
 
+# fill
+ggplot(iris, aes(x = Sepal.Length, y = Petal.Length, shape = Species,fill=Species)) +
+  geom_point(color="black")+               # fixed mapping = all borders are black
+  scale_shape_manual(values=c(21,22,15))   # 15=soild shape = not 'fillable'
 
 ```
 
-- ***choose wisely*** - `linetype` harder to distinguish than `color` -- when colors are limited to high contrasts.
+
+
+
+<br><br>
+
+::: color-box 
+::: 
+
+
+
+
 
 
 # fill-colors: `fill`
@@ -197,10 +347,6 @@ ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
 ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
   geom_point(aes(fill=Species), shape=21)             # single shape as an "option"
 
-# not working out of the box- shape by species
-ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
-  geom_point(aes(fill=Species, shape=Species))
-
 # need to assign shapes separately
 ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
   geom_point(aes(fill=Species, shape=Species))+
@@ -215,23 +361,152 @@ ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
 
 
 
+<br><br>
 
-# Best Practices
+::: color-box 
+::: 
 
-## Find the red dot
+
+
+
+
+# `linetype`
+
+## Available Linetypes
+
+ggplot2 supports six named linetypes: `"solid"`, `"dashed"`, `"dotted"`, `"dotdash"`, `"longdash"`, `"twodash"`.
+
+```{r linetype-reference}
+#| fig-cap: "Six named linetypes available in ggplot2."
+#| fig-height: 2.8
+
+lt_df <- data.frame(
+  y = 6:1,
+  label = c("solid", "dashed", "dotted", "dotdash", "longdash", "twodash"),
+  lt    = c("solid", "dashed", "dotted", "dotdash", "longdash", "twodash")
+)
+
+ggplot(lt_df) +
+  geom_segment(aes(x = 0, xend = 1, y = y, yend = y, linetype = lt), linewidth = 1.2) +
+  geom_text(aes(x = 1.03, y = y, label = label), hjust = 0, size = 3.5) +
+  scale_linetype_identity() +
+  xlim(0, 1.7) +
+  theme_void() +
+  labs(title = "Named linetypes")
+```
+
+
+
+
+<br><br>
+
+::: color-box 
+::: 
+
+
+
+
+## Assign linetypes
+
+
+```{r}
+# re-assign to tibble 
+economics_long <- as_tibble(economics_long)  
+
+str(economics_long)
+
+# data in 'long format'
+economics_long
+
+
+# no grouping 
+ggplot(economics_long, aes(x=date, y=value01)) + 
+  geom_line()
+
+# grouping by 'group'
+ggplot(economics_long, aes(x=date, y=value01,group=variable)) + 
+  geom_line()
+
+# grouping by linetype
+ggplot(economics_long, aes(x=date, y=value01,linetype=variable)) + 
+  geom_line()
+
+# grouping by color
+ggplot(economics_long, aes(x=date, y=value01,color=variable)) + 
+  geom_line()
+
+# both
+ggplot(economics_long, aes(x=date, y=value01,color=variable, linetype=variable)) + 
+  geom_line()
+
+
+```
+
+
+
+
+- ***NOTE*** - `linetype` is harder to distinguish than `color, when colors are limited to high contrast colors.
+
+
+
+<br><br>
+
+::: color-box 
+::: 
+
+
+## Manual `linetype`-selection
+
+
+```{r}
+
+economics_long %>% 
+  filter(variable%in%c("pop","unemploy")) %>%
+  ggplot(aes(x=date, y=value01)) + 
+    geom_line(aes(linetype=variable))+
+    scale_linetype_manual(values=c(2,3))
+
+economics_long %>% 
+  filter(variable%in%c("pop","unemploy")) %>%
+  ggplot(aes(x=date, y=value01)) + 
+    geom_line(aes(linetype=variable))+
+    scale_linetype_manual(values=c("dotted","dashed"))
+
+
+```
+
+
+
+
+<br><br>
+
+::: color-box 
+::: 
+
+
+
+
+
+
+# ✅ Best Practices 
+
+## Color vs. shape
+
+
+### Find the red dot
 
 - based on <https://socviz.co/lookatdata.html> (Figure 1.18)
 
 ```{r echo=FALSE, message=FALSE, fig.cap="*Searching for the red dot becomes progressively harder.*"}
 
 set.seed(2)
-d20 <- data.table(x=sample(x = seq(0,30,by=0.01), size=20),
+d20 <- tibble(x=sample(x = seq(0,30,by=0.01), size=20),
                   y=sample(x = seq(0,100,by=0.01), size=20),
                   color=c(rep("B",times=19),"A"),
                   shape=c("X",rep("Y",times=19))
                   )
 
-d100 <- data.table(x=sample(x = seq(0,30,by=0.01), size=100),
+d100 <- tibble(x=sample(x = seq(0,30,by=0.01), size=100),
                   y=sample(x = seq(0,100,by=0.01), size=100),
                   color1=c(rep("B",times=99),"A"),
                   shape1=c(rep("Y",times=99),"X"),
@@ -316,7 +591,7 @@ p1|p2|p3|p4|p5
 ```
 
 
-## Find the red dot (2)
+### Find the red dot (2)
 
 
 ```{r echo=FALSE, message=FALSE}
@@ -351,74 +626,213 @@ p5|p6
 
 
 
-## `alpha` - for overlaps and *appearance* 
 
-- parameter `alpha` is limited between 0 - 1 
-- `alpha=0` is *invisible*/*transparent* object  
-- `alpha=1` standard = not-transparent 
+::: {.callout-tip icon=false}
+## Color dominates for categorical variables  
 
-
-
-```{r}
-
-#generate overlapping scatterplot data by sampling from a normal distribution for x+y
-set.seed(1) #fix random sampling with 'seed'
-dRandom <- data.table( 
-                        x=rnorm(n=1000,mean=0,sd=0.5),
-                        y=rnorm(n=1000,mean=0,sd=0.5)
-                      )
-
-str(dRandom)
+see e.g.
+[Channel Expressiveness Types and Effectiveness Ranks](https://www.cs.ubc.ca/~tmm/vadbook/eamonn-figs/fig5.1.pdf)
 
 
-#default
-ggplot(dRandom, aes(x=x, y=y))+
-  geom_point()
+from: 
+Tamara Munzner. Visualization Analysis and Design. A K Peters Visualization Series, CRC Press, 2014. <https://www.cs.ubc.ca/~tmm/vadbook/>
 
 
-#alpha=0.5 fix
-ggplot(dRandom, aes(x=x, y=y))+
-  geom_point(alpha=0.5)
+::: 
 
 
-#alpha depending on x-values'
-ggplot(dRandom, aes(x=x, y=y))+
-  geom_point(aes(alpha=x))
+<br><br>
+
+::: color-box 
+::: 
+
+
+## Design for colorblind readers
+
+Roughly 8% of men and 0.5% of women have some form of color vision deficiency. Strategies:
+
+* do use professionally composed color palettes (suited for color blindness)
+  - such as, the **Okabe-Ito** palette or **viridis**, or **scico**-palettes.
+- **Redundantly encode** with shape and/or linetype.
+- Check your figure with `colorspace::cvd_emulator()` or <https://www.color-blindness.com/coblis-color-blindness-simulator/>.
+
+
+
+
+<br><br>
+
+::: color-box 
+::: 
+
+
+
+
+## Match palette type to data type
+
+- **Categorical** → qualitative palettes (ColorBrewer Set2, Okabe-Ito). 
+- **Ordered / continuous** → sequential palettes (e.g. viridis family) with perceptually uniform lightness steps.
+- **Diverging** → diverging palettes (scico `berlin`, `vik`; ColorBrewer `RdBu`) when the midpoint has meaning (e.g., zero, an average).
+
+
+
+- [Scientific colour maps by type ](https://s-ink.org/scientific-colour-maps)  <- VISIT   
+- [Colour map guideline](https://s-ink.org/colour-map-guideline)  
+
+
+<br><br>
+
+::: color-box 
+::: 
+
+
+### `#endrainbow`
+
+- **DO NOT USE** 'basic' **rainbow** color palettes 
+  - Perceptual non-uniform
+  - Artificial boundaries
+  - Accessibility issues
+  - Ambiguous ordering 
+- <https://www.fabiocrameri.ch/endrainbow/>
+- Crameri, F., Shephard, G.E. & Heron, P.J. The misuse of colour in science communication. Nat Commun 11, 5444 (2020). 
+<https://doi.org/10.1038/s41467-020-19160-7>
+- <https://clauswilke.com/dataviz/color-pitfalls.html>
+
+<br><br>
+
+::: color-box 
+::: 
+
+
+### Packages with color palettes
+
+* `scico` -- <https://github.com/thomasp85/scico> uses color maps from <https://www.fabiocrameri.ch/colourmaps/>
+* `cols4all` -- `cols4all::c4a_gui()`  -- <https://github.com/mtennekes/cols4all>
+* `colorBlindness` <https://cran.r-project.org/web/packages/colorBlindness/vignettes/colorBlindness.html>
+* ...
+
+Extensive list: <https://github.com/EmilHvitfeldt/r-color-palettes>
+
+<br><br>
+
+::: color-box 
+::: 
+
+
+## Limit the number of categories
+
+- **Color**: > 7–8 categories becomes very hard to distinguish.
+- **Shape**: > 5–6 shapes is cognitively demanding.
+- If you have many groups, consider faceting (`facet_wrap()`) instead (**later in the course**)
+
+
+<br><br>
+<br>
+
+>**Categorical** color palettes in data visualization should not have more than **5 colors** (this is a fairly well-discussed "rule" of the field). In addition to this, **redundant encodings** should follow the same rules.<br>
+> <https://observablehq.com/@frankelavsky/no-use-of-color-alone-in-data-visualization>
+
+
+<br><br>
+
+<br><br>
+
+::: color-box 
+::: 
+
+## Maintain consistency across figures
+
+Use the same color–category mapping throughout a report or presentation. Define your palette as a named vector once and reuse it:
+
+```{r palette-reuse}
+# named vector: c(name = value,...)
+species_colors <- c(
+  "setosa"     = "#D55E00",
+  "versicolor" = "#0072B2",
+  "virginica"  = "#009E73"
+)
+species_colors
+
+
+ggplot(iris,aes(x=Petal.Width,y=Petal.Length,color=Species)) +
+    geom_point()+
+    scale_color_manual(values=species_colors)
+
+
+# only versicolor - but same color assignment 
+iris %>% 
+  filter(Species=="versicolor") %>%
+  ggplot(aes(x=Petal.Width,y=Petal.Length,color=Species)) +
+      geom_point()+
+      scale_color_manual(values=species_colors)
+
+
+
+# Exmple: get colors from predefined palettes e.g. scico
+# search for color palette access functions 
+scico(n=5,palette="bilbao",begin=0,end=0.8)
+
+my_cols <- c("cat1"="#4C0000" 
+            ,"cat2"="#A46E59" 
+            ,"cat3"="#C4BFAC"
+)
+```
+
+
+<br><br>
+
+::: color-box 
+::: 
+
+
+## Point shapes
+
+- search for 'strong visual boundaries' (o,+)
+- use (highlighting) colors
+
+> "The hollow circle is a flexible and robust plotting symbol"
+> Krzywinski, M., Wong, B. Plotting symbols. Nat Methods 10, 451 (2013). <https://doi.org/10.1038/nmeth.2490>
+
+
+
+```{r echo=FALSE}
+#from ggpubr::show_line_types()
+
+lt <- c("blank", "solid", "dashed", "dotted", "dotdash",  "longdash", "twodash")
+
+d <- data.frame(lt = factor(lt, levels = lt))
+
+ggplot() + scale_x_continuous(name = "", limits = c(0, 1), 
+    breaks = NULL) + scale_linetype_identity() + geom_segment(data = d, 
+    mapping = aes(x = 0, xend = 1, y = lt, yend = lt, linetype = lt)) + 
+    labs(title = "Line types available in R", y = "") + theme(axis.text.y = element_text(face = "bold", 
+    color = "black"))+
+    theme_minimal()+
+    scale_y_discrete(labels=paste(0:6,lt,sep=' = '))
 
 ```
 
 
 
-# Color palettes
+<br><br>
 
-
-## Manual color selection
-
-* `scale_color_manual`
-* `scale_fill_manual`
-
-- color names: <http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf>
-
-```{r}
-# With color names
-
-#internal definition
-ggplot(data=iris, aes(x=Sepal.Length,y=Sepal.Width))+
-  geom_point(aes(color=Species))+
-  scale_color_manual(values=c("red","orange","blue"))
-
-#external (global) variable
-cols <- c("red","orange","blue")
-
-ggplot(data=iris, aes(x=Sepal.Length,y=Sepal.Width))+
-  geom_point(aes(color=Species))+
-  scale_color_manual(values=cols)
-
-```
+::: color-box 
+::: 
 
 
 
-### RGB or HEX
+<br><br><br><br>
+
+
+
+
+
+
+
+
+
+# Bonus: Corporate Design - HEX RGB color definitions
+
+## RGB or HEX
 
 - RGB <https://en.wikipedia.org/wiki/RGB_color_model>
 - HEX <https://www.color-hex.com>
@@ -462,224 +876,13 @@ ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
 
 ```
 
+::: color-box 
+::: 
 
-- `scale_color_identity` could be used when there is a color-code column in the dataset 
-- <https://ggplot2.tidyverse.org/reference/scale_identity.html>
 
 
+<br><br><br><br>
 
-
-## Predefined color palettes
-
-- <https://ggplot2.tidyverse.org/reference/scale_grey.html>
-
-
-### ggplot2-Optionen
-
-A small selection: 
-> `scale_colour_grey`, `scale_colour_brewer`, `scale_colour_hue`, `scale_colour_viridis_d`
-... etc.
-
-- all palettes exist for `_color_` and `_fill_`
-
-
-```{r}
-# grayscale
-ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
-  geom_point(aes(color=Species))+
-  scale_colour_grey()
-
-#default color scale
-ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
-  geom_point(aes(color=Species))+
-  scale_colour_hue()
-
-
-```
-
-```{r}
-
-ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
-  geom_point(aes(color=Species))+
-  scale_colour_brewer()
-
-```
-
-
-- `scale_colour_brewer()` palettes
-- <https://colorbrewer2.org>
-
-```{r  echo=FALSE}
-par(cex=0.5)
-RColorBrewer::display.brewer.all()+theme_void(base_size = 8)
-
-```
-
-... und reduziert auf möglichst *colorblindFriendly* Paletten:
-
-```{r  echo=FALSE}
-
-par(cex=0.5)
-RColorBrewer::display.brewer.all(colorblindFriendly = TRUE)
-
-```
-
-
-```{r}
-
-ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
-  geom_point(aes(color=Species))+
-  scale_color_brewer(palette="Set2")
-
-```
-
-
-- <https://ggplot2.tidyverse.org/reference/scale_viridis.html>
-
-```{r}
-
-ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
-  geom_point(aes(color=Species))+
-  scale_colour_viridis_d()
-
-
-# possibly improve visibility of light colors with fill+shape 
-ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
-     geom_point(aes(fill=Species), shape=21)+
-     scale_fill_viridis_d(option="C")   # fill scale
-
-
-# or change the range
-ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
-     geom_point(aes(color=Species))+
-     scale_color_viridis_d(option="C", begin=0, end=0.75)
-
-```
-
-
-## `#endrainbow`
-
-- <https://www.fabiocrameri.ch/endrainbow/>
-- Crameri, F., Shephard, G.E. & Heron, P.J. The misuse of colour in science communication. Nat Commun 11, 5444 (2020). 
-<https://doi.org/10.1038/s41467-020-19160-7>
-
-
-### Packages with color palettes
-
-* `scico` -- <https://github.com/thomasp85/scico> uses color maps from <https://www.fabiocrameri.ch/colourmaps/>
-
-```{r}
-ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
-  geom_point(aes(color=Species),size=2)+
-  scico::scale_color_scico_d(palette = "batlow",begin = 0.2,end=0.8)+
-  theme_bw()
-```
-
-
-* `cols4all` -- `cols4all::c4a_gui()`  -- <https://github.com/mtennekes/cols4all>
-* `colorBlindness` <https://cran.r-project.org/web/packages/colorBlindness/vignettes/colorBlindness.html>
-* ...
-
-Extensive list: <https://github.com/EmilHvitfeldt/r-color-palettes>
-
-
-
-## Best practices
-
-
-* do use professionally composed color palettes (suited for color blindness)
-* do not 'overuse' color
-
-- Gehlenborg, N., Wong, B. Mapping quantitative data to color. Nat Methods 9, 769 (2012). <https://doi.org/10.1038/nmeth.2134>
-- Wong, B. Avoiding color. Nat Methods 8, 525 (2011). <https://doi.org/10.1038/nmeth.1642>
-- Wong, B. Points of view: Points of review (part 2). Nat Methods 8, 189 (2011). <https://doi.org/10.1038/nmeth0311-189>
-- <https://colorusage.arc.nasa.gov/GuidelinesHierarchy.php>
-- <https://medialab.github.io/iwanthue/>
-
-
-### Limiting the Number of Categories
->**Categorical** color palettes in data visualization should not have more than **5 colors** (this is a fairly well-discussed "rule" of the field). In addition to this, redundant encodings should follow the same rules.<br>
->When crafting your own color schemes, think about the distinct nameability of not only your colors, but also whatever else you use to redundantly encode that color. Design for an upper limit between 3 and 5, but ideally stay under 6 total categories. This will help reduce cognitive load for your audience and you may even discover that distinct nameability gets quite hard after 5 categories anyway.<br>
-> <https://observablehq.com/@frankelavsky/no-use-of-color-alone-in-data-visualization>
-
-# Manual `shape`-selection
-
-```{r}
-
-ggplot(data=iris, aes(x=Sepal.Width,y=Sepal.Length))+
-  geom_point(aes(shape=Species))+
-  scale_shape_manual(values=c(2,3,4))
-
-```
-
-```{r echo=FALSE}
-
-df_shapes <- data.table(shape = 0:25)
-ggplot(df_shapes, aes(0, 0, shape = shape)) +
-  geom_point(aes(shape = shape), size = 5, fill = 'red') +
-  scale_shape_identity() +
-  facet_wrap(~shape) +
-  theme_void()
-
-
-```
-
-
-
-## Best practices
-
-- search for 'strong visual boundaries' (o,+)
-- use (highlighting) colors
-
-> "The hollow circle is a flexible and robust plotting symbol"
-> Krzywinski, M., Wong, B. Plotting symbols. Nat Methods 10, 451 (2013). <https://doi.org/10.1038/nmeth.2490>
-
-
-# Manual `linetype`-selection
-
-
-```{r}
-
-economics_long <- as.data.table(economics_long)
-economics_long_red <- economics_long[variable%in%c("pop","unemploy")]
-
-ggplot(economics_long_red, aes(x=date, y=value01)) + 
-  geom_line(aes(linetype=variable))+
-  scale_linetype_manual(values=c(2,3))
-
-ggplot(economics_long_red, aes(x=date, y=value01)) + 
-  geom_line(aes(linetype=variable))+
-  scale_linetype_manual(values=c("dotted","dashed"))
-
-
-```
-
-```{r echo=FALSE}
-#from ggpubr::show_line_types()
-
-lt <- c("blank", "solid", "dashed", "dotted", "dotdash",  "longdash", "twodash")
-
-d <- data.frame(lt = factor(lt, levels = lt))
-
-ggplot() + scale_x_continuous(name = "", limits = c(0, 1), 
-    breaks = NULL) + scale_linetype_identity() + geom_segment(data = d, 
-    mapping = aes(x = 0, xend = 1, y = lt, yend = lt, linetype = lt)) + 
-    labs(title = "Line types available in R", y = "") + theme(axis.text.y = element_text(face = "bold", 
-    color = "black"))+
-    theme_minimal()+
-    scale_y_discrete(labels=paste(0:6,lt,sep=' = '))
-
-```
-
-
-
-
-
-# Exercise
-
-- Play around with some options from the latest input 
-- e.g. colors, bar plots, etc...
-- ...
 
 
 
@@ -702,6 +905,11 @@ ggplot() + scale_x_continuous(name = "", limits = c(0, 1),
 - <http://mkweb.bcgsc.ca/biovis2012/krzywinski-visualizing-biological-data.pdf>
 - <https://blog.datawrapper.de/10-ways-to-use-fewer-colors-in-your-data-visualizations/>
 - <https://observablehq.com/@frankelavsky/no-use-of-color-alone-in-data-visualization>
+- Gehlenborg, N., Wong, B. Mapping quantitative data to color. Nat Methods 9, 769 (2012). <https://doi.org/10.1038/nmeth.2134>  
+- Wong, B. Points of view: Points of review (part 2). Nat Methods 8, 189 (2011). <https://doi.org/10.1038/nmeth0311-189>  
+- <https://colorusage.arc.nasa.gov/GuidelinesHierarchy.php>   
+- <https://medialab.github.io/iwanthue/>     
+- <https://clauswilke.com/dataviz/color-pitfalls.html>
 
 #  Session Info
 

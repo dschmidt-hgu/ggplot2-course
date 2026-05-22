@@ -11,6 +11,9 @@ format:
   html:
    embed-resources: true
    css: "./css/clean_qmd.css"
+   df-print: paged
+editor_options: 
+  chunk_output_type: console
 ---
 ```{r echo=FALSE}
 
@@ -21,40 +24,74 @@ source("./src/custom.R")
 
 # 008 Exporting Vector Graphics
 
-## Package installation
 
-- Copy and paste the following code in the R-console to install necessary packages.
 
+# 🎯 Learning objectives
+
+::: {.callout-note icon=false}
+## Layered graphics
+
+**... understanding concepts:**
+
+* you understand the difference between *vector* and *raster* images  
+
+
+**... tool usage:**
+
+* you can **save** a ggplot in a *vector* and *raster* images format with specified dimensions   
+
+
+:::
+
+
+<br><br>
+
+::: color-box 
+::: 
+
+# Prerequisites
 
 ```{r message=FALSE}
 
 if (!require("pacman")) install.packages("pacman")
   
-pacman::p_load("data.table")
 pacman::p_load("ggplot2")
-
+pacman::p_load("svglite")
 
 ```
+
+
+<br><br>
+
+
+::: color-box 
+::: 
 
 # Plot preparation
 
 
 ```{r message=FALSE}
 
-clim <- fread("clim_DWD_Geisenheim_historic_monthly.csv")
-clim[,"MESS_DATUM":=as.POSIXct(MESS_DATUM)] 
-clim[,"month":=month(MESS_DATUM)]
+p <- ggplot(iris,aes(x=Species,y=Petal.Length,color=Species))+
+        geom_violin(alpha=0.2)+                         # (optional) supports sina-shape
+        ggforce::geom_sina(jitter_y=FALSE,size=0.5)+    # deactivate value-jitter
+        geom_boxplot(width=0.1          # adjust to place inside the violin
+                    ,alpha=0.5          # adjust to see the raw data 
+                    ,outliers = FALSE   # no 'duplicate' data points
+                    ,color="gray30"
+                    )+
+        theme_minimal()+
+        theme(legend.position = "none") +
+        scale_color_viridis_d(begin=0.1,end=0.8)
 
-pB1 <- ggplot(clim[month=="1"][MESS_DATUM >= as.POSIXct("1980-01-01") & MESS_DATUM < as.POSIXct("2017-01-01")], 
-        aes(x=MESS_DATUM,y=MO_TT.Lufttemperatur))+
-    geom_line()+
-    geom_smooth(method="lm")+
-    scale_x_datetime(name="t (Month/Year)",date_breaks = "5 year", date_labels = "%m/%Y")+
-    ylab("January Monthly-Mean Air Temperature (°C)")+
-    theme_classic()
 
 ```
 
+<br><br>
+
+
+::: color-box 
+::: 
 
 # Export to file
 
@@ -78,16 +115,18 @@ pB1 <- ggplot(clim[month=="1"][MESS_DATUM >= as.POSIXct("1980-01-01") & MESS_DAT
 # )
 
 # Print the plot 
-pB1
+p
 
-# save the last printed plot as 15x10cm PDF
-ggsave("FigurePB1.pdf", width=15,height=10, unit="cm")
+# save the last printed plot as 9x8cm PDF
+# if not 'plot' parameter is set.
+ggsave("FigurePB1.pdf", width=9,height=8, unit="cm")
 
+# save a plot (variable) without printing, as 9x8cm PNG with a 300 DPI resolution
+# plot = p   
+ggsave("FigurePB1.png", plot=p, width=9,height=8, unit="cm", dpi=300)
 
-# save a plot (variable) without printing, as 15x10cm PNG with a 300 DPI resolution
-ggsave("FigurePB1.png", plot=pB1, width=15,height=10, unit="cm", dpi=300)
-
-ggsave("FigurePB1.svg", width=15,height=10, unit="cm")
+pacman::p_load("svglite")
+ggsave("FigurePB1.svg", plot=p,width=9,height=8, unit="cm")
 
 
 ```
@@ -102,17 +141,33 @@ ggsave("FigurePB1.svg", width=15,height=10, unit="cm")
 
 
 
+<br><br>
+
+
+::: color-box 
+::: 
 
 
 # Exercise
 
+::: {.callout-tip icon=false}
+## 👉  Compare vector and raster graphics by zooming in
+
+
 - Create a plot of your choice and export it as a vector and as a raster graphics
 - Compare the plot quality when zooming in 
+:::
 
+<br><br>
+
+
+::: color-box 
+::: 
 
 # Additional resources
 
 - <a href=https://youtu.be/-Fs2t6P5AjY>Vector versus raster graphics</a>
+- [cairo_pdf device for special character usage etc..](https://cran.r-project.org/web/packages/Cairo/)
 
 #  Session Info
 
