@@ -32,11 +32,12 @@ source("./src/custom.R")
 
 **... understanding concepts:**
 
-*     
+- you understand the necessity to **always visualize **your data before jumping into analyis   
+- you understand the difference between **exploratory** and **explantory** data visulizations   
 
 **... tool usage:**
 
-*   use your **data visualization literacy** to spot *bad graphics* 
+- you train to use your **data visualization literacy** to spot *bad graphics*    
 
 :::
 

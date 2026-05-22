@@ -682,7 +682,7 @@ pB1
 
 ```{r}
 pB1  + 
-    theme(panel.grid.major.y=element_line()) 
+    theme(panel.grid.major.y=element_line(color="gray20")) 
 
 ```
 
@@ -735,7 +735,7 @@ pB3  +
 ```{r}
 # add freezing point - if this is relevant to your study 
 pB1+
-    geom_hline(yintercept = 0, linetype="dashed", color="grey")
+    geom_hline(yintercept = 0, linetype="dashed", color="grey80")  
 
 
 ```
@@ -753,6 +753,28 @@ pB1+
   - horizontal lines can help pointing out smaller differences (see above)  
   - maybe a threshold or reference value besides *0* would also be a valid limit  
 - scatter plots and line plots are often used to show trends in or between data and not their absolute values, hence the zero-baseline is not always relevant
+
+
+<br><br>
+
+::: color-box 
+::: 
+
+## Grid lines
+
+
+- reduce the a minimum to avoid 
+(*chartjunk*) while supporting precision where necessary (see [Q1](https://www.perceptualedge.com/articles/dmreview/grid_lines.pdf),[Q2](https://policyviz.com/2021/07/29/to-gridline-or-not-to-gridline/)) 
+
+- no 'strong' colors, e.g. add transparency/light gray colors (gridline alpha=0.2; [Heer and Bostock (2010)](http://www.cs.kent.edu/~javed/class-P2P12F/papers-2012/PAPER2012-2010-MTurk-CHI.pdf)  
+
+
+
+
+<br><br>
+
+::: color-box 
+::: 
 
 
 ## *Colors with a meaning*

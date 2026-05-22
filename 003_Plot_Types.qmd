@@ -146,7 +146,7 @@ What can you extract from the sina regarding the measurement resolution?
 
 Make sure to **disable jittering** in the direction **that would change the measurement value** (usually *y*-direction). 
 
-```{r}
+```{r,eval=FALSE}
 geom_jitter(height=0)              # jitter height = 0
 ggforce::geom_sina(jitter_y=FALSE) # disable jittering in y-direction
 ```
@@ -163,7 +163,7 @@ ggforce::geom_sina(jitter_y=FALSE) # disable jittering in y-direction
 ::: {.callout-warning icon=false}
 ## Warning note on geom_violin + geom_density + geom_sina
 
-Interpret with caution if there are fewer than approx. 50 observations in a group.
+Interpret with caution, if there are fewer than approx. 50 observations in a group.
 
 See **Exercise**
 
